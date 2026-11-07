@@ -128,12 +128,12 @@
     <!-- P4 头身 -->
     <div class="page" data-type="base">
         <div class="q-card">
-            <div class="q-title">第4题：头身体感状态</div>
-            <div class="opt"><input type="radio" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
-            <div class="opt"><input type="radio" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
-            <div class="opt"><input type="radio" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
-            <div class="opt"><input type="radio" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
-            <div class="opt"><input type="radio" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
+            <div class="q-title">第4题：头身体感状态（可多选，选"身体轻松"则与其他互斥）</div>
+            <div class="opt" onclick="toggleQ3(this,'normal')"><input type="checkbox" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
+            <div class="opt" onclick="toggleQ3(this,'qi')"><input type="checkbox" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
+            <div class="opt" onclick="toggleQ3(this,'tanshi')"><input type="checkbox" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
+            <div class="opt" onclick="toggleQ3(this,'xueyu')"><input type="checkbox" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
+            <div class="opt" onclick="toggleQ3(this,'tebin')"><input type="checkbox" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -408,10 +408,10 @@ function nextPage(){
     const page = pageList[currentPage];
     if(!page) return;
 
-    // 如果当前页有 radio 题目，校验是否已选；没有 radio 的页（如收尾页）直接放行
-    const radios = page.querySelectorAll('input[type="radio"]');
-    if(radios.length > 0){
-        const checked = page.querySelector('input[type="radio"]:checked');
+    // 如果当前页有 题目（radio或checkbox），校验是否已选
+    const inputs = page.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+    if(inputs.length > 0){
+        const checked = page.querySelector('input[type="radio"]:checked, input[type="checkbox"]:checked');
         if(!checked){
             const card = page.querySelector('.q-card');
             card.classList.remove('shake');
@@ -443,15 +443,41 @@ function prevPage(){
 
 // 给指定题目名加分
 function addScore(name, scores){
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    if(!el) return;
-    const vList = el.value.split(",");
-    vList.forEach(key=>{
-        // ★ 关键修复：不能用 if(scores[key])，因为初始值是0，falsy会导致永远不加分
-        if(scores[key] !== undefined){
-            scores[key] += 1;
-        }
+    // 支持单选radio和多选checkbox
+    const els = document.querySelectorAll(`input[name="${name}"]:checked`);
+    els.forEach(el=>{
+        const vList = el.value.split(",");
+        vList.forEach(key=>{
+            if(scores[key] !== undefined){
+                scores[key] += 1;
+            }
+        });
     });
+}
+
+// 第4题多选切换（normal与其他互斥）
+function toggleQ3(el, val){
+    const cb = el.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    el.classList.toggle("selected", cb.checked);
+    // 互斥逻辑
+    const card = el.closest(".q-card");
+    if(val === "normal" && cb.checked){
+        // 选了身体轻松，取消其他
+        card.querySelectorAll('input[name="q3"]').forEach(other=>{
+            if(other.value !== "normal"){
+                other.checked = false;
+                other.closest(".opt").classList.remove("selected");
+            }
+        });
+    } else if(val !== "normal" && cb.checked){
+        // 选了其他，取消身体轻松
+        const normal = card.querySelector('input[name="q3"][value="normal"]');
+        if(normal){
+            normal.checked = false;
+            normal.closest(".opt").classList.remove("selected");
+        }
+    }
 }
 
 // 提交计算结果
