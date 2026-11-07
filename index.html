@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================
-     中医问诊体质自测系统
+     中医在线问诊记录
      © 繁星 版权所有 | 未经授权禁止商用
-     本页面受版权保护，转载请保留此声明
      ============================================ -->
 <html lang="zh-CN">
 <head>
@@ -10,85 +9,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="繁星">
     <meta name="copyright" content="© 繁星 版权所有">
-    <title>中医问诊体质自测</title>
+    <title>中医自查辨证</title>
     <style>
-        *{box-sizing: border-box;margin:0;padding:0;font-family:system-ui, -apple-system, "Microsoft YaHei", sans-serif;}
-        body{background:#f0e8d6;color:#2c2c2c;padding:48px 16px 16px;max-width:800px;margin:0 auto;line-height:1.6;background-image:radial-gradient(ellipse at top, #f5efe0 0%, #ede4cc 100%);}
+        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;}
+        body{background:#f0e8d6;color:#2c2c2c;padding:40px 16px 16px;max-width:800px;margin:0 auto;line-height:1.6;background-image:radial-gradient(ellipse at top,#f5efe0 0%,#e8dcc0 100%);min-height:100vh;}
         .header{text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #b8a682;}
-        .header h2{font-size:26px;letter-spacing:8px;color:#1a1a1a;font-weight:700;text-shadow:1px 1px 0 rgba(0,0,0,0.05);}
-        .warn{background:#fdf3dc;border:1px solid #c9a96e;padding:12px;border-radius:4px;color:#7a4a1a;margin-bottom:20px;font-size:14px;}
-
-        /* 进度条 */
+        .header h1{font-size:24px;letter-spacing:6px;color:#1a1a1a;font-weight:700;}
+        .header p{font-size:12px;color:#999;margin-top:6px;}
+        .warn{background:#fdf3dc;border:1px solid #c9966e;padding:12px;border-radius:4px;color:#7a4a1a;margin-bottom:20px;font-size:13px;}
         .progress-wrap{width:100%;height:6px;background:#d8c9a8;border-radius:99px;margin-bottom:20px;overflow:hidden;}
-        .progress-bar{height:100%;background:#2c2c2c;width:0%;transition:all 0.4s ease;}
-
-        /* 分页核心样式 */
+        .progress-bar{height:100%;background:#8b2e2e;width:0%;transition:all 0.4s ease;}
         .page{display:none;animation:fadeIn 0.4s ease;}
         .page.active{display:block;}
-        @keyframes fadeIn{
-            from{opacity:0;transform:translateX(10px);}
-            to{opacity:1;transform:translateX(0);}
-        }
-
-        .q-card{background:#faf6ea;padding:24px 20px;border-radius:4px;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;min-height:260px;display:flex;flex-direction:column;justify-content:center;}
-        .q-title{font-size:18px;font-weight:bold;margin-bottom:20px;color:#2c2c2c;letter-spacing:2px;}
-        .opt{margin:12px 0;font-size:16px;cursor:pointer;padding:12px 14px;border-radius:4px;border:1px solid #c9b88e;transition:0.2s;display:flex;align-items:flex-start;gap:8px;background:#fffdf5;}
-        .opt:hover{background:#f0e8d0;border-color:#a89060;}
-        .opt:has(input:checked){background:#e5d8b8;border-color:#8b6f3a;}
-        .opt input{margin-top:4px;transform:scale(1.1);flex-shrink:0;accent-color:#a83226;}
-
-        /* 按钮区 */
-        .btn-group{display:flex;gap:12px;margin-top:24px;}
-        .btn-group button{flex:1;padding:14px;border:none;border-radius:4px;font-size:16px;cursor:pointer;transition:0.2s;letter-spacing:4px;}
-        .btn-next{background:#a83226;color:#f5efe0;}
-        .btn-next:hover{background:#8b2820;}
-        .btn-prev{background:#d8c9a0;color:#5c4a28;}
-        .btn-prev:disabled{opacity:0.5;cursor:not-allowed;}
-
-        /* 结果页样式 */
-        #result{margin-top:20px;background:#faf6ea;padding:20px;border-radius:4px;display:none;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;}
-        #result h3{margin-bottom:16px;color:#2c2c2c;letter-spacing:3px;}
-        .tag{display:inline-block;padding:6px 12px;border-radius:2px;margin:4px;font-size:14px;letter-spacing:1px;}
-        .tag-main{background:#a83226;color:#f5efe0;}
-        .tag-sub{background:#d8c9a0;color:#5c4a28;}
-        .item-report{margin:12px 0;padding:14px;border-left:3px solid #a83226;background:#f5ecd4;border-radius:0 4px 4px 0;}
-        .item-report strong{color:#5c2018;}
-        .item-report p{margin-top:6px;}
-        .tip-text{margin-top:16px;color:#8a7a5a;font-size:14px;line-height:1.7;}
-        .btn-reset{width:100%;padding:14px;border:none;border-radius:4px;font-size:16px;cursor:pointer;background:#a83226;color:#f5efe0;margin-top:20px;letter-spacing:4px;}
-        .btn-reset:hover{background:#8b2820;}
-
-        /* 浮动提示 toast */
-        .toast{position:fixed;top:20%;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(30,25,15,0.92);color:#f5efe0;padding:12px 24px;border-radius:2px;font-size:14px;z-index:999;opacity:0;transition:all 0.3s ease;pointer-events:none;white-space:nowrap;}
-        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-        /* 题目卡片抖动动画 */
-        @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
-        .shake{animation:shake 0.4s ease;border-color:#c0392b !important;}
+        @keyframes fadeIn{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:translateX(0);}}
+        .q-card{background:#faf6ea;padding:24px 20px;border-radius:4px;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;}
+        .q-title{font-size:17px;font-weight:bold;margin-bottom:16px;color:#3e3a30;letter-spacing:1px;}
+        .q-sub{font-size:14px;color:#6a5a40;margin:16px 0 10px;font-weight:bold;border-left:3px solid #8b2e2e;padding-left:8px;}
+        .opt{padding:12px 14px;border:1px solid #d4c5a0;border-radius:4px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;background:#fff;}
+        .opt:hover{border-color:#8b2e2e;background:#fdf8ee;}
+        .opt.selected{border-color:#8b2e2e;background:#f5e6d0;box-shadow:inset 3px 0 0 #8b2e2e;}
+        .opt input{margin-right:8px;cursor:pointer;}
+        .opt span{cursor:pointer;font-size:15px;}
+        .btn-group{display:flex;justify-content:space-between;margin-top:20px;gap:12px;}
+        button{padding:12px 24px;border:none;border-radius:4px;font-size:14px;cursor:pointer;transition:all 0.2s;letter-spacing:2px;}
+        .btn-prev{background:#d8c9a8;color:#5a4a30;}
+        .btn-next{background:#8b2e2e;color:#fff;}
+        button:disabled{opacity:0.4;cursor:not-allowed;}
+        textarea{width:100%;padding:12px;border:1px solid #d4c5a0;border-radius:4px;font-size:15px;background:#fff;min-height:100px;resize:vertical;font-family:inherit;}
+        .result-card{background:#faf6ea;padding:24px 20px;border-radius:4px;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;}
+        .result-card h2{color:#8b2e2e;font-size:20px;margin-bottom:16px;letter-spacing:2px;}
+        .result-section{background:#fff;padding:14px;border-radius:4px;margin-bottom:12px;border-left:3px solid #b8a682;}
+        .result-section b{color:#5a4a20;}
+        .result-section p{font-size:14px;color:#444;margin-top:4px;}
+        .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:4px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
+        .toast.show{opacity:1;}
+        .branch-hint{font-size:13px;color:#8b2e2e;margin-bottom:12px;padding:8px 12px;background:#fdf0e8;border-radius:4px;}
     </style>
 </head>
 <body>
+
 <div class="header">
-    <h2>中医问诊健康自测</h2>
-    <p>十问辨证 · 兼夹体质精准评估</p>
-    <p style="font-size:12px;color:#999;margin-top:8px;">© 繁星 版权所有</p>
-</div>
-<div class="warn">
-    ⚠️ 重要声明：本问卷仅为健康科普参考，<b>不能替代专业中医师面诊诊断</b>，不构成诊疗、用药建议，如有不适请及时就医。
+    <h1>中医自查辨证</h1>
+    <p>十问辨证 · 自我初步判断</p>
+    <p style="font-size:12px;color:#999;">© 繁星 版权所有</p>
 </div>
 
-<!-- 进度条 -->
+<div class="warn">
+    ⚠️ 本工具仅用于健康自查与科普参考，<b>不能替代专业中医师面诊</b>。结果仅供初步判断，不构成诊疗建议。
+</div>
+
 <div class="progress-wrap">
     <div class="progress-bar" id="progress"></div>
 </div>
 
 <div id="container">
+
     <!-- P1 性别 -->
-    <div class="page active" data-type="base">
+    <div class="page active" data-key="gender">
         <div class="q-card">
-            <div class="q-title">第1题：请选择您的性别</div>
-            <div class="opt"><input type="radio" name="gender" value="male"> <span>男</span></div>
-            <div class="opt"><input type="radio" name="gender" value="female"> <span>女</span></div>
+            <div class="q-title">1. 您的性别</div>
+            <div class="opt" onclick="selectSingle(this,'gender','male')"><input type="radio" name="gender" value="男"> <span>男</span></div>
+            <div class="opt" onclick="selectSingle(this,'gender','female')"><input type="radio" name="gender" value="女"> <span>女</span></div>
+            <div class="opt" onclick="selectSingle(this,'gender','secret')"><input type="radio" name="gender" value="不愿填写"> <span>不愿填写</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" disabled>上一页</button>
@@ -96,13 +78,15 @@
         </div>
     </div>
 
-    <!-- P2 寒热 -->
-    <div class="page" data-type="base">
+    <!-- P2 年龄 -->
+    <div class="page" data-key="age">
         <div class="q-card">
-            <div class="q-title">第2题：身体寒热状态</div>
-            <div class="opt"><input type="radio" name="q1" value="normal"> <span>平和，不怕冷不怕热</span></div>
-            <div class="opt"><input type="radio" name="q1" value="yangxu"> <span>常年怕冷、手脚冰凉，喜暖畏寒</span></div>
-            <div class="opt"><input type="radio" name="q1" value="yinxu"> <span>怕热烦躁、容易潮热、手心脚心发热</span></div>
+            <div class="q-title">2. 您的年龄段</div>
+            <div class="opt" onclick="selectSingle(this,'age','u18')"><input type="radio" name="age" value="18以下"> <span>18以下</span></div>
+            <div class="opt" onclick="selectSingle(this,'age','a1825')"><input type="radio" name="age" value="18-25"> <span>18–25</span></div>
+            <div class="opt" onclick="selectSingle(this,'age','a2635')"><input type="radio" name="age" value="26-35"> <span>26–35</span></div>
+            <div class="opt" onclick="selectSingle(this,'age','a3650')"><input type="radio" name="age" value="36-50"> <span>36–50</span></div>
+            <div class="opt" onclick="selectSingle(this,'age','a50')"><input type="radio" name="age" value="50以上"> <span>50以上</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -110,13 +94,15 @@
         </div>
     </div>
 
-    <!-- P3 出汗 -->
-    <div class="page" data-type="base">
+    <!-- P3 持续时间 -->
+    <div class="page" data-key="duration">
         <div class="q-card">
-            <div class="q-title">第3题：日常出汗情况</div>
-            <div class="opt"><input type="radio" name="q2" value="normal"> <span>出汗正常，无异常</span></div>
-            <div class="opt"><input type="radio" name="q2" value="qi"> <span>稍微一动就出汗（自汗、气虚）</span></div>
-            <div class="opt"><input type="radio" name="q2" value="yinxu"> <span>睡着后出汗，醒后即止（盗汗、阴虚）</span></div>
+            <div class="q-title">3. 本次不适持续时间</div>
+            <div class="opt" onclick="selectSingle(this,'duration','normal')"><input type="radio" name="duration" value="日常体质采集"> <span>只是日常体质采集，没有明显难受</span></div>
+            <div class="opt" onclick="selectSingle(this,'duration','days')"><input type="radio" name="duration" value="几天内"> <span>几天内</span></div>
+            <div class="opt" onclick="selectSingle(this,'duration','weeks')"><input type="radio" name="duration" value="几周"> <span>几周</span></div>
+            <div class="opt" onclick="selectSingle(this,'duration','months')"><input type="radio" name="duration" value="数月"> <span>数月</span></div>
+            <div class="opt" onclick="selectSingle(this,'duration','years')"><input type="radio" name="duration" value="常年反复"> <span>常年反复</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -124,15 +110,20 @@
         </div>
     </div>
 
-    <!-- P4 头身 -->
-    <div class="page" data-type="base">
+    <!-- P4 部位选择 -->
+    <div class="page" data-key="bodypart">
         <div class="q-card">
-            <div class="q-title">第4题：头身体感状态</div>
-            <div class="opt"><input type="radio" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
-            <div class="opt"><input type="radio" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
-            <div class="opt"><input type="radio" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
-            <div class="opt"><input type="radio" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
-            <div class="opt"><input type="radio" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
+            <div class="q-title">4. 本次最主要不舒服的部位</div>
+            <div class="branch-hint">选择后将显示对应部位的细分症状</div>
+            <div class="opt" onclick="selectPart(this,'head')"><input type="radio" name="bodypart" value="头部"> <span>头部（头、额头、太阳穴、后脑勺）</span></div>
+            <div class="opt" onclick="selectPart(this,'face')"><input type="radio" name="bodypart" value="五官"> <span>五官（眼、耳、口、鼻、咽喉、牙龈）</span></div>
+            <div class="opt" onclick="selectPart(this,'chest')"><input type="radio" name="bodypart" value="胸胁"> <span>胸胁（胸口、两胁、乳房）</span></div>
+            <div class="opt" onclick="selectPart(this,'abdomen')"><input type="radio" name="bodypart" value="胃脘腹部"> <span>胃脘腹部（胃、肚脐周围、小腹）</span></div>
+            <div class="opt" onclick="selectPart(this,'back')"><input type="radio" name="bodypart" value="腰背"> <span>腰背</span></div>
+            <div class="opt" onclick="selectPart(this,'limb')"><input type="radio" name="bodypart" value="四肢关节"> <span>四肢关节</span></div>
+            <div class="opt" onclick="selectPart(this,'skin')"><input type="radio" name="bodypart" value="皮肤"> <span>皮肤</span></div>
+            <div class="opt" onclick="selectPart(this,'whole')"><input type="radio" name="bodypart" value="全身"> <span>全身（说不清固定位置，浑身难受）</span></div>
+            <div class="opt" onclick="selectPart(this,'other')"><input type="radio" name="bodypart" value="其他部位"> <span>其他部位</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -140,14 +131,23 @@
         </div>
     </div>
 
-    <!-- P5 大便 -->
-    <div class="page" data-type="base">
+    <!-- 分支A 头部 -->
+    <div class="page" data-key="branch-head" data-branch="head">
         <div class="q-card">
-            <div class="q-title">第5题：大便状态</div>
-            <div class="opt"><input type="radio" name="q4" value="normal"> <span>大便成形、排便顺畅</span></div>
-            <div class="opt"><input type="radio" name="q4" value="yangxu,tanshi"> <span>大便溏稀、不成形、容易腹泻</span></div>
-            <div class="opt"><input type="radio" name="q4" value="shire,tanshi"> <span>大便粘马桶、排便不爽、异味大</span></div>
-            <div class="opt"><input type="radio" name="q4" value="yinxu"> <span>大便偏干、干结、容易便秘</span></div>
+            <div class="q-title">4-A 头部细分症状</div>
+            <div class="q-sub">头痛位置</div>
+            <div class="opt" onclick="selectSingle(this,'head_pos','forehead')"><input type="radio" name="head_pos" value="前额"> <span>前额</span></div>
+            <div class="opt" onclick="selectSingle(this,'head_pos','temple')"><input type="radio" name="head_pos" value="两侧太阳穴"> <span>两侧太阳穴</span></div>
+            <div class="opt" onclick="selectSingle(this,'head_pos','back')"><input type="radio" name="head_pos" value="后脑勺"> <span>后脑勺</span></div>
+            <div class="opt" onclick="selectSingle(this,'head_pos','top')"><input type="radio" name="head_pos" value="头顶"> <span>头顶</span></div>
+            <div class="opt" onclick="selectSingle(this,'head_pos','whole')"><input type="radio" name="head_pos" value="整个头部弥漫"> <span>整个头部弥漫不舒服</span></div>
+            <div class="q-sub">头部感受（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','胀痛')"><input type="checkbox" name="head_sym" value="胀痛"> <span>胀痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','刺痛')"><input type="checkbox" name="head_sym" value="刺痛"> <span>刺痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','昏沉发重')"><input type="checkbox" name="head_sym" value="昏沉发重"> <span>昏沉发重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','空痛隐隐')"><input type="checkbox" name="head_sym" value="空痛隐隐"> <span>空痛隐隐</span></div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','跳痛')"><input type="checkbox" name="head_sym" value="跳痛"> <span>跳痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'head_sym','头晕')"><input type="checkbox" name="head_sym" value="头晕"> <span>头晕</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -155,14 +155,26 @@
         </div>
     </div>
 
-    <!-- P6 口味 -->
-    <div class="page" data-type="base">
+    <!-- 分支B 五官 -->
+    <div class="page" data-key="branch-face" data-branch="face">
         <div class="q-card">
-            <div class="q-title">第6题：口味与饮食偏好</div>
-            <div class="opt"><input type="radio" name="q5" value="normal"> <span>口中清爽，食欲正常，冷热无明显偏好</span></div>
-            <div class="opt"><input type="radio" name="q5" value="yinxu"> <span>经常口干咽燥、总想喝水，偏爱冷饮凉食</span></div>
-            <div class="opt"><input type="radio" name="q5" value="yangxu"> <span>口淡不渴、喝水不多，吃凉的胃不舒服、喜热饮热食</span></div>
-            <div class="opt"><input type="radio" name="q5" value="tanshi,shire"> <span>口中发黏发腻、发苦发甜，或食欲差、容易腹胀</span></div>
+            <div class="q-title">4-B 五官细分症状</div>
+            <div class="q-sub">具体哪里不舒服</div>
+            <div class="opt" onclick="selectSingle(this,'face_part','eye')"><input type="radio" name="face_part" value="眼睛"> <span>眼睛</span></div>
+            <div class="opt" onclick="selectSingle(this,'face_part','ear')"><input type="radio" name="face_part" value="耳朵"> <span>耳朵</span></div>
+            <div class="opt" onclick="selectSingle(this,'face_part','nose')"><input type="radio" name="face_part" value="鼻子"> <span>鼻子</span></div>
+            <div class="opt" onclick="selectSingle(this,'face_part','mouth')"><input type="radio" name="face_part" value="口腔嘴唇"> <span>口腔/嘴唇</span></div>
+            <div class="opt" onclick="selectSingle(this,'face_part','teeth')"><input type="radio" name="face_part" value="牙龈牙齿"> <span>牙龈牙齿</span></div>
+            <div class="opt" onclick="selectSingle(this,'face_part','throat')"><input type="radio" name="face_part" value="咽喉"> <span>咽喉</span></div>
+            <div class="q-sub">细分感受（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','干涩')"><input type="checkbox" name="face_sym" value="干涩"> <span>干涩（眼/咽/鼻干）</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','红痒')"><input type="checkbox" name="face_sym" value="红痒"> <span>红痒</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','胀痛')"><input type="checkbox" name="face_sym" value="胀痛"> <span>胀痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','耳鸣')"><input type="checkbox" name="face_sym" value="耳鸣"> <span>耳鸣/耳闷</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','鼻塞流涕')"><input type="checkbox" name="face_sym" value="鼻塞流涕"> <span>鼻塞/流涕</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','溃疡')"><input type="checkbox" name="face_sym" value="溃疡"> <span>口腔溃疡</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','咽痛异物感')"><input type="checkbox" name="face_sym" value="咽痛异物感"> <span>咽痛/异物感/痰多黏喉</span></div>
+            <div class="opt" onclick="toggleMulti(this,'face_sym','牙龈出血')"><input type="checkbox" name="face_sym" value="牙龈出血"> <span>牙龈红肿/出血/牙痛</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -170,14 +182,16 @@
         </div>
     </div>
 
-    <!-- P7 睡眠 -->
-    <div class="page" data-type="base">
+    <!-- 分支C 胸胁 -->
+    <div class="page" data-key="branch-chest" data-branch="chest">
         <div class="q-card">
-            <div class="q-title">第7题：睡眠质量</div>
-            <div class="opt"><input type="radio" name="q6" value="normal"> <span>入睡顺畅、睡眠深沉、睡醒精神好</span></div>
-            <div class="opt"><input type="radio" name="q6" value="ganyu,yinxu"> <span>心烦难入睡、翻来覆去半天睡不着</span></div>
-            <div class="opt"><input type="radio" name="q6" value="qi"> <span>入睡还行但梦特别多、容易惊醒，睡醒仍觉得累</span></div>
-            <div class="opt"><input type="radio" name="q6" value="qi,tanshi"> <span>困倦嗜睡、睡不醒、越睡越累</span></div>
+            <div class="q-title">4-C 胸胁细分症状（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','胸闷憋气')"><input type="checkbox" name="chest_sym" value="胸闷憋气"> <span>胸闷憋气</span></div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','胸口隐痛')"><input type="checkbox" name="chest_sym" value="胸口隐痛"> <span>胸口隐痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','胁肋胀')"><input type="checkbox" name="chest_sym" value="胁肋胀"> <span>胁肋胀</span></div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','刺痛')"><input type="checkbox" name="chest_sym" value="刺痛"> <span>刺痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','乳房胀痛')"><input type="checkbox" name="chest_sym" value="乳房胀痛"> <span>乳房胀痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'chest_sym','心慌心悸')"><input type="checkbox" name="chest_sym" value="心慌心悸"> <span>心慌心悸</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -185,14 +199,17 @@
         </div>
     </div>
 
-    <!-- P8 情志 -->
-    <div class="page" data-type="base">
+    <!-- 分支D 胃脘腹部 -->
+    <div class="page" data-key="branch-abdomen" data-branch="abdomen">
         <div class="q-card">
-            <div class="q-title">第8题：日常情志情绪</div>
-            <div class="opt"><input type="radio" name="q7" value="normal"> <span>情绪平稳、心态平和</span></div>
-            <div class="opt"><input type="radio" name="q7" value="ganyu"> <span>容易烦闷压抑、爱叹气、情绪不畅</span></div>
-            <div class="opt"><input type="radio" name="q7" value="yinxu"> <span>容易急躁易怒、心火旺盛</span></div>
-            <div class="opt"><input type="radio" name="q7" value="qi,ganyu"> <span>多思多虑、容易焦虑紧张、心悸胆怯</span></div>
+            <div class="q-title">4-D 胃脘腹部细分症状（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','胃胀')"><input type="checkbox" name="abd_sym" value="胃胀"> <span>胃胀</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','胃痛')"><input type="checkbox" name="abd_sym" value="胃痛"> <span>胃痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','腹部冷痛')"><input type="checkbox" name="abd_sym" value="腹部冷痛"> <span>腹部冷痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','腹部灼热')"><input type="checkbox" name="abd_sym" value="腹部灼热"> <span>腹部灼热</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','肚脐周围不适')"><input type="checkbox" name="abd_sym" value="肚脐周围不适"> <span>肚脐周围不适</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','小腹坠胀')"><input type="checkbox" name="abd_sym" value="小腹坠胀"> <span>小腹坠胀</span></div>
+            <div class="opt" onclick="toggleMulti(this,'abd_sym','嗳气反酸')"><input type="checkbox" name="abd_sym" value="嗳气反酸"> <span>嗳气反酸</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -200,15 +217,21 @@
         </div>
     </div>
 
-    <!-- P9 舌象 -->
-    <div class="page" data-type="base">
+    <!-- 分支E 腰背 -->
+    <div class="page" data-key="branch-back" data-branch="back">
         <div class="q-card">
-            <div class="q-title">第9题：照镜子看舌象</div>
-            <div class="opt"><input type="radio" name="q8" value="normal"> <span>舌色淡红、舌苔薄白、干湿适中</span></div>
-            <div class="opt"><input type="radio" name="q8" value="tanshi"> <span>舌体胖大、舌边有齿痕、舌苔白厚腻</span></div>
-            <div class="opt"><input type="radio" name="q8" value="shire"> <span>舌质偏红、舌苔黄腻</span></div>
-            <div class="opt"><input type="radio" name="q8" value="yinxu"> <span>舌色偏红、舌苔少甚至无苔、舌面偏干</span></div>
-            <div class="opt"><input type="radio" name="q8" value="xueyu"> <span>舌色偏暗、或有瘀点瘀斑</span></div>
+            <div class="q-title">4-E 腰背细分症状</div>
+            <div class="q-sub">位置</div>
+            <div class="opt" onclick="selectSingle(this,'back_pos','腰')"><input type="radio" name="back_pos" value="腰"> <span>腰</span></div>
+            <div class="opt" onclick="selectSingle(this,'back_pos','后背')"><input type="radio" name="back_pos" value="后背"> <span>后背</span></div>
+            <div class="opt" onclick="selectSingle(this,'back_pos','腰骶')"><input type="radio" name="back_pos" value="腰骶"> <span>腰骶</span></div>
+            <div class="q-sub">感受（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','酸痛')"><input type="checkbox" name="back_sym" value="酸痛"> <span>酸痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','冷痛')"><input type="checkbox" name="back_sym" value="冷痛"> <span>冷痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','僵硬')"><input type="checkbox" name="back_sym" value="僵硬"> <span>僵硬</span></div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','沉重')"><input type="checkbox" name="back_sym" value="沉重"> <span>沉重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','刺痛')"><input type="checkbox" name="back_sym" value="刺痛"> <span>刺痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'back_sym','劳累后加重')"><input type="checkbox" name="back_sym" value="劳累后加重"> <span>劳累后加重</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -216,13 +239,23 @@
         </div>
     </div>
 
-    <!-- 女性专项分页 1 经量 -->
-    <div class="page" data-type="female">
+    <!-- 分支F 四肢关节 -->
+    <div class="page" data-key="branch-limb" data-branch="limb">
         <div class="q-card">
-            <div class="q-title">女性专项1：月经经量情况</div>
-            <div class="opt"><input type="radio" name="m1" value="normal"> <span>经量适中，周期稳定</span></div>
-            <div class="opt"><input type="radio" name="m1" value="xuexu,qi"> <span>经量偏少、经期容易推迟</span></div>
-            <div class="opt"><input type="radio" name="m1" value="re,yinxu"> <span>经量偏多、经期容易提前</span></div>
+            <div class="q-title">4-F 四肢关节细分症状</div>
+            <div class="q-sub">位置</div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','肩')"><input type="radio" name="limb_pos" value="肩"> <span>肩</span></div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','手臂')"><input type="radio" name="limb_pos" value="手臂"> <span>手臂</span></div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','手指')"><input type="radio" name="limb_pos" value="手指"> <span>手指</span></div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','膝盖')"><input type="radio" name="limb_pos" value="膝盖"> <span>膝盖</span></div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','小腿')"><input type="radio" name="limb_pos" value="小腿"> <span>小腿</span></div>
+            <div class="opt" onclick="selectSingle(this,'limb_pos','脚踝')"><input type="radio" name="limb_pos" value="脚踝"> <span>脚踝</span></div>
+            <div class="q-sub">感受（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'limb_sym','酸痛')"><input type="checkbox" name="limb_sym" value="酸痛"> <span>酸痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'limb_sym','冷痛')"><input type="checkbox" name="limb_sym" value="冷痛"> <span>冷痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'limb_sym','灼热肿痛')"><input type="checkbox" name="limb_sym" value="灼热肿痛"> <span>灼热肿痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'limb_sym','僵硬活动不利')"><input type="checkbox" name="limb_sym" value="僵硬活动不利"> <span>僵硬活动不利</span></div>
+            <div class="opt" onclick="toggleMulti(this,'limb_sym','发麻')"><input type="checkbox" name="limb_sym" value="发麻"> <span>发麻</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -230,13 +263,15 @@
         </div>
     </div>
 
-    <!-- 女性专项分页 2 颜色血块 -->
-    <div class="page" data-type="female">
+    <!-- 分支G 皮肤 -->
+    <div class="page" data-key="branch-skin" data-branch="skin">
         <div class="q-card">
-            <div class="q-title">女性专项2：经血颜色与血块</div>
-            <div class="opt"><input type="radio" name="m2" value="normal"> <span>色淡红，无明显血块</span></div>
-            <div class="opt"><input type="radio" name="m2" value="xueyu,ganyu"> <span>经血暗紫、血块较多</span></div>
-            <div class="opt"><input type="radio" name="m2" value="yangxu,xuexu"> <span>经血色淡、质地偏稀</span></div>
+            <div class="q-title">4-G 皮肤细分症状（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'skin_sym','瘙痒')"><input type="checkbox" name="skin_sym" value="瘙痒"> <span>瘙痒</span></div>
+            <div class="opt" onclick="toggleMulti(this,'skin_sym','起疹')"><input type="checkbox" name="skin_sym" value="起疹"> <span>起疹</span></div>
+            <div class="opt" onclick="toggleMulti(this,'skin_sym','干燥脱皮')"><input type="checkbox" name="skin_sym" value="干燥脱皮"> <span>干燥脱皮</span></div>
+            <div class="opt" onclick="toggleMulti(this,'skin_sym','局部灼热')"><input type="checkbox" name="skin_sym" value="局部灼热"> <span>局部灼热</span></div>
+            <div class="opt" onclick="toggleMulti(this,'skin_sym','麻木')"><input type="checkbox" name="skin_sym" value="麻木"> <span>麻木</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -244,306 +279,675 @@
         </div>
     </div>
 
-    <!-- 女性专项分页 3 痛经 -->
-    <div class="page" data-type="female">
+    <!-- 分支H 全身 -->
+    <div class="page" data-key="branch-whole" data-branch="whole">
         <div class="q-card">
-            <div class="q-title">女性专项3：痛经状态</div>
-            <div class="opt"><input type="radio" name="m3" value="normal"> <span>基本无痛经，经期舒适</span></div>
-            <div class="opt"><input type="radio" name="m3" value="ganyu,xueyu"> <span>经前胀痛/刺痛、按压疼痛加重</span></div>
-            <div class="opt"><input type="radio" name="m3" value="yangxu,xuexu"> <span>经期冷痛、热敷/按压可缓解</span></div>
+            <div class="q-title">4-H 全身感受（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'whole_sym','浑身乏力沉重')"><input type="checkbox" name="whole_sym" value="浑身乏力沉重"> <span>浑身乏力沉重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'whole_sym','周身酸痛')"><input type="checkbox" name="whole_sym" value="周身酸痛"> <span>周身酸痛</span></div>
+            <div class="opt" onclick="toggleMulti(this,'whole_sym','忽冷忽热')"><input type="checkbox" name="whole_sym" value="忽冷忽热"> <span>忽冷忽热</span></div>
+            <div class="opt" onclick="toggleMulti(this,'whole_sym','莫名燥热')"><input type="checkbox" name="whole_sym" value="莫名燥热"> <span>莫名燥热</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
-            <button class="btn-next" onclick="submitTest()">立即生成体质报告</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
         </div>
     </div>
 
-    <!-- 男性最后一页（直接提交） -->
-    <div class="page" data-type="male-end">
+    <!-- 分支I 其他 -->
+    <div class="page" data-key="branch-other" data-branch="other">
         <div class="q-card">
-            <div class="q-title">答题完成</div>
-            <p style="text-align:center;font-size:16px;color:#666;">所有题目已作答完毕，点击下方按钮即可查看专属中医体质报告</p>
+            <div class="q-title">4-I 请详细描述不适部位和感受</div>
+            <textarea name="other_desc" placeholder="请描述具体哪里不舒服、什么样的感觉..."></textarea>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
-            <button class="btn-next" onclick="submitTest()">立即生成体质报告</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
         </div>
     </div>
+
+    <!-- P5 加重减轻规律 -->
+    <div class="page" data-key="pattern">
+        <div class="q-card">
+            <div class="q-title">5. 症状加重、减轻规律（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','劳累后加重')"><input type="checkbox" name="pattern" value="劳累之后加重"> <span>劳累之后加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','休息后减轻')"><input type="checkbox" name="pattern" value="休息之后减轻"> <span>休息之后减轻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','受凉加重')"><input type="checkbox" name="pattern" value="受凉遇冷加重"> <span>受凉、遇冷加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','保暖减轻')"><input type="checkbox" name="pattern" value="保暖热敷减轻"> <span>保暖、热敷之后减轻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','受热加重')"><input type="checkbox" name="pattern" value="受热闷热加重"> <span>受热、闷热环境加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','吹风加重')"><input type="checkbox" name="pattern" value="吹风后加重"> <span>吹风之后加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','饭后加重')"><input type="checkbox" name="pattern" value="饭后加重"> <span>饭后加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','空腹加重')"><input type="checkbox" name="pattern" value="空腹加重"> <span>空腹的时候加重</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','白天明显')"><input type="checkbox" name="pattern" value="白天明显夜里减轻"> <span>白天明显、夜里减轻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','夜里明显')"><input type="checkbox" name="pattern" value="夜里明显白天减轻"> <span>夜里明显、白天减轻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'pattern','无明显规律')"><input type="checkbox" name="pattern" value="无明显规律"> <span>没有明显规律</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P6 寒热 -->
+    <div class="page" data-key="coldheat">
+        <div class="q-card">
+            <div class="q-title">6. 寒热情况</div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','cold')"><input type="radio" name="coldheat" value="怕冷明显喜温热"> <span>怕冷明显，喜温热</span></div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','heat')"><input type="radio" name="coldheat" value="怕热明显喜凉"> <span>怕热明显，喜凉</span></div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','normal')"><input type="radio" name="coldheat" value="寒热适中"> <span>平时不怕冷也不怕热</span></div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','alternate')"><input type="radio" name="coldheat" value="一阵冷一阵热"> <span>一阵冷一阵热</span></div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','coldhand')"><input type="radio" name="coldheat" value="手脚冰凉身不怕冷"> <span>手脚常年冰凉，但身体不怕冷</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P7 出汗 -->
+    <div class="page" data-key="sweat">
+        <div class="q-card">
+            <div class="q-title">7. 出汗情况</div>
+            <div class="opt" onclick="selectSingle(this,'sweat','none')"><input type="radio" name="sweat" value="基本不出汗"> <span>基本不出汗</span></div>
+            <div class="opt" onclick="selectSingle(this,'sweat','zihan')"><input type="radio" name="sweat" value="自汗"> <span>安静不动也容易出汗（自汗）</span></div>
+            <div class="opt" onclick="selectSingle(this,'sweat','daohan')"><input type="radio" name="sweat" value="盗汗"> <span>睡着出汗，醒了就停（盗汗）</span></div>
+            <div class="opt" onclick="selectSingle(this,'sweat','move')"><input type="radio" name="sweat" value="动则大汗"> <span>一动就大量出汗</span></div>
+            <div class="opt" onclick="selectSingle(this,'sweat','head')"><input type="radio" name="sweat" value="头汗多"> <span>只有头部出汗</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P8 大便 -->
+    <div class="page" data-key="stool">
+        <div class="q-card">
+            <div class="q-title">8. 大便情况</div>
+            <div class="opt" onclick="selectSingle(this,'stool','normal')"><input type="radio" name="stool" value="成形顺畅每日一次"> <span>成形、顺畅，每日一次</span></div>
+            <div class="opt" onclick="selectSingle(this,'stool','loose')"><input type="radio" name="stool" value="偏稀不成形"> <span>偏稀、不成形</span></div>
+            <div class="opt" onclick="selectSingle(this,'stool','dry')"><input type="radio" name="stool" value="干结难排"> <span>干结难排</span></div>
+            <div class="opt" onclick="selectSingle(this,'stool','firstdry')"><input type="radio" name="stool" value="先干后稀"> <span>先干后稀</span></div>
+            <div class="opt" onclick="selectSingle(this,'stool','sticky')"><input type="radio" name="stool" value="黏马桶冲不净"> <span>黏马桶，冲不干净</span></div>
+            <div class="opt" onclick="selectSingle(this,'stool','irregular')"><input type="radio" name="stool" value="时干时稀"> <span>时干时稀</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P9 小便 -->
+    <div class="page" data-key="urine">
+        <div class="q-card">
+            <div class="q-title">9. 小便情况</div>
+            <div class="opt" onclick="selectSingle(this,'urine','normal')"><input type="radio" name="urine" value="正常色淡黄"> <span>正常，色淡黄</span></div>
+            <div class="opt" onclick="selectSingle(this,'urine','yellow')"><input type="radio" name="urine" value="颜色很黄"> <span>颜色很黄</span></div>
+            <div class="opt" onclick="selectSingle(this,'urine','clear')"><input type="radio" name="urine" value="清长量多"> <span>清长、量多</span></div>
+            <div class="opt" onclick="selectSingle(this,'urine','freq')"><input type="radio" name="urine" value="尿频"> <span>尿频</span></div>
+            <div class="opt" onclick="selectSingle(this,'urine','night')"><input type="radio" name="urine" value="夜尿多"> <span>夜尿多</span></div>
+            <div class="opt" onclick="selectSingle(this,'urine','pain')"><input type="radio" name="urine" value="小便涩痛"> <span>小便涩痛</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P10 饮食口味 -->
+    <div class="page" data-key="taste">
+        <div class="q-card">
+            <div class="q-title">10. 饮食口味（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'taste','胃口正常')"><input type="checkbox" name="taste" value="胃口正常"> <span>胃口正常</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','食欲差')"><input type="checkbox" name="taste" value="食欲差不想吃"> <span>食欲差、不想吃</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','易饥多食')"><input type="checkbox" name="taste" value="容易饿吃得多"> <span>容易饿、吃得多</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口苦')"><input type="checkbox" name="taste" value="口苦"> <span>口苦</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口淡')"><input type="checkbox" name="taste" value="口淡无味"> <span>口淡无味</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口黏')"><input type="checkbox" name="taste" value="口黏发腻"> <span>口黏、发腻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口干想饮')"><input type="checkbox" name="taste" value="口干想喝水"> <span>口干想喝水</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口干不饮')"><input type="checkbox" name="taste" value="口干但不想喝水"> <span>口干但不想喝水</span></div>
+            <div class="opt" onclick="toggleMulti(this,'taste','口酸')"><input type="checkbox" name="taste" value="口中发酸"> <span>口中发酸</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P11 睡眠 -->
+    <div class="page" data-key="sleep">
+        <div class="q-card">
+            <div class="q-title">11. 睡眠状态</div>
+            <div class="opt" onclick="selectSingle(this,'sleep','normal')"><input type="radio" name="sleep" value="入睡顺畅一觉到天亮"> <span>入睡顺畅，一觉到天亮</span></div>
+            <div class="opt" onclick="selectSingle(this,'sleep','hard')"><input type="radio" name="sleep" value="入睡困难"> <span>入睡困难</span></div>
+            <div class="opt" onclick="selectSingle(this,'sleep','dream')"><input type="radio" name="sleep" value="容易醒多梦"> <span>容易醒、多梦</span></div>
+            <div class="opt" onclick="selectSingle(this,'sleep','early')"><input type="radio" name="sleep" value="早醒无法再睡"> <span>早醒，醒后无法再睡</span></div>
+            <div class="opt" onclick="selectSingle(this,'sleep','sleepy')"><input type="radio" name="sleep" value="嗜睡总想睡"> <span>嗜睡，总想睡觉</span></div>
+            <div class="opt" onclick="selectSingle(this,'sleep','shallow')"><input type="radio" name="sleep" value="睡眠浅"> <span>睡眠浅</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P12 舌象 -->
+    <!-- P12a 舌色 -->
+    <div class="page" data-key="tongue_color">
+        <div class="q-card">
+            <div class="q-title">12.1 舌色（自然光下观察）</div>
+            <div class="opt" onclick="selectSingle(this,'tongue_color','淡红正常')"><input type="radio" name="tongue_color" value="淡红正常"> <span>淡红（正常）</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_color','舌淡白')"><input type="radio" name="tongue_color" value="舌淡偏白"> <span>舌淡偏白</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_color','舌红')"><input type="radio" name="tongue_color" value="舌红"> <span>舌红</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_color','舌暗紫')"><input type="radio" name="tongue_color" value="舌暗红紫暗"> <span>舌暗红/紫暗</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P12b 舌苔有无 -->
+    <div class="page" data-key="tongue_thick">
+        <div class="q-card">
+            <div class="q-title">12.2 舌苔厚薄</div>
+            <div class="branch-hint">如果几乎看不到舌苔，选"无苔"，后面颜色干湿会自动跳过</div>
+            <div class="opt" onclick="selectSingle(this,'tongue_thick','无苔')"><input type="radio" name="tongue_thick" value="无苔"> <span>无苔 / 几乎看不到苔</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_thick','薄苔')"><input type="radio" name="tongue_thick" value="薄苔"> <span>薄苔，能看到舌面</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_thick','厚苔')"><input type="radio" name="tongue_thick" value="厚苔"> <span>厚苔，看不见舌面</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P12c 舌苔颜色干湿（有苔才显示） -->
+    <div class="page" data-key="tongue_coat">
+        <div class="q-card">
+            <div class="q-title">12.3 舌苔颜色与干湿</div>
+            <div class="q-sub">舌苔颜色</div>
+            <div class="opt" onclick="selectSingle(this,'tongue_coat','白苔')"><input type="radio" name="tongue_coat" value="白苔"> <span>白苔</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_coat','黄苔')"><input type="radio" name="tongue_coat" value="黄苔"> <span>黄苔</span></div>
+            <div class="q-sub">舌苔干湿</div>
+            <div class="opt" onclick="selectSingle(this,'tongue_wet','湿润正常')"><input type="radio" name="tongue_wet" value="湿润正常"> <span>湿润正常</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_wet','偏干')"><input type="radio" name="tongue_wet" value="偏干"> <span>偏干</span></div>
+            <div class="opt" onclick="selectSingle(this,'tongue_wet','水滑')"><input type="radio" name="tongue_wet" value="水滑口水多"> <span>水滑、口水多</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P12d 舌形 -->
+    <div class="page" data-key="tongue_shape">
+        <div class="q-card">
+            <div class="q-title">12.4 舌形（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'tongue_shape','胖大齿痕')"><input type="checkbox" name="tongue_shape" value="舌体胖大有齿痕"> <span>舌体胖大、有齿痕</span></div>
+            <div class="opt" onclick="toggleMulti(this,'tongue_shape','舌瘦')"><input type="checkbox" name="tongue_shape" value="舌瘦"> <span>舌瘦</span></div>
+            <div class="opt" onclick="toggleMulti(this,'tongue_shape','裂纹')"><input type="checkbox" name="tongue_shape" value="舌有裂纹"> <span>舌有裂纹</span></div>
+            <div class="opt" onclick="toggleMulti(this,'tongue_shape','舌尖红')"><input type="checkbox" name="tongue_shape" value="舌尖红"> <span>舌尖红</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P13 既往诱因 -->
+    <div class="page" data-key="history">
+        <div class="q-card">
+            <div class="q-title">13. 既往与诱因（可多选）</div>
+            <div class="opt" onclick="toggleMulti(this,'history','无慢性病')"><input type="checkbox" name="history" value="无慢性病"> <span>无慢性病</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','经常熬夜')"><input type="checkbox" name="history" value="经常熬夜"> <span>经常熬夜</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','常吃冷饮')"><input type="checkbox" name="history" value="常吃冷饮生冷"> <span>常吃冷饮、生冷</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','嗜辛辣油腻')"><input type="checkbox" name="history" value="嗜辛辣油腻"> <span>嗜辛辣油腻</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','情绪压抑')"><input type="checkbox" name="history" value="容易情绪压抑生气"> <span>容易情绪压抑、生气</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','长期劳累')"><input type="checkbox" name="history" value="长期劳累"> <span>长期劳累</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','有旧病')"><input type="checkbox" name="history" value="有旧病"> <span>有旧病</span></div>
+            <div class="opt" onclick="toggleMulti(this,'history','正在服药')"><input type="checkbox" name="history" value="正在服用药物"> <span>正在服用药物</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P14 月经（女性） -->
+    <div class="page" data-key="menses" data-female="true">
+        <div class="q-card">
+            <div class="q-title">14. 月经情况（女性专属）</div>
+            <div class="opt" onclick="selectSingle(this,'menses','未行经')"><input type="radio" name="menses" value="尚未行经"> <span>尚未行经</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','规律')"><input type="radio" name="menses" value="周期规律"> <span>周期规律</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','提前')"><input type="radio" name="menses" value="周期提前"> <span>周期提前</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','推后')"><input type="radio" name="menses" value="周期推后"> <span>周期推后</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','量少')"><input type="radio" name="menses" value="经量偏少"> <span>经量偏少</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','量多')"><input type="radio" name="menses" value="经量偏多"> <span>经量偏多</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','痛经')"><input type="radio" name="menses" value="痛经"> <span>痛经</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','白带异常')"><input type="radio" name="menses" value="白带异常"> <span>白带异常</span></div>
+            <div class="opt" onclick="selectSingle(this,'menses','已绝经')"><input type="radio" name="menses" value="已绝经"> <span>已绝经</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P15 补充信息 -->
+    <div class="page" data-key="note">
+        <div class="q-card">
+            <div class="q-title">15. 补充信息</div>
+            <p style="font-size:14px;color:#666;margin-bottom:12px;">其他伴随症状、诱发因素、你想补充的情况：</p>
+            <textarea name="note" placeholder="选填，可写..."></textarea>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="generateReport()">生成问诊记录</button>
+        </div>
+    </div>
+
+    <!-- 结果页 -->
+    <div class="page" data-key="result">
+        <div class="result-card" id="resultArea"></div>
+    </div>
+
 </div>
 
-<!-- 结果区域 -->
-<div id="result">
-    <h3>📋 您的中医体质自测报告</h3>
-    <div id="resContent"></div>
-    <button class="btn-reset" onclick="resetAll()">重新自测</button>
-</div>
-
-<!-- 浮动提示 -->
-<div class="toast" id="toast">请先选择本题答案</div>
-
-<!-- 隐藏版权标记（勿删，删除将导致功能异常） -->
-<div style="display:none;" id="copyright-stamp">© 繁星 · 中医问诊体质自测系统 · 版权所有</div>
+<!-- 隐藏版权标记（勿删） -->
+<div style="display:none;" id="copyright-stamp">© 繁星 · 中医自查辨证 · 版权所有</div>
 
 <script>
-// 版权校验标记（删除此段将导致报告生成失败）
 const _copySticker = "繁星版权所有_2026";
 function _verifyStamp(){
     const el = document.getElementById("copyright-stamp");
-    if(!el || !el.textContent.includes("繁星")){
+    if(!el || !el.textContent.includes("繁星")) return false;
+    return true;
+}
+
+let pages = [];
+let currentPage = 0;
+let selectedPart = null;
+
+function initPages(){
+    pages = Array.from(document.querySelectorAll("#container .page"));
+    showPage();
+}
+
+function showPage(){
+    pages.forEach((p,i)=>p.classList.toggle("active", i===currentPage));
+    const total = pages.length - 1;
+    document.querySelector(".progress-bar").style.width = (currentPage/total)*100 + "%";
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function getPageData(){
+    const data = {};
+    pages.forEach(p=>{
+        const key = p.dataset.key;
+        if(!key) return;
+        const radios = p.querySelectorAll('input[type="radio"]:checked');
+        const checks = p.querySelectorAll('input[type="checkbox"]:checked');
+        const textareas = p.querySelectorAll('textarea');
+        if(radios.length) data[key+"_r"] = Array.from(radios).map(r=>r.value);
+        if(checks.length) data[key+"_c"] = Array.from(checks).map(c=>c.value);
+        textareas.forEach(t=>{ if(t.value.trim()) data[key+"_t"] = t.value.trim(); });
+    });
+    return data;
+}
+
+function checkCurrentPage(){
+    const p = pages[currentPage];
+    const key = p.dataset.key;
+    // 单选页至少选一个（补充页和其他填空页除外）
+    const radios = p.querySelectorAll('input[type="radio"]:checked');
+    const hasRadio = p.querySelector('input[type="radio"]');
+    if(hasRadio && radios.length === 0){
+        showToast("请先选择一个选项");
         return false;
     }
     return true;
 }
 
-// 体质完整数据库
-const db = {
-    normal:{
-        name:"平和质",
-        desc:"整体阴阳气血均衡，脏腑功能协调，是健康理想体质状态。",
-        tip:"养护建议：保持规律作息、饮食均衡、适度运动，维持现有良好生活习惯即可。"
-    },
-    qi:{
-        name:"气虚倾向",
-        desc:"人体正气亏虚，脏腑机能减退，主要表现为神疲乏力、少气懒言、自汗、不耐劳累。",
-        tip:"养护建议：避免熬夜、过度劳累、大汗运动；多食山药、小米、莲子、黄芪等平和补气食材，静养为主。"
-    },
-    yangxu:{
-        name:"阳虚倾向",
-        desc:"体内阳气不足，温煦、推动功能减弱，畏寒怕冷、手脚冰凉、大便溏稀、不耐寒凉。",
-        tip:"养护建议：重点做好腰腹、下肢保暖；杜绝生冷冰饮、生食凉菜；可适量食用生姜、桂圆、红枣等温阳食材。"
-    },
-    yinxu:{
-        name:"阴虚倾向",
-        desc:"体内阴液亏虚，滋润、宁静功能不足，虚热内生，表现口干、盗汗、心烦、失眠、手足心热。",
-        tip:"养护建议：严禁熬夜（熬夜耗阴最重）；少吃辛辣、烧烤、油炸燥热食物；多食银耳、百合、雪梨、桑葚滋阴润燥。"
-    },
-    tanshi:{
-        name:"痰湿倾向",
-        desc:"脾胃运化失常，水湿停滞体内，身体困重、困倦嗜睡、舌苔厚腻、体型偏厚重。",
-        tip:"养护建议：戒掉奶茶、甜品、生冷、油腻食物；坚持适度运动升发阳气，促进水湿代谢。"
-    },
-    shire:{
-        name:"湿热倾向",
-        desc:"湿邪夹杂热邪郁于体内，口苦口黏、皮肤易长痘、心烦燥热、身体沉重。",
-        tip:"养护建议：清淡饮食，忌口甜辣油腻；保证睡眠、避免闷热潮湿环境，多通风除湿。"
-    },
-    ganyu:{
-        name:"肝郁倾向",
-        desc:"肝气郁结、气机不畅，情绪压抑、爱叹气、胸闷、失眠多梦、情志不畅。",
-        tip:"养护建议：多舒展运动、拉伸、散步；主动调节情绪，减少憋闷，少生气、少焦虑。"
-    },
-    xuexu:{
-        name:"血虚倾向",
-        desc:"血液亏虚，脏腑失养，面色淡白、头晕眼花、经期量少色淡、体虚乏力。",
-        tip:"养护建议：杜绝长期熬夜耗血；减少长时间看电子屏幕（久视伤血）；适量食用红枣、猪肝、黑芝麻养血。"
-    },
-    xueyu:{
-        name:"血瘀倾向",
-        desc:"血行不畅、瘀血阻滞，身体刺痛、固定痛、经血暗沉有血块、气血循环差。",
-        tip:"养护建议：避免久坐不动，每日适度走动、拉伸；经期忌寒凉、忌生冷，促进气血流通。"
-    },
-    re:{
-        name:"内热倾向",
-        desc:"体内郁热内生，容易上火、燥热、经期提前量多、心烦易怒。",
-        tip:"养护建议：清淡饮食、多喝温水；减少熬夜燥热，忌口辛辣烧烤。"
-    },
-    tebin:{
-        name:"特禀倾向",
-        desc:"先天禀赋异常，过敏体质，容易出现荨麻疹、鼻炎、哮喘、药物或食物过敏等反应。",
-        tip:"养护建议：排查并远离已知过敏原；季节交替注意防护；少食辛辣腥发食物，增强体质。"
-    }
-}
-
-// 全局变量
-let currentPage = 0;
-let pageList = [];
-let pageListReady = false; // 页面列表是否已初始化过
-
-// 初始化页面列表（过滤男女专属页面）
-function initPageList(){
-    const allPages = Array.from(document.querySelectorAll(".page"));
-    const gender = document.querySelector('input[name="gender"]:checked')?.value;
-    pageList = [];
-
-    allPages.forEach(page=>{
-        const type = page.dataset.type;
-        if(type === "base") pageList.push(page);
-        if(gender === "female" && type === "female") pageList.push(page);
-        if(gender === "male" && type === "male-end") pageList.push(page);
-    })
-    pageListReady = true;
-}
-
-// 更新进度条
-function updateProgress(){
-    const total = pageList.length;
-    const now = currentPage + 1;
-    const percent = (now / total) * 100;
-    document.getElementById("progress").style.width = percent + "%";
-}
-
-// 切换页面显示
-function renderPage(){
-    // 清除所有页面的抖动/红色边框残留
-    document.querySelectorAll('.shake').forEach(el=>el.classList.remove('shake'));
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    if(pageList[currentPage]){
-        pageList[currentPage].classList.add("active");
-    }
-    updateProgress();
-}
-
-// 浮动提示
-function showToast(msg){
-    const t = document.getElementById("toast");
-    t.textContent = msg || "请先选择本题答案";
-    t.classList.add("show");
-    clearTimeout(t._timer);
-    t._timer = setTimeout(()=>t.classList.remove("show"), 1800);
-}
-
-// 下一页
 function nextPage(){
-    const page = pageList[currentPage];
-    if(!page) return;
+    if(!checkCurrentPage()) return;
 
-    // 如果当前页有 radio 题目，校验是否已选；没有 radio 的页（如收尾页）直接放行
-    const radios = page.querySelectorAll('input[type="radio"]');
-    if(radios.length > 0){
-        const checked = page.querySelector('input[type="radio"]:checked');
-        if(!checked){
-            const card = page.querySelector('.q-card');
-            card.classList.remove('shake');
-            void card.offsetWidth;
-            card.classList.add('shake');
-            showToast("请先选择本题答案再继续");
+    // 第4题选完部位后，跳到对应分支页
+    if(pages[currentPage].dataset.key === "bodypart"){
+        const checked = document.querySelector('input[name="bodypart"]:checked');
+        selectedPart = checked ? checked.value : null;
+        // 找到对应分支页索引
+        const branchMap = {
+            "头部":"branch-head", "五官":"branch-face", "胸胁":"branch-chest",
+            "胃脘腹部":"branch-abdomen", "腰背":"branch-back", "四肢关节":"branch-limb",
+            "皮肤":"branch-skin", "全身":"branch-whole", "其他部位":"branch-other"
+        };
+        const targetKey = branchMap[selectedPart];
+        if(targetKey){
+            const idx = pages.findIndex(p=>p.dataset.key === targetKey);
+            if(idx > -1){
+                currentPage = idx;
+                showPage();
+                return;
+            }
+        }
+    }
+
+    // 女性专属页：如果性别是男或不愿填写，跳过月经题
+    if(pages[currentPage].dataset.key === "history"){
+        const genderVal = document.querySelector('input[name="gender"]:checked');
+        if(genderVal && genderVal.value !== "女"){
+            // 跳到补充信息页，跳过月经
+            const noteIdx = pages.findIndex(p=>p.dataset.key === "note");
+            currentPage = noteIdx;
+            showPage();
             return;
         }
     }
 
-    // 第一次点下一页（从性别页出发），构建完整页面队列
-    if(!pageListReady){
-        initPageList();
+    // 舌象：如果舌苔选了"无苔"，跳过颜色干湿页，直接到舌形
+    if(pages[currentPage].dataset.key === "tongue_thick"){
+        const thickVal = document.querySelector('input[name="tongue_thick"]:checked');
+        if(thickVal && thickVal.value === "无苔"){
+            const shapeIdx = pages.findIndex(p=>p.dataset.key === "tongue_shape");
+            currentPage = shapeIdx;
+            showPage();
+            return;
+        }
     }
 
-    if(currentPage < pageList.length - 1){
+    // 分支页答完后，跳过其他分支页，直接到第5题（规律页）
+    const curKey = pages[currentPage].dataset.key;
+    if(curKey && curKey.startsWith("branch-")){
+        const patternIdx = pages.findIndex(p=>p.dataset.key === "pattern");
+        currentPage = patternIdx;
+        showPage();
+        return;
+    }
+
+    if(currentPage < pages.length-1){
         currentPage++;
-        renderPage();
+        showPage();
     }
 }
 
-// 上一页
 function prevPage(){
+    if(currentPage === pages.length-1) return;
+    // 如果当前在分支页，返回时回到部位选择页
+    const curKey = pages[currentPage].dataset.key;
+    if(curKey && curKey.startsWith("branch-")){
+        const idx = pages.findIndex(p=>p.dataset.key === "bodypart");
+        currentPage = idx;
+        showPage();
+        return;
+    }
+    // 如果当前在补充信息页，且是男性跳过来的，返回时回到既往诱因页
+    if(curKey === "note"){
+        const genderVal = document.querySelector('input[name="gender"]:checked');
+        if(genderVal && genderVal.value !== "女"){
+            const idx = pages.findIndex(p=>p.dataset.key === "history");
+            currentPage = idx;
+            showPage();
+            return;
+        }
+    }
+    // 舌形页返回：如果之前是无苔跳过的，回到舌苔厚薄页；否则回到舌苔颜色页
+    if(curKey === "tongue_shape"){
+        const thickVal = document.querySelector('input[name="tongue_thick"]:checked');
+        if(thickVal && thickVal.value === "无苔"){
+            const idx = pages.findIndex(p=>p.dataset.key === "tongue_thick");
+            currentPage = idx;
+            showPage();
+            return;
+        }
+    }
+    // 从规律页返回时，回到用户选的那个分支页
+    if(curKey === "pattern" && selectedPart){
+        const branchMap = {
+            "头部":"branch-head", "五官":"branch-face", "胸胁":"branch-chest",
+            "胃脘腹部":"branch-abdomen", "腰背":"branch-back", "四肢关节":"branch-limb",
+            "皮肤":"branch-skin", "全身":"branch-whole", "其他部位":"branch-other"
+        };
+        const targetKey = branchMap[selectedPart];
+        if(targetKey){
+            const idx = pages.findIndex(p=>p.dataset.key === targetKey);
+            currentPage = idx;
+            showPage();
+            return;
+        }
+    }
     if(currentPage > 0){
         currentPage--;
-        renderPage();
+        showPage();
     }
 }
 
-// 给指定题目名加分
-function addScore(name, scores){
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    if(!el) return;
-    const vList = el.value.split(",");
-    vList.forEach(key=>{
-        // ★ 关键修复：不能用 if(scores[key])，因为初始值是0，falsy会导致永远不加分
-        if(scores[key] !== undefined){
-            scores[key] += 1;
-        }
+function selectSingle(el, name, val){
+    const card = el.closest(".q-card");
+    card.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
+        r.closest(".opt").classList.remove("selected");
+        r.checked = false;
     });
+    el.classList.add("selected");
+    el.querySelector(`input[name="${name}"]`).checked = true;
 }
 
-// 提交计算结果
-function submitTest(){
-    // 版权校验（删除版权标记将无法生成报告）
+function selectPart(el, val){
+    selectSingle(el, "bodypart", val);
+}
+
+function toggleMulti(el, name, val){
+    const cb = el.querySelector(`input[type="checkbox"]`);
+    cb.click();
+}
+
+// 统一绑定checkbox样式更新，阻止冒泡避免双重切换
+document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.addEventListener('click', function(e){
+        e.stopPropagation();
+    });
+    cb.addEventListener('change', function(){
+        this.closest('.opt').classList.toggle('selected', this.checked);
+    });
+});
+
+function showToast(msg){
+    let t = document.querySelector(".toast");
+    if(!t){
+        t = document.createElement("div");
+        t.className = "toast";
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>t.classList.remove("show"), 2000);
+}
+
+function getRadioVal(name){
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : "未填写";
+}
+function getCheckVals(name){
+    const els = document.querySelectorAll(`input[name="${name}"]:checked`);
+    return els.length ? Array.from(els).map(e=>e.value).join("、") : "无";
+}
+function getTextVal(name){
+    const el = document.querySelector(`textarea[name="${name}"]`);
+    return el && el.value.trim() ? el.value.trim() : "无";
+}
+
+function generateReport(){
     if(!_verifyStamp() || _copySticker.indexOf("繁星") === -1){
         showToast("页面文件异常，请联系作者");
         return;
     }
 
-    const scores = {};
-    Object.keys(db).forEach(k=>scores[k]=0);
+    const gender = getRadioVal("gender");
+    const age = getRadioVal("age");
+    const duration = getRadioVal("duration");
+    const bodypart = getRadioVal("bodypart");
+    const pattern = getCheckVals("pattern");
+    const coldheat = getRadioVal("coldheat");
+    const sweat = getRadioVal("sweat");
+    const stool = getRadioVal("stool");
+    const urine = getRadioVal("urine");
+    const taste = getCheckVals("taste");
+    const sleep = getRadioVal("sleep");
+    const tongueColor = getRadioVal("tongue_color");
+    const tongueThick = getRadioVal("tongue_thick");
+    const hasCoat = tongueThick !== "无苔";
+    const tongueCoat = hasCoat ? getRadioVal("tongue_coat") : "（无苔，跳过）";
+    const tongueWet = hasCoat ? getRadioVal("tongue_wet") : "（无苔，跳过）";
+    const tongueShape = getCheckVals("tongue_shape");
+    const history = getCheckVals("history");
+    const note = getTextVal("note");
 
-    // 必选校验
-    const genderVal = document.querySelector('input[name="gender"]:checked')?.value;
-    if(!genderVal){showToast("请先选择性别");return;}
-
-    // 基础题计分
-    const qs = ["q1","q2","q3","q4","q5","q6","q7","q8"];
-    qs.forEach(q=>addScore(q, scores));
-
-    // 女性专项计分
-    if(genderVal === "female"){
-        const mList = ["m1","m2","m3"];
-        mList.forEach(m=>addScore(m, scores));
+    // 分支症状
+    let branchSym = "";
+    if(bodypart === "头部"){
+        branchSym = `位置：${getRadioVal("head_pos")}；感受：${getCheckVals("head_sym")}`;
+    } else if(bodypart === "五官"){
+        branchSym = `部位：${getRadioVal("face_part")}；感受：${getCheckVals("face_sym")}`;
+    } else if(bodypart === "胸胁"){
+        branchSym = `感受：${getCheckVals("chest_sym")}`;
+    } else if(bodypart === "胃脘腹部"){
+        branchSym = `感受：${getCheckVals("abd_sym")}`;
+    } else if(bodypart === "腰背"){
+        branchSym = `位置：${getRadioVal("back_pos")}；感受：${getCheckVals("back_sym")}`;
+    } else if(bodypart === "四肢关节"){
+        branchSym = `位置：${getRadioVal("limb_pos")}；感受：${getCheckVals("limb_sym")}`;
+    } else if(bodypart === "皮肤"){
+        branchSym = `感受：${getCheckVals("skin_sym")}`;
+    } else if(bodypart === "全身"){
+        branchSym = `感受：${getCheckVals("whole_sym")}`;
+    } else if(bodypart === "其他部位"){
+        branchSym = `描述：${getTextVal("other_desc")}`;
     }
 
-    // 排序、主兼夹判定
-    const sortedList = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0);
-    let mainList = [], subList = [];
-    if(sortedList.length>0){
-        const top = sortedList[0][1];
-        sortedList.forEach(([k,s])=>{
-            if(s === top) mainList.push(k);
-            else if(s >= top * 0.6) subList.push(k);
-        })
+    let menses = "（男性已跳过）";
+    if(gender === "女"){
+        menses = getRadioVal("menses");
     }
 
-    // 渲染报告
+    // ===== 辨证分析引擎 =====
+    function rv(name){
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : "";
+    }
+    function cv(name){
+        const els = document.querySelectorAll(`input[name="${name}"]:checked`);
+        return Array.from(els).map(e=>e.value);
+    }
+
+    const score = {cold:0, heat:0, xu:0, shi:0, yu:0, yuqi:0};
+    // 寒证
+    if(rv("coldheat")==="怕冷明显喜温热") score.cold += 2;
+    if(rv("coldheat")==="手脚冰凉身不怕冷") score.cold += 1;
+    if(rv("stool")==="偏稀不成形") score.cold += 1;
+    if(rv("urine")==="清长量多") score.cold += 1;
+    if(cv("taste").includes("口淡无味")) score.cold += 1;
+    if(rv("tongue_color")==="舌淡偏白") score.cold += 1;
+    if(hasCoat && rv("tongue_coat")==="白苔") score.cold += 1;
+    if(cv("pattern").includes("受凉遇冷加重")) score.cold += 1;
+    if(cv("pattern").includes("保暖热敷减轻")) score.cold += 1;
+    if(cv("back_sym").includes("冷痛")) score.cold += 1;
+    if(cv("limb_sym").includes("冷痛")) score.cold += 1;
+    // 热证
+    if(rv("coldheat")==="怕热明显喜凉") score.heat += 2;
+    if(rv("stool")==="干结难排") score.heat += 1;
+    if(rv("urine")==="颜色很黄") score.heat += 1;
+    if(cv("taste").includes("口苦")) score.heat += 1;
+    if(cv("taste").includes("口干想喝水")) score.heat += 1;
+    if(rv("tongue_color")==="舌红") score.heat += 2;
+    if(hasCoat && rv("tongue_coat")==="黄苔") score.heat += 2;
+    if(rv("tongue_wet")==="偏干") score.heat += 1;
+    if(cv("pattern").includes("受热闷热加重")) score.heat += 1;
+    if(cv("face_sym").includes("红痒")) score.heat += 1;
+    if(cv("abd_sym").includes("腹部灼热")) score.heat += 1;
+    if(cv("limb_sym").includes("灼热肿痛")) score.heat += 1;
+    // 虚证
+    if(rv("sweat")==="自汗") score.xu += 1;
+    if(rv("sweat")==="动则大汗") score.xu += 1;
+    if(rv("stool")==="先干后稀") score.xu += 1;
+    if(rv("sleep")==="容易醒多梦") score.xu += 1;
+    if(rv("sleep")==="睡眠浅") score.xu += 1;
+    if(rv("tongue_thick")==="无苔") score.xu += 1;
+    if(cv("tongue_shape").includes("舌瘦")) score.xu += 1;
+    if(cv("pattern").includes("劳累之后加重")) score.xu += 1;
+    if(cv("pattern").includes("休息之后减轻")) score.xu += 1;
+    if(cv("history").includes("长期劳累")) score.xu += 1;
+    if(cv("head_sym").includes("空痛隐隐")) score.xu += 1;
+    if(cv("back_sym").includes("酸痛")) score.xu += 1;
+    if(cv("whole_sym").includes("浑身乏力沉重")) score.xu += 1;
+    // 湿证
+    if(rv("stool")==="黏马桶冲不净") score.shi += 2;
+    if(cv("taste").includes("口黏发腻")) score.shi += 1;
+    if(rv("tongue_thick")==="厚苔") score.shi += 1;
+    if(rv("tongue_wet")==="水滑口水多") score.shi += 1;
+    if(cv("tongue_shape").includes("舌体胖大有齿痕")) score.shi += 1;
+    if(cv("whole_sym").includes("浑身乏力沉重")) score.shi += 1;
+    // 瘀证
+    if(rv("tongue_color")==="舌暗红紫暗") score.yu += 2;
+    if(cv("head_sym").includes("刺痛")) score.yu += 1;
+    if(cv("chest_sym").includes("刺痛")) score.yu += 1;
+    if(cv("back_sym").includes("刺痛")) score.yu += 1;
+    if(cv("limb_sym").includes("发麻")) score.yu += 1;
+    if(cv("skin_sym").includes("麻木")) score.yu += 1;
+    // 郁证
+    if(cv("chest_sym").includes("胸闷憋气")) score.yuqi += 1;
+    if(cv("chest_sym").includes("胁肋胀")) score.yuqi += 1;
+    if(cv("chest_sym").includes("乳房胀痛")) score.yuqi += 1;
+    if(cv("history").includes("容易情绪压抑生气")) score.yuqi += 1;
+    if(rv("sleep")==="入睡困难") score.yuqi += 1;
+    if(cv("abd_sym").includes("胃胀")) score.yuqi += 1;
+    if(cv("face_sym").includes("咽痛异物感")) score.yuqi += 1;
+
+    // 综合判断
+    const results = [];
+    if(score.cold >= 2 && score.heat < 2) results.push({name:"寒证", desc:"怕冷、喜暖、便溏、口淡，多属阳虚或外感寒邪", tip:"注意保暖，忌生冷冰饮，可适当食用生姜、桂圆、羊肉等温阳食物"});
+    if(score.heat >= 2 && score.cold < 2) results.push({name:"热证", desc:"怕热、口渴、便干、舌红苔黄，多属内热或阴虚火旺", tip:"饮食清淡，忌辛辣烧烤，可食用绿豆、苦瓜、梨等清热滋阴食物"});
+    if(score.cold >= 2 && score.heat >= 2) results.push({name:"寒热错杂", desc:"既有怕冷又有上火表现，病机较复杂", tip:"建议面诊中医师，不建议自行用药调理"});
+    if(score.xu >= 2) results.push({name:"虚证", desc:"乏力、气短、自汗、劳累后加重，多属气虚或气血不足", tip:"避免熬夜过度劳累，可食用山药、红枣、黄芪等补气食物，静养为主"});
+    if(score.shi >= 2) results.push({name:"湿证", desc:"身体沉重、口黏、便黏、苔腻，多属脾虚湿盛或湿热内蕴", tip:"忌甜腻生冷油腻，适当运动出汗，可食用薏米、赤小豆、冬瓜祛湿"});
+    if(score.yu >= 2) results.push({name:"血瘀", desc:"刺痛固定、舌色暗紫、麻木，多属血行不畅", tip:"避免久坐不动，适当运动促进气血流通，可食用山楂、玫瑰花等活血"});
+    if(score.yuqi >= 2) results.push({name:"气郁", desc:"胸闷胁胀、情绪压抑、入睡难，多属肝气郁结", tip:"多舒展运动、散步，主动调节情绪，可饮用玫瑰花茶、陈皮疏肝理气"});
+
     let html = "";
-    if(mainList.length===1 && mainList[0]==="normal"){
-        html += `<span class="tag tag-main">平和质（健康均衡）</span>`;
-        html += `<div class="item-report"><strong>${db.normal.name}</strong><p>${db.normal.desc}</p><p>${db.normal.tip}</p></div>`;
-    }else if(mainList.length > 0){
-        html += `<div>${mainList.map(k=>`<span class="tag tag-main">主体质：${db[k].name}</span>`).join("")}</div>`;
-        if(subList.length){
-            html += `<div style="margin-top:8px;">${subList.map(k=>`<span class="tag tag-sub">兼夹体质：${db[k].name}</span>`).join("")}</div>`;
-        }
-        html += `<div style="margin-top:16px;">`;
-        const allKeys = [...new Set([...mainList,...subList])];
-        allKeys.forEach(k=>{
-            html += `<div class="item-report"><strong>${db[k].name}</strong><p>${db[k].desc}</p><p>${db[k].tip}</p></div>`;
+    html += `<h2>中医辨证分析</h2>`;
+    if(results.length === 0){
+        html += `<div class="result-section" style="border-left-color:#8b2e2e;"><b>初步判断</b><p>症状信息较少，未出现明显偏颇证型倾向。建议结合线下面诊综合判断。</p></div>`;
+    } else {
+        results.forEach((r,i)=>{
+            html += `<div class="result-section" style="border-left-color:#8b2e2e;"><b>${i+1}. ${r.name}</b><p>${r.desc}</p><p style="color:#7a4a1a;font-size:13px;margin-top:6px;"><b>调理方向：</b>${r.tip}</p></div>`;
         });
-        html += `</div>`;
-    }else{
-        // 兜底：理论上不会走到这里，但防止异常空白
-        html += `<p style="color:#888;">未能识别出明显体质倾向，建议面诊中医师辨证。</p>`;
     }
+    html += `<div style="margin:16px 0;padding:12px;background:#fdf3dc;border-radius:4px;font-size:13px;color:#7a4a1a;">⚠️ 以上仅为根据问卷信息的初步辨证参考，不能替代专业中医师面诊。症状持续加重、高烧不退、剧烈疼痛请立即就医。</div>`;
 
-    html += `<p class="tip-text">温馨提示：本自测仅为中医体质倾向性科普参考，体质多为复合兼夹状态，无法替代专业医师辨证，身体不适请及时线下就医。</p>`;
-    html += `<p style="text-align:center;margin-top:16px;font-size:11px;color:#bbb;">© 繁星 · 中医问诊体质自测系统</p>`;
+    html += `<h2 style="margin-top:24px;">问诊详细记录</h2>`;
+    html += `<div class="result-section"><b>基本信息</b><p>性别：${gender} ｜ 年龄：${age} ｜ 不适持续：${duration}</p></div>`;
+    html += `<div class="result-section"><b>主诉部位</b><p>${bodypart}</p><p style="color:#666;font-size:13px;">${branchSym}</p></div>`;
+    html += `<div class="result-section"><b>症状规律</b><p>${pattern}</p></div>`;
+    html += `<div class="result-section"><b>寒热</b><p>${coldheat}</p></div>`;
+    html += `<div class="result-section"><b>出汗</b><p>${sweat}</p></div>`;
+    html += `<div class="result-section"><b>大便</b><p>${stool}</p></div>`;
+    html += `<div class="result-section"><b>小便</b><p>${urine}</p></div>`;
+    html += `<div class="result-section"><b>饮食口味</b><p>${taste}</p></div>`;
+    html += `<div class="result-section"><b>睡眠</b><p>${sleep}</p></div>`;
+    html += `<div class="result-section"><b>舌象</b><p>舌色：${tongueColor} ｜ 苔质：${tongueThick} ｜ 苔色：${tongueCoat} ｜ 苔润：${tongueWet}</p><p>舌形：${tongueShape}</p></div>`;
+    html += `<div class="result-section"><b>既往诱因</b><p>${history}</p></div>`;
+    html += `<div class="result-section"><b>月经情况</b><p>${menses}</p></div>`;
+    html += `<div class="result-section"><b>补充说明</b><p>${note}</p></div>`;
+    html += `<p style="font-size:12px;color:#999;margin-top:16px;text-align:center;">本记录由中医在线问诊系统生成，仅供参考，不构成诊疗建议。请携带本记录就诊专业中医师。</p>`;
+    html += `<p style="text-align:center;margin-top:8px;font-size:11px;color:#bbb;">© 繁星 · 中医自查辨证</p>`;
 
-    document.getElementById("resContent").innerHTML = html;
-    document.getElementById("container").style.display = "none";
-    document.getElementById("result").style.display = "block";
-    window.scrollTo(0,0);
+    document.getElementById("resultArea").innerHTML = html;
+    currentPage = pages.length - 1;
+    showPage();
 }
 
-// 重置全部
-function resetAll(){
-    document.querySelectorAll("input[type=radio]").forEach(i=>i.checked=false);
-    document.getElementById("container").style.display = "block";
-    document.getElementById("result").style.display = "none";
-    currentPage = 0;
-    pageList = [document.querySelector('.page[data-type="base"]')];
-    pageListReady = false;
-    renderPage();
-}
-
-// 整个选项区域可点击选中（点文字/空白处 = 点圆圈）
-document.querySelectorAll('.opt').forEach(opt=>{
-    opt.addEventListener('click', function(e){
-        const radio = this.querySelector('input[type="radio"]');
-        if(radio && e.target !== radio){
-            radio.checked = true;
-        }
-    });
-});
-
-// 首次初始化：只显示性别页
-pageList = [document.querySelector('.page[data-type="base"]')];
-renderPage();
+initPages();
 </script>
+
 </body>
 </html>
-<!-- （注：内容由AI生成） -->
