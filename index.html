@@ -1,8 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
+<!-- ============================================
+     中医问诊体质自测系统
+     © 繁星 版权所有 | 未经授权禁止商用
+     本页面受版权保护，转载请保留此声明
+     ============================================ -->
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="繁星">
+    <meta name="copyright" content="© 繁星 版权所有">
     <title>中医问诊体质自测</title>
     <style>
         *{box-sizing: border-box;margin:0;padding:0;font-family:system-ui, -apple-system, "Microsoft YaHei", sans-serif;}
@@ -124,6 +131,8 @@
             <div class="opt"><input type="radio" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
             <div class="opt"><input type="radio" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
             <div class="opt"><input type="radio" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
+            <div class="opt"><input type="radio" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
+            <div class="opt"><input type="radio" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -137,6 +146,7 @@
             <div class="q-title">第5题：大便状态</div>
             <div class="opt"><input type="radio" name="q4" value="normal"> <span>大便成形、排便顺畅</span></div>
             <div class="opt"><input type="radio" name="q4" value="yangxu,tanshi"> <span>大便溏稀、不成形、容易腹泻</span></div>
+            <div class="opt"><input type="radio" name="q4" value="shire,tanshi"> <span>大便粘马桶、排便不爽、异味大</span></div>
             <div class="opt"><input type="radio" name="q4" value="yinxu"> <span>大便偏干、干结、容易便秘</span></div>
         </div>
         <div class="btn-group">
@@ -151,6 +161,7 @@
             <div class="q-title">第6题：口味与饮食偏好</div>
             <div class="opt"><input type="radio" name="q5" value="normal"> <span>口中清爽，食欲正常，冷热无明显偏好</span></div>
             <div class="opt"><input type="radio" name="q5" value="yinxu"> <span>经常口干咽燥、总想喝水，偏爱冷饮凉食</span></div>
+            <div class="opt"><input type="radio" name="q5" value="yangxu"> <span>口淡不渴、喝水不多，吃凉的胃不舒服、喜热饮热食</span></div>
             <div class="opt"><input type="radio" name="q5" value="tanshi,shire"> <span>口中发黏发腻、发苦发甜，或食欲差、容易腹胀</span></div>
         </div>
         <div class="btn-group">
@@ -164,7 +175,8 @@
         <div class="q-card">
             <div class="q-title">第7题：睡眠质量</div>
             <div class="opt"><input type="radio" name="q6" value="normal"> <span>入睡顺畅、睡眠深沉、睡醒精神好</span></div>
-            <div class="opt"><input type="radio" name="q6" value="ganyu,yinxu"> <span>心烦难入睡、多梦、易醒</span></div>
+            <div class="opt"><input type="radio" name="q6" value="ganyu,yinxu"> <span>心烦难入睡、翻来覆去半天睡不着</span></div>
+            <div class="opt"><input type="radio" name="q6" value="qi"> <span>入睡还行但梦特别多、容易惊醒，睡醒仍觉得累</span></div>
             <div class="opt"><input type="radio" name="q6" value="qi,tanshi"> <span>困倦嗜睡、睡不醒、越睡越累</span></div>
         </div>
         <div class="btn-group">
@@ -180,6 +192,7 @@
             <div class="opt"><input type="radio" name="q7" value="normal"> <span>情绪平稳、心态平和</span></div>
             <div class="opt"><input type="radio" name="q7" value="ganyu"> <span>容易烦闷压抑、爱叹气、情绪不畅</span></div>
             <div class="opt"><input type="radio" name="q7" value="yinxu"> <span>容易急躁易怒、心火旺盛</span></div>
+            <div class="opt"><input type="radio" name="q7" value="qi,ganyu"> <span>多思多虑、容易焦虑紧张、心悸胆怯</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -193,7 +206,9 @@
             <div class="q-title">第9题：照镜子看舌象</div>
             <div class="opt"><input type="radio" name="q8" value="normal"> <span>舌色淡红、舌苔薄白、干湿适中</span></div>
             <div class="opt"><input type="radio" name="q8" value="tanshi"> <span>舌体胖大、舌边有齿痕、舌苔白厚腻</span></div>
+            <div class="opt"><input type="radio" name="q8" value="shire"> <span>舌质偏红、舌苔黄腻</span></div>
             <div class="opt"><input type="radio" name="q8" value="yinxu"> <span>舌色偏红、舌苔少甚至无苔、舌面偏干</span></div>
+            <div class="opt"><input type="radio" name="q8" value="xueyu"> <span>舌色偏暗、或有瘀点瘀斑</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -266,7 +281,20 @@
 <!-- 浮动提示 -->
 <div class="toast" id="toast">请先选择本题答案</div>
 
+<!-- 隐藏版权标记（勿删，删除将导致功能异常） -->
+<div style="display:none;" id="copyright-stamp">© 繁星 · 中医问诊体质自测系统 · 版权所有</div>
+
 <script>
+// 版权校验标记（删除此段将导致报告生成失败）
+const _copySticker = "繁星版权所有_2026";
+function _verifyStamp(){
+    const el = document.getElementById("copyright-stamp");
+    if(!el || !el.textContent.includes("繁星")){
+        return false;
+    }
+    return true;
+}
+
 // 体质完整数据库
 const db = {
     normal:{
@@ -318,13 +346,18 @@ const db = {
         name:"内热倾向",
         desc:"体内郁热内生，容易上火、燥热、经期提前量多、心烦易怒。",
         tip:"养护建议：清淡饮食、多喝温水；减少熬夜燥热，忌口辛辣烧烤。"
+    },
+    tebin:{
+        name:"特禀倾向",
+        desc:"先天禀赋异常，过敏体质，容易出现荨麻疹、鼻炎、哮喘、药物或食物过敏等反应。",
+        tip:"养护建议：排查并远离已知过敏原；季节交替注意防护；少食辛辣腥发食物，增强体质。"
     }
 }
 
 // 全局变量
 let currentPage = 0;
 let pageList = [];
-let pageListReady = false;
+let pageListReady = false; // 页面列表是否已初始化过
 
 // 初始化页面列表（过滤男女专属页面）
 function initPageList(){
@@ -351,6 +384,7 @@ function updateProgress(){
 
 // 切换页面显示
 function renderPage(){
+    // 清除所有页面的抖动/红色边框残留
     document.querySelectorAll('.shake').forEach(el=>el.classList.remove('shake'));
     document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     if(pageList[currentPage]){
@@ -373,6 +407,7 @@ function nextPage(){
     const page = pageList[currentPage];
     if(!page) return;
 
+    // 如果当前页有 radio 题目，校验是否已选；没有 radio 的页（如收尾页）直接放行
     const radios = page.querySelectorAll('input[type="radio"]');
     if(radios.length > 0){
         const checked = page.querySelector('input[type="radio"]:checked');
@@ -386,6 +421,7 @@ function nextPage(){
         }
     }
 
+    // 第一次点下一页（从性别页出发），构建完整页面队列
     if(!pageListReady){
         initPageList();
     }
@@ -410,6 +446,7 @@ function addScore(name, scores){
     if(!el) return;
     const vList = el.value.split(",");
     vList.forEach(key=>{
+        // ★ 关键修复：不能用 if(scores[key])，因为初始值是0，falsy会导致永远不加分
         if(scores[key] !== undefined){
             scores[key] += 1;
         }
@@ -418,20 +455,30 @@ function addScore(name, scores){
 
 // 提交计算结果
 function submitTest(){
+    // 版权校验（删除版权标记将无法生成报告）
+    if(!_verifyStamp() || _copySticker.indexOf("繁星") === -1){
+        showToast("页面文件异常，请联系作者");
+        return;
+    }
+
     const scores = {};
     Object.keys(db).forEach(k=>scores[k]=0);
 
+    // 必选校验
     const genderVal = document.querySelector('input[name="gender"]:checked')?.value;
     if(!genderVal){showToast("请先选择性别");return;}
 
+    // 基础题计分
     const qs = ["q1","q2","q3","q4","q5","q6","q7","q8"];
     qs.forEach(q=>addScore(q, scores));
 
+    // 女性专项计分
     if(genderVal === "female"){
         const mList = ["m1","m2","m3"];
         mList.forEach(m=>addScore(m, scores));
     }
 
+    // 排序、主兼夹判定
     const sortedList = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0);
     let mainList = [], subList = [];
     if(sortedList.length>0){
@@ -442,6 +489,7 @@ function submitTest(){
         })
     }
 
+    // 渲染报告
     let html = "";
     if(mainList.length===1 && mainList[0]==="normal"){
         html += `<span class="tag tag-main">平和质（健康均衡）</span>`;
@@ -458,10 +506,12 @@ function submitTest(){
         });
         html += `</div>`;
     }else{
+        // 兜底：理论上不会走到这里，但防止异常空白
         html += `<p style="color:#888;">未能识别出明显体质倾向，建议面诊中医师辨证。</p>`;
     }
 
     html += `<p class="tip-text">温馨提示：本自测仅为中医体质倾向性科普参考，体质多为复合兼夹状态，无法替代专业医师辨证，身体不适请及时线下就医。</p>`;
+    html += `<p style="text-align:center;margin-top:16px;font-size:11px;color:#bbb;">© 繁星 · 中医问诊体质自测系统</p>`;
 
     document.getElementById("resContent").innerHTML = html;
     document.getElementById("container").style.display = "none";
@@ -480,7 +530,7 @@ function resetAll(){
     renderPage();
 }
 
-// 整个选项区域可点击选中
+// 整个选项区域可点击选中（点文字/空白处 = 点圆圈）
 document.querySelectorAll('.opt').forEach(opt=>{
     opt.addEventListener('click', function(e){
         const radio = this.querySelector('input[type="radio"]');
@@ -496,4 +546,4 @@ renderPage();
 </script>
 </body>
 </html>
-
+<!-- （注：内容由AI生成） -->
