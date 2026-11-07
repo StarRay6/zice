@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<!-- ============================================
+     中医问诊体质自测系统
+     © 繁星 版权所有 | 未经授权禁止商用
+     本页面受版权保护，转载请保留此声明
+     ============================================ -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="繁星">
+    <meta name="copyright" content="© 繁星 版权所有">
+    <title>中医问诊体质自测</title>
+    <style>
+        *{box-sizing: border-box;margin:0;padding:0;font-family:system-ui, -apple-system, "Microsoft YaHei", sans-serif;}
+        body{background:#f0e8d6;color:#2c2c2c;padding:48px 16px 16px;max-width:800px;margin:0 auto;line-height:1.6;background-image:radial-gradient(ellipse at top, #f5efe0 0%, #ede4cc 100%);}
+        .header{text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #b8a682;}
+        .header h2{font-size:26px;letter-spacing:8px;color:#1a1a1a;font-weight:700;text-shadow:1px 1px 0 rgba(0,0,0,0.05);}
+        .warn{background:#fdf3dc;border:1px solid #c9a96e;padding:12px;border-radius:4px;color:#7a4a1a;margin-bottom:20px;font-size:14px;}
+
+        /* 进度条 */
+        .progress-wrap{width:100%;height:6px;background:#d8c9a8;border-radius:99px;margin-bottom:20px;overflow:hidden;}
+        .progress-bar{height:100%;background:#2c2c2c;width:0%;transition:all 0.4s ease;}
+
+        /* 分页核心样式 */
+        .page{display:none;animation:fadeIn 0.4s ease;}
+        .page.active{display:block;}
+        @keyframes fadeIn{
+            from{opacity:0;transform:translateX(10px);}
+            to{opacity:1;transform:translateX(0);}
+        }
+
+        .q-card{background:#faf6ea;padding:24px 20px;border-radius:4px;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;min-height:260px;display:flex;flex-direction:column;justify-content:center;}
+        .q-title{font-size:18px;font-weight:bold;margin-bottom:20px;color:#2c2c2c;letter-spacing:2px;}
+        .opt{margin:12px 0;font-size:16px;cursor:pointer;padding:12px 14px;border-radius:4px;border:1px solid #c9b88e;transition:0.2s;display:flex;align-items:flex-start;gap:8px;background:#fffdf5;}
+        .opt:hover{background:#f0e8d0;border-color:#a89060;}
+        .opt:has(input:checked){background:#e5d8b8;border-color:#8b6f3a;}
+        .opt input{margin-top:4px;transform:scale(1.1);flex-shrink:0;accent-color:#a83226;}
+
+        /* 按钮区 */
+        .btn-group{display:flex;gap:12px;margin-top:24px;}
+        .btn-group button{flex:1;padding:14px;border:none;border-radius:4px;font-size:16px;cursor:pointer;transition:0.2s;letter-spacing:4px;}
+        .btn-next{background:#a83226;color:#f5efe0;}
+        .btn-next:hover{background:#8b2820;}
+        .btn-prev{background:#d8c9a0;color:#5c4a28;}
+        .btn-prev:disabled{opacity:0.5;cursor:not-allowed;}
+
+        /* 结果页样式 */
+        #result{margin-top:20px;background:#faf6ea;padding:20px;border-radius:4px;display:none;box-shadow:0 2px 12px rgba(60,40,15,0.1);border:1px solid #d4c5a0;}
+        #result h3{margin-bottom:16px;color:#2c2c2c;letter-spacing:3px;}
+        .tag{display:inline-block;padding:6px 12px;border-radius:2px;margin:4px;font-size:14px;letter-spacing:1px;}
+        .tag-main{background:#a83226;color:#f5efe0;}
+        .tag-sub{background:#d8c9a0;color:#5c4a28;}
+        .item-report{margin:12px 0;padding:14px;border-left:3px solid #a83226;background:#f5ecd4;border-radius:0 4px 4px 0;}
+        .item-report strong{color:#5c2018;}
+        .item-report p{margin-top:6px;}
+        .tip-text{margin-top:16px;color:#8a7a5a;font-size:14px;line-height:1.7;}
+        .btn-reset{width:100%;padding:14px;border:none;border-radius:4px;font-size:16px;cursor:pointer;background:#a83226;color:#f5efe0;margin-top:20px;letter-spacing:4px;}
+        .btn-reset:hover{background:#8b2820;}
+
+        /* 浮动提示 toast */
+        .toast{position:fixed;top:20%;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(30,25,15,0.92);color:#f5efe0;padding:12px 24px;border-radius:2px;font-size:14px;z-index:999;opacity:0;transition:all 0.3s ease;pointer-events:none;white-space:nowrap;}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* 题目卡片抖动动画 */
+        @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+        .shake{animation:shake 0.4s ease;border-color:#c0392b !important;}
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>中医问诊健康自测</h2>
+    <p>十问辨证 · 兼夹体质精准评估</p>
+    <p style="font-size:12px;color:#999;margin-top:8px;">© 繁星 版权所有</p>
+</div>
+<div class="warn">
+    ⚠️ 重要声明：本问卷仅为健康科普参考，<b>不能替代专业中医师面诊诊断</b>，不构成诊疗、用药建议，如有不适请及时就医。
+</div>
+
+<!-- 进度条 -->
+<div class="progress-wrap">
+    <div class="progress-bar" id="progress"></div>
+</div>
+
+<div id="container">
+    <!-- P1 性别 -->
+    <div class="page active" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第1题：请选择您的性别</div>
+            <div class="opt"><input type="radio" name="gender" value="male"> <span>男</span></div>
+            <div class="opt"><input type="radio" name="gender" value="female"> <span>女</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" disabled>上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P2 寒热 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第2题：身体寒热状态</div>
+            <div class="opt"><input type="radio" name="q1" value="normal"> <span>平和，不怕冷不怕热</span></div>
+            <div class="opt"><input type="radio" name="q1" value="yangxu"> <span>常年怕冷、手脚冰凉，喜暖畏寒</span></div>
+            <div class="opt"><input type="radio" name="q1" value="yinxu"> <span>怕热烦躁、容易潮热、手心脚心发热</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P3 出汗 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第3题：日常出汗情况</div>
+            <div class="opt"><input type="radio" name="q2" value="normal"> <span>出汗正常，无异常</span></div>
+            <div class="opt"><input type="radio" name="q2" value="qi"> <span>稍微一动就出汗（自汗、气虚）</span></div>
+            <div class="opt"><input type="radio" name="q2" value="yinxu"> <span>睡着后出汗，醒后即止（盗汗、阴虚）</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P4 头身 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第4题：头身体感状态</div>
+            <div class="opt"><input type="radio" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
+            <div class="opt"><input type="radio" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
+            <div class="opt"><input type="radio" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
+            <div class="opt"><input type="radio" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
+            <div class="opt"><input type="radio" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P5 大便 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第5题：大便状态</div>
+            <div class="opt"><input type="radio" name="q4" value="normal"> <span>大便成形、排便顺畅</span></div>
+            <div class="opt"><input type="radio" name="q4" value="yangxu,tanshi"> <span>大便溏稀、不成形、容易腹泻</span></div>
+            <div class="opt"><input type="radio" name="q4" value="shire,tanshi"> <span>大便粘马桶、排便不爽、异味大</span></div>
+            <div class="opt"><input type="radio" name="q4" value="yinxu"> <span>大便偏干、干结、容易便秘</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P6 口味 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第6题：口味与饮食偏好</div>
+            <div class="opt"><input type="radio" name="q5" value="normal"> <span>口中清爽，食欲正常，冷热无明显偏好</span></div>
+            <div class="opt"><input type="radio" name="q5" value="yinxu"> <span>经常口干咽燥、总想喝水，偏爱冷饮凉食</span></div>
+            <div class="opt"><input type="radio" name="q5" value="yangxu"> <span>口淡不渴、喝水不多，吃凉的胃不舒服、喜热饮热食</span></div>
+            <div class="opt"><input type="radio" name="q5" value="tanshi,shire"> <span>口中发黏发腻、发苦发甜，或食欲差、容易腹胀</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P7 睡眠 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第7题：睡眠质量</div>
+            <div class="opt"><input type="radio" name="q6" value="normal"> <span>入睡顺畅、睡眠深沉、睡醒精神好</span></div>
+            <div class="opt"><input type="radio" name="q6" value="ganyu,yinxu"> <span>心烦难入睡、翻来覆去半天睡不着</span></div>
+            <div class="opt"><input type="radio" name="q6" value="qi"> <span>入睡还行但梦特别多、容易惊醒，睡醒仍觉得累</span></div>
+            <div class="opt"><input type="radio" name="q6" value="qi,tanshi"> <span>困倦嗜睡、睡不醒、越睡越累</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P8 情志 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第8题：日常情志情绪</div>
+            <div class="opt"><input type="radio" name="q7" value="normal"> <span>情绪平稳、心态平和</span></div>
+            <div class="opt"><input type="radio" name="q7" value="ganyu"> <span>容易烦闷压抑、爱叹气、情绪不畅</span></div>
+            <div class="opt"><input type="radio" name="q7" value="yinxu"> <span>容易急躁易怒、心火旺盛</span></div>
+            <div class="opt"><input type="radio" name="q7" value="qi,ganyu"> <span>多思多虑、容易焦虑紧张、心悸胆怯</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P9 舌象 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第9题：照镜子看舌象</div>
+            <div class="opt"><input type="radio" name="q8" value="normal"> <span>舌色淡红、舌苔薄白、干湿适中</span></div>
+            <div class="opt"><input type="radio" name="q8" value="tanshi"> <span>舌体胖大、舌边有齿痕、舌苔白厚腻</span></div>
+            <div class="opt"><input type="radio" name="q8" value="shire"> <span>舌质偏红、舌苔黄腻</span></div>
+            <div class="opt"><input type="radio" name="q8" value="yinxu"> <span>舌色偏红、舌苔少甚至无苔、舌面偏干</span></div>
+            <div class="opt"><input type="radio" name="q8" value="xueyu"> <span>舌色偏暗、或有瘀点瘀斑</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- 女性专项分页 1 经量 -->
+    <div class="page" data-type="female">
+        <div class="q-card">
+            <div class="q-title">女性专项1：月经经量情况</div>
+            <div class="opt"><input type="radio" name="m1" value="normal"> <span>经量适中，周期稳定</span></div>
+            <div class="opt"><input type="radio" name="m1" value="xuexu,qi"> <span>经量偏少、经期容易推迟</span></div>
+            <div class="opt"><input type="radio" name="m1" value="re,yinxu"> <span>经量偏多、经期容易提前</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- 女性专项分页 2 颜色血块 -->
+    <div class="page" data-type="female">
+        <div class="q-card">
+            <div class="q-title">女性专项2：经血颜色与血块</div>
+            <div class="opt"><input type="radio" name="m2" value="normal"> <span>色淡红，无明显血块</span></div>
+            <div class="opt"><input type="radio" name="m2" value="xueyu,ganyu"> <span>经血暗紫、血块较多</span></div>
+            <div class="opt"><input type="radio" name="m2" value="yangxu,xuexu"> <span>经血色淡、质地偏稀</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- 女性专项分页 3 痛经 -->
+    <div class="page" data-type="female">
+        <div class="q-card">
+            <div class="q-title">女性专项3：痛经状态</div>
+            <div class="opt"><input type="radio" name="m3" value="normal"> <span>基本无痛经，经期舒适</span></div>
+            <div class="opt"><input type="radio" name="m3" value="ganyu,xueyu"> <span>经前胀痛/刺痛、按压疼痛加重</span></div>
+            <div class="opt"><input type="radio" name="m3" value="yangxu,xuexu"> <span>经期冷痛、热敷/按压可缓解</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="submitTest()">立即生成体质报告</button>
+        </div>
+    </div>
+
+    <!-- 男性最后一页（直接提交） -->
+    <div class="page" data-type="male-end">
+        <div class="q-card">
+            <div class="q-title">答题完成</div>
+            <p style="text-align:center;font-size:16px;color:#666;">所有题目已作答完毕，点击下方按钮即可查看专属中医体质报告</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="submitTest()">立即生成体质报告</button>
+        </div>
+    </div>
+</div>
+
+<!-- 结果区域 -->
+<div id="result">
+    <h3>📋 您的中医体质自测报告</h3>
+    <div id="resContent"></div>
+    <button class="btn-reset" onclick="resetAll()">重新自测</button>
+</div>
+
+<!-- 浮动提示 -->
+<div class="toast" id="toast">请先选择本题答案</div>
+
+<!-- 隐藏版权标记（勿删，删除将导致功能异常） -->
+<div style="display:none;" id="copyright-stamp">© 繁星 · 中医问诊体质自测系统 · 版权所有</div>
+
+<script>
+// 版权校验标记（删除此段将导致报告生成失败）
+const _copySticker = "繁星版权所有_2026";
+function _verifyStamp(){
+    const el = document.getElementById("copyright-stamp");
+    if(!el || !el.textContent.includes("繁星")){
+        return false;
+    }
+    return true;
+}
+
+// 体质完整数据库
+const db = {
+    normal:{
+        name:"平和质",
+        desc:"整体阴阳气血均衡，脏腑功能协调，是健康理想体质状态。",
+        tip:"养护建议：保持规律作息、饮食均衡、适度运动，维持现有良好生活习惯即可。"
+    },
+    qi:{
+        name:"气虚倾向",
+        desc:"人体正气亏虚，脏腑机能减退，主要表现为神疲乏力、少气懒言、自汗、不耐劳累。",
+        tip:"养护建议：避免熬夜、过度劳累、大汗运动；多食山药、小米、莲子、黄芪等平和补气食材，静养为主。"
+    },
+    yangxu:{
+        name:"阳虚倾向",
+        desc:"体内阳气不足，温煦、推动功能减弱，畏寒怕冷、手脚冰凉、大便溏稀、不耐寒凉。",
+        tip:"养护建议：重点做好腰腹、下肢保暖；杜绝生冷冰饮、生食凉菜；可适量食用生姜、桂圆、红枣等温阳食材。"
+    },
+    yinxu:{
+        name:"阴虚倾向",
+        desc:"体内阴液亏虚，滋润、宁静功能不足，虚热内生，表现口干、盗汗、心烦、失眠、手足心热。",
+        tip:"养护建议：严禁熬夜（熬夜耗阴最重）；少吃辛辣、烧烤、油炸燥热食物；多食银耳、百合、雪梨、桑葚滋阴润燥。"
+    },
+    tanshi:{
+        name:"痰湿倾向",
+        desc:"脾胃运化失常，水湿停滞体内，身体困重、困倦嗜睡、舌苔厚腻、体型偏厚重。",
+        tip:"养护建议：戒掉奶茶、甜品、生冷、油腻食物；坚持适度运动升发阳气，促进水湿代谢。"
+    },
+    shire:{
+        name:"湿热倾向",
+        desc:"湿邪夹杂热邪郁于体内，口苦口黏、皮肤易长痘、心烦燥热、身体沉重。",
+        tip:"养护建议：清淡饮食，忌口甜辣油腻；保证睡眠、避免闷热潮湿环境，多通风除湿。"
+    },
+    ganyu:{
+        name:"肝郁倾向",
+        desc:"肝气郁结、气机不畅，情绪压抑、爱叹气、胸闷、失眠多梦、情志不畅。",
+        tip:"养护建议：多舒展运动、拉伸、散步；主动调节情绪，减少憋闷，少生气、少焦虑。"
+    },
+    xuexu:{
+        name:"血虚倾向",
+        desc:"血液亏虚，脏腑失养，面色淡白、头晕眼花、经期量少色淡、体虚乏力。",
+        tip:"养护建议：杜绝长期熬夜耗血；减少长时间看电子屏幕（久视伤血）；适量食用红枣、猪肝、黑芝麻养血。"
+    },
+    xueyu:{
+        name:"血瘀倾向",
+        desc:"血行不畅、瘀血阻滞，身体刺痛、固定痛、经血暗沉有血块、气血循环差。",
+        tip:"养护建议：避免久坐不动，每日适度走动、拉伸；经期忌寒凉、忌生冷，促进气血流通。"
+    },
+    re:{
+        name:"内热倾向",
+        desc:"体内郁热内生，容易上火、燥热、经期提前量多、心烦易怒。",
+        tip:"养护建议：清淡饮食、多喝温水；减少熬夜燥热，忌口辛辣烧烤。"
+    },
+    tebin:{
+        name:"特禀倾向",
+        desc:"先天禀赋异常，过敏体质，容易出现荨麻疹、鼻炎、哮喘、药物或食物过敏等反应。",
+        tip:"养护建议：排查并远离已知过敏原；季节交替注意防护；少食辛辣腥发食物，增强体质。"
+    }
+}
+
+// 全局变量
+let currentPage = 0;
+let pageList = [];
+let pageListReady = false; // 页面列表是否已初始化过
+
+// 初始化页面列表（过滤男女专属页面）
+function initPageList(){
+    const allPages = Array.from(document.querySelectorAll(".page"));
+    const gender = document.querySelector('input[name="gender"]:checked')?.value;
+    pageList = [];
+
+    allPages.forEach(page=>{
+        const type = page.dataset.type;
+        if(type === "base") pageList.push(page);
+        if(gender === "female" && type === "female") pageList.push(page);
+        if(gender === "male" && type === "male-end") pageList.push(page);
+    })
+    pageListReady = true;
+}
+
+// 更新进度条
+function updateProgress(){
+    const total = pageList.length;
+    const now = currentPage + 1;
+    const percent = (now / total) * 100;
+    document.getElementById("progress").style.width = percent + "%";
+}
+
+// 切换页面显示
+function renderPage(){
+    // 清除所有页面的抖动/红色边框残留
+    document.querySelectorAll('.shake').forEach(el=>el.classList.remove('shake'));
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    if(pageList[currentPage]){
+        pageList[currentPage].classList.add("active");
+    }
+    updateProgress();
+}
+
+// 浮动提示
+function showToast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg || "请先选择本题答案";
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+// 下一页
+function nextPage(){
+    const page = pageList[currentPage];
+    if(!page) return;
+
+    // 如果当前页有 radio 题目，校验是否已选；没有 radio 的页（如收尾页）直接放行
+    const radios = page.querySelectorAll('input[type="radio"]');
+    if(radios.length > 0){
+        const checked = page.querySelector('input[type="radio"]:checked');
+        if(!checked){
+            const card = page.querySelector('.q-card');
+            card.classList.remove('shake');
+            void card.offsetWidth;
+            card.classList.add('shake');
+            showToast("请先选择本题答案再继续");
+            return;
+        }
+    }
+
+    // 第一次点下一页（从性别页出发），构建完整页面队列
+    if(!pageListReady){
+        initPageList();
+    }
+
+    if(currentPage < pageList.length - 1){
+        currentPage++;
+        renderPage();
+    }
+}
+
+// 上一页
+function prevPage(){
+    if(currentPage > 0){
+        currentPage--;
+        renderPage();
+    }
+}
+
+// 给指定题目名加分
+function addScore(name, scores){
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    if(!el) return;
+    const vList = el.value.split(",");
+    vList.forEach(key=>{
+        // ★ 关键修复：不能用 if(scores[key])，因为初始值是0，falsy会导致永远不加分
+        if(scores[key] !== undefined){
+            scores[key] += 1;
+        }
+    });
+}
+
+// 提交计算结果
+function submitTest(){
+    // 版权校验（删除版权标记将无法生成报告）
+    if(!_verifyStamp() || _copySticker.indexOf("繁星") === -1){
+        showToast("页面文件异常，请联系作者");
+        return;
+    }
+
+    const scores = {};
+    Object.keys(db).forEach(k=>scores[k]=0);
+
+    // 必选校验
+    const genderVal = document.querySelector('input[name="gender"]:checked')?.value;
+    if(!genderVal){showToast("请先选择性别");return;}
+
+    // 基础题计分
+    const qs = ["q1","q2","q3","q4","q5","q6","q7","q8"];
+    qs.forEach(q=>addScore(q, scores));
+
+    // 女性专项计分
+    if(genderVal === "female"){
+        const mList = ["m1","m2","m3"];
+        mList.forEach(m=>addScore(m, scores));
+    }
+
+    // 排序、主兼夹判定
+    const sortedList = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0);
+    let mainList = [], subList = [];
+    if(sortedList.length>0){
+        const top = sortedList[0][1];
+        sortedList.forEach(([k,s])=>{
+            if(s === top) mainList.push(k);
+            else if(s >= top * 0.6) subList.push(k);
+        })
+    }
+
+    // 渲染报告
+    let html = "";
+    if(mainList.length===1 && mainList[0]==="normal"){
+        html += `<span class="tag tag-main">平和质（健康均衡）</span>`;
+        html += `<div class="item-report"><strong>${db.normal.name}</strong><p>${db.normal.desc}</p><p>${db.normal.tip}</p></div>`;
+    }else if(mainList.length > 0){
+        html += `<div>${mainList.map(k=>`<span class="tag tag-main">主体质：${db[k].name}</span>`).join("")}</div>`;
+        if(subList.length){
+            html += `<div style="margin-top:8px;">${subList.map(k=>`<span class="tag tag-sub">兼夹体质：${db[k].name}</span>`).join("")}</div>`;
+        }
+        html += `<div style="margin-top:16px;">`;
+        const allKeys = [...new Set([...mainList,...subList])];
+        allKeys.forEach(k=>{
+            html += `<div class="item-report"><strong>${db[k].name}</strong><p>${db[k].desc}</p><p>${db[k].tip}</p></div>`;
+        });
+        html += `</div>`;
+    }else{
+        // 兜底：理论上不会走到这里，但防止异常空白
+        html += `<p style="color:#888;">未能识别出明显体质倾向，建议面诊中医师辨证。</p>`;
+    }
+
+    html += `<p class="tip-text">温馨提示：本自测仅为中医体质倾向性科普参考，体质多为复合兼夹状态，无法替代专业医师辨证，身体不适请及时线下就医。</p>`;
+    html += `<p style="text-align:center;margin-top:16px;font-size:11px;color:#bbb;">© 繁星 · 中医问诊体质自测系统</p>`;
+
+    document.getElementById("resContent").innerHTML = html;
+    document.getElementById("container").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    window.scrollTo(0,0);
+}
+
+// 重置全部
+function resetAll(){
+    document.querySelectorAll("input[type=radio]").forEach(i=>i.checked=false);
+    document.getElementById("container").style.display = "block";
+    document.getElementById("result").style.display = "none";
+    currentPage = 0;
+    pageList = [document.querySelector('.page[data-type="base"]')];
+    pageListReady = false;
+    renderPage();
+}
+
+// 整个选项区域可点击选中（点文字/空白处 = 点圆圈）
+document.querySelectorAll('.opt').forEach(opt=>{
+    opt.addEventListener('click', function(e){
+        const radio = this.querySelector('input[type="radio"]');
+        if(radio && e.target !== radio){
+            radio.checked = true;
+        }
+    });
+});
+
+// 首次初始化：只显示性别页
+pageList = [document.querySelector('.page[data-type="base"]')];
+renderPage();
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
