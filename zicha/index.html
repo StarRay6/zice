@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================
-     中医在线问诊记录
+     中医自查辨证
      © 繁星 版权所有 | 未经授权禁止商用
      ============================================ -->
 <html lang="zh-CN">
@@ -78,15 +78,12 @@
         </div>
     </div>
 
-    <!-- P2 年龄 -->
+    <!-- P2 年龄（根据性别动态显示） -->
     <div class="page" data-key="age">
         <div class="q-card">
             <div class="q-title">2. 您的年龄段</div>
-            <div class="opt" onclick="selectSingle(this,'age','u18')"><input type="radio" name="age" value="18以下"> <span>18以下</span></div>
-            <div class="opt" onclick="selectSingle(this,'age','a1825')"><input type="radio" name="age" value="18-25"> <span>18–25</span></div>
-            <div class="opt" onclick="selectSingle(this,'age','a2635')"><input type="radio" name="age" value="26-35"> <span>26–35</span></div>
-            <div class="opt" onclick="selectSingle(this,'age','a3650')"><input type="radio" name="age" value="36-50"> <span>36–50</span></div>
-            <div class="opt" onclick="selectSingle(this,'age','a50')"><input type="radio" name="age" value="50以上"> <span>50以上</span></div>
+            <div class="branch-hint" id="ageHint">请先选择性别，再选择对应年龄段</div>
+            <div id="ageOptions"></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -335,6 +332,7 @@
             <div class="opt" onclick="selectSingle(this,'coldheat','cold')"><input type="radio" name="coldheat" value="怕冷明显喜温热"> <span>怕冷明显，喜温热</span></div>
             <div class="opt" onclick="selectSingle(this,'coldheat','heat')"><input type="radio" name="coldheat" value="怕热明显喜凉"> <span>怕热明显，喜凉</span></div>
             <div class="opt" onclick="selectSingle(this,'coldheat','normal')"><input type="radio" name="coldheat" value="寒热适中"> <span>平时不怕冷也不怕热</span></div>
+            <div class="opt" onclick="selectSingle(this,'coldheat','shangre')"><input type="radio" name="coldheat" value="上热下寒"> <span>上面容易上火（口干咽痛长痘），下面又怕冷（脚凉便溏）</span></div>
             <div class="opt" onclick="selectSingle(this,'coldheat','alternate')"><input type="radio" name="coldheat" value="一阵冷一阵热"> <span>一阵冷一阵热</span></div>
             <div class="opt" onclick="selectSingle(this,'coldheat','coldhand')"><input type="radio" name="coldheat" value="手脚冰凉身不怕冷"> <span>手脚常年冰凉，但身体不怕冷</span></div>
         </div>
@@ -543,7 +541,7 @@
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
-            <button class="btn-next" onclick="generateReport()">生成问诊记录</button>
+            <button class="btn-next" onclick="generateReport()">生成辨证结果</button>
         </div>
     </div>
 
@@ -611,6 +609,12 @@ function checkCurrentPage(){
 
 function nextPage(){
     if(!checkCurrentPage()) return;
+
+    // 选完性别后，动态生成对应性别的年龄选项
+    if(pages[currentPage].dataset.key === "gender"){
+        const genderVal = document.querySelector('input[name="gender"]:checked')?.value;
+        renderAgeOptions(genderVal);
+    }
 
     // 第4题选完部位后，跳到对应分支页
     if(pages[currentPage].dataset.key === "bodypart"){
@@ -732,6 +736,44 @@ function selectSingle(el, name, val){
     el.querySelector(`input[name="${name}"]`).checked = true;
 }
 
+// 根据性别动态生成年龄选项（女子7年周期，男子8年周期）
+function renderAgeOptions(gender){
+    const container = document.getElementById("ageOptions");
+    const hint = document.getElementById("ageHint");
+    let options = [];
+    if(gender === "女"){
+        hint.textContent = "女子以7岁为一生理周期";
+        options = [
+            {val:"u14", text:"14岁以下（青春期前）"},
+            {val:"a1421", text:"14–21岁（青春期后青年期）"},
+            {val:"a2135", text:"21–35岁（身体盛壮期）"},
+            {val:"a3549", text:"35–49岁（渐衰期）"},
+            {val:"a49", text:"49岁以上（更年期/绝经后）"}
+        ];
+    } else if(gender === "男"){
+        hint.textContent = "男子以8岁为一生理周期";
+        options = [
+            {val:"u16", text:"16岁以下（青春期前）"},
+            {val:"a1624", text:"16–24岁（青春期后青年期）"},
+            {val:"a2440", text:"24–40岁（筋骨隆盛期）"},
+            {val:"a4056", text:"40–56岁（渐衰期）"},
+            {val:"a56", text:"56岁以上（天癸渐竭）"}
+        ];
+    } else {
+        hint.textContent = "不愿透露性别，按通用年龄段选择";
+        options = [
+            {val:"u18", text:"18岁以下"},
+            {val:"a1830", text:"18–30岁"},
+            {val:"a3045", text:"30–45岁"},
+            {val:"a4560", text:"45–60岁"},
+            {val:"a60", text:"60岁以上"}
+        ];
+    }
+    container.innerHTML = options.map(o=>
+        `<div class="opt" onclick="selectSingle(this,'age','${o.val}')"><input type="radio" name="age" value="${o.val}"> <span>${o.text}</span></div>`
+    ).join("");
+}
+
 function selectPart(el, val){
     selectSingle(el, "bodypart", val);
 }
@@ -841,67 +883,139 @@ function generateReport(){
     }
 
     const score = {cold:0, heat:0, xu:0, shi:0, yu:0, yuqi:0};
-    // 寒证
+
+    // 年龄性别权重调整（《黄帝内经》七七/八八周期融入打分）
+    const genderVal = rv("gender");
+    const ageVal = rv("age");
+    // 49岁以上女性：更年期前后，忽冷忽热/上热下寒直接按寒热错杂权重计分
+    const isMenopausal = (genderVal === "女" && ageVal === "a49");
+    const isFemaleMid = (genderVal === "女" && ageVal === "a3549");  // 五七至七七，阳明脉衰
+    const isMaleMid = (genderVal === "男" && ageVal === "a4056");   // 五八至八八，肾气衰
+    const isMaleOld = (genderVal === "男" && ageVal === "a56");      // 七八，肝气衰
+
+    // ===== 寒证 =====
     if(rv("coldheat")==="怕冷明显喜温热") score.cold += 2;
     if(rv("coldheat")==="手脚冰凉身不怕冷") score.cold += 1;
-    if(rv("stool")==="偏稀不成形") score.cold += 1;
-    if(rv("urine")==="清长量多") score.cold += 1;
-    if(cv("taste").includes("口淡无味")) score.cold += 1;
-    if(rv("tongue_color")==="舌淡偏白") score.cold += 1;
-    if(hasCoat && rv("tongue_coat")==="白苔") score.cold += 1;
-    if(cv("pattern").includes("受凉遇冷加重")) score.cold += 1;
-    if(cv("pattern").includes("保暖热敷减轻")) score.cold += 1;
-    if(cv("back_sym").includes("冷痛")) score.cold += 1;
-    if(cv("limb_sym").includes("冷痛")) score.cold += 1;
-    // 热证
+    if(rv("coldheat")==="上热下寒"){
+        if(isMenopausal){ score.cold += 2; score.heat += 2; }
+        else { score.cold += 1; score.heat += 1; }
+    }
+    if(rv("coldheat")==="一阵冷一阵热"){
+        if(isMenopausal){ score.cold += 2; score.heat += 2; }
+        else { score.cold += 1; score.heat += 1; }
+    }
+    // 寒象表现组（便稀、尿清长、口淡、舌淡白、白苔——组内选多个只加1分）
+    const coldSymptoms = [
+        rv("stool")==="偏稀不成形",
+        rv("urine")==="清长量多",
+        cv("taste").includes("口淡无味"),
+        rv("tongue_color")==="舌淡偏白",
+        hasCoat && rv("tongue_coat")==="白苔"
+    ];
+    if(coldSymptoms.some(Boolean)) score.cold += 1;
+    // 寒证规律组（受凉加重/保暖减轻——正反两面，组内只加1分）
+    const coldPattern = [
+        cv("pattern").includes("受凉遇冷加重"),
+        cv("pattern").includes("保暖热敷减轻")
+    ];
+    if(coldPattern.some(Boolean)) score.cold += 1;
+    // 局部冷痛组（背痛/肢冷痛——组内只加1分）
+    const coldLocal = [
+        cv("back_sym").includes("冷痛"),
+        cv("limb_sym").includes("冷痛")
+    ];
+    if(coldLocal.some(Boolean)) score.cold += 1;
+
+    // ===== 热证 =====
     if(rv("coldheat")==="怕热明显喜凉") score.heat += 2;
-    if(rv("stool")==="干结难排") score.heat += 1;
-    if(rv("urine")==="颜色很黄") score.heat += 1;
-    if(cv("taste").includes("口苦")) score.heat += 1;
-    if(cv("taste").includes("口干想喝水")) score.heat += 1;
-    if(rv("tongue_color")==="舌红") score.heat += 2;
-    if(hasCoat && rv("tongue_coat")==="黄苔") score.heat += 2;
-    if(rv("tongue_wet")==="偏干") score.heat += 1;
+    // 热象表现组（便干、尿黄、口苦、口干、舌红、黄苔、舌干——组内选多个只加1分）
+    const heatSymptoms = [
+        rv("stool")==="干结难排",
+        rv("urine")==="颜色很黄",
+        cv("taste").includes("口苦"),
+        cv("taste").includes("口干想喝水"),
+        rv("tongue_color")==="舌红",
+        hasCoat && rv("tongue_coat")==="黄苔",
+        rv("tongue_wet")==="偏干"
+    ];
+    if(heatSymptoms.some(Boolean)) score.heat += 1;
+    // 热证规律
     if(cv("pattern").includes("受热闷热加重")) score.heat += 1;
-    if(cv("face_sym").includes("红痒")) score.heat += 1;
-    if(cv("abd_sym").includes("腹部灼热")) score.heat += 1;
-    if(cv("limb_sym").includes("灼热肿痛")) score.heat += 1;
-    // 虚证
-    if(rv("sweat")==="自汗") score.xu += 1;
-    if(rv("sweat")==="动则大汗") score.xu += 1;
+    // 局部热象组（面红痒、腹灼热、肢灼热——组内只加1分）
+    const heatLocal = [
+        cv("face_sym").includes("红痒"),
+        cv("abd_sym").includes("腹部灼热"),
+        cv("limb_sym").includes("灼热肿痛")
+    ];
+    if(heatLocal.some(Boolean)) score.heat += 1;
+
+    // ===== 虚证 =====
+    // 气虚表现组（自汗、动则大汗、舌瘦、劳累加重、休息减轻、长期劳累、头空痛、腰酸、乏力——组内选多个只加1分）
+    const xuQiSymptoms = [
+        rv("sweat")==="自汗",
+        rv("sweat")==="动则大汗",
+        cv("tongue_shape").includes("舌瘦"),
+        cv("pattern").includes("劳累之后加重"),
+        cv("pattern").includes("休息之后减轻"),
+        cv("history").includes("长期劳累"),
+        cv("head_sym").includes("空痛隐隐"),
+        cv("back_sym").includes("酸痛"),
+        cv("whole_sym").includes("浑身乏力沉重")
+    ];
+    if(xuQiSymptoms.some(Boolean)) score.xu += 1;
+    // 年龄权重：中年女性（阳明脉衰）或中年男性（肾气衰），虚证权重额外+1
+    if((isFemaleMid || isMaleMid) && xuQiSymptoms.some(Boolean)) score.xu += 1;
+    // 阴虚表现组（无苔、梦多易醒、睡眠浅——组内只加1分）
+    const xuYinSymptoms = [
+        rv("tongue_thick")==="无苔",
+        rv("sleep")==="容易醒多梦",
+        rv("sleep")==="睡眠浅"
+    ];
+    if(xuYinSymptoms.some(Boolean)) score.xu += 1;
     if(rv("stool")==="先干后稀") score.xu += 1;
-    if(rv("sleep")==="容易醒多梦") score.xu += 1;
-    if(rv("sleep")==="睡眠浅") score.xu += 1;
-    if(rv("tongue_thick")==="无苔") score.xu += 1;
-    if(cv("tongue_shape").includes("舌瘦")) score.xu += 1;
-    if(cv("pattern").includes("劳累之后加重")) score.xu += 1;
-    if(cv("pattern").includes("休息之后减轻")) score.xu += 1;
-    if(cv("history").includes("长期劳累")) score.xu += 1;
-    if(cv("head_sym").includes("空痛隐隐")) score.xu += 1;
-    if(cv("back_sym").includes("酸痛")) score.xu += 1;
-    if(cv("whole_sym").includes("浑身乏力沉重")) score.xu += 1;
-    // 湿证
+
+    // ===== 湿证 =====
+    // 湿盛表现组（便黏、口黏、厚苔、水滑、齿痕、沉重——组内选多个只加1分，便黏核心症状单独+2）
     if(rv("stool")==="黏马桶冲不净") score.shi += 2;
-    if(cv("taste").includes("口黏发腻")) score.shi += 1;
-    if(rv("tongue_thick")==="厚苔") score.shi += 1;
-    if(rv("tongue_wet")==="水滑口水多") score.shi += 1;
-    if(cv("tongue_shape").includes("舌体胖大有齿痕")) score.shi += 1;
-    if(cv("whole_sym").includes("浑身乏力沉重")) score.shi += 1;
-    // 瘀证
+    const shiSymptoms = [
+        cv("taste").includes("口黏发腻"),
+        rv("tongue_thick")==="厚苔",
+        rv("tongue_wet")==="水滑口水多",
+        cv("tongue_shape").includes("舌体胖大有齿痕"),
+        cv("whole_sym").includes("浑身乏力沉重")
+    ];
+    if(shiSymptoms.some(Boolean)) score.shi += 1;
+
+    // ===== 血瘀 =====
+    // 舌紫暗单独+2，刺痛/发麻组内只加1分
     if(rv("tongue_color")==="舌暗红紫暗") score.yu += 2;
-    if(cv("head_sym").includes("刺痛")) score.yu += 1;
-    if(cv("chest_sym").includes("刺痛")) score.yu += 1;
-    if(cv("back_sym").includes("刺痛")) score.yu += 1;
-    if(cv("limb_sym").includes("发麻")) score.yu += 1;
-    if(cv("skin_sym").includes("麻木")) score.yu += 1;
-    // 郁证
-    if(cv("chest_sym").includes("胸闷憋气")) score.yuqi += 1;
-    if(cv("chest_sym").includes("胁肋胀")) score.yuqi += 1;
-    if(cv("chest_sym").includes("乳房胀痛")) score.yuqi += 1;
-    if(cv("history").includes("容易情绪压抑生气")) score.yuqi += 1;
-    if(rv("sleep")==="入睡困难") score.yuqi += 1;
-    if(cv("abd_sym").includes("胃胀")) score.yuqi += 1;
-    if(cv("face_sym").includes("咽痛异物感")) score.yuqi += 1;
+    const yuSymptoms = [
+        cv("head_sym").includes("刺痛"),
+        cv("chest_sym").includes("刺痛"),
+        cv("back_sym").includes("刺痛"),
+        cv("limb_sym").includes("发麻"),
+        cv("skin_sym").includes("麻木")
+    ];
+    if(yuSymptoms.some(Boolean)) score.yu += 1;
+    // 年龄权重：老年男性（肝气衰、筋不能动），血瘀权重额外+1
+    if(isMaleOld && yuSymptoms.some(Boolean)) score.yu += 1;
+
+    // ===== 气郁 =====
+    // 躯体症状组（胸闷、胁胀、乳胀、胃胀、咽痛异物感——组内选多个只加1分）
+    const yuqiBody = [
+        cv("chest_sym").includes("胸闷憋气"),
+        cv("chest_sym").includes("胁肋胀"),
+        cv("chest_sym").includes("乳房胀痛"),
+        cv("abd_sym").includes("胃胀"),
+        cv("face_sym").includes("咽痛异物感")
+    ];
+    if(yuqiBody.some(Boolean)) score.yuqi += 1;
+    // 情绪睡眠组（情绪压抑、入睡难——组内只加1分）
+    const yuqiMind = [
+        cv("history").includes("容易情绪压抑生气"),
+        rv("sleep")==="入睡困难"
+    ];
+    if(yuqiMind.some(Boolean)) score.yuqi += 1;
 
     // 综合判断
     const results = [];
@@ -913,8 +1027,27 @@ function generateReport(){
     if(score.yu >= 2) results.push({name:"血瘀", desc:"刺痛固定、舌色暗紫、麻木，多属血行不畅", tip:"避免久坐不动，适当运动促进气血流通，可食用山楂、玫瑰花等活血"});
     if(score.yuqi >= 2) results.push({name:"气郁", desc:"胸闷胁胀、情绪压抑、入睡难，多属肝气郁结", tip:"多舒展运动、散步，主动调节情绪，可饮用玫瑰花茶、陈皮疏肝理气"});
 
+    // 年龄段特殊提示（《黄帝内经》七七/八八周期）
+    let ageTip = "";
+    if(genderVal === "女" && ageVal === "a49"){
+        if(score.heat >= 1 || score.cold >= 1){
+            ageTip = "根据您的年龄段（七七任脉虚，更年期前后），忽冷忽热、烘热汗出多属肝肾阴虚、天癸将竭所致的经断前后诸证（更年期综合征）。调理宜滋补肝肾、调和阴阳，可参考二仙汤、甘麦大枣汤思路，不建议单纯清热或温阳。";
+        } else {
+            ageTip = "您处于七七之年（更年期前后），肾气渐衰、天癸将竭，日常宜侧重滋肾养阴、调和阴阳，避免过度劳累和情绪波动。";
+        }
+    } else if(genderVal === "女" && ageVal === "a3549"){
+        ageTip = "您处于五七至七七之间（阳明脉衰，面始焦），脾胃功能渐弱、面色开始变差，日常注意健脾养胃、规律作息，是延缓衰老的关键阶段。工作压力大，肝气易郁，注意情绪疏导。";
+    } else if(genderVal === "男" && ageVal === "a56"){
+        ageTip = "您处于七八之年（肝气衰，天癸渐竭），肾气渐衰、筋骨活动不利，日常宜侧重补肾强腰、适度运动，避免久坐和过度劳累。";
+    } else if(genderVal === "男" && ageVal === "a4056"){
+        ageTip = "您处于五八至八八之间（肾气衰，发堕齿槁），肾气开始走下坡路，日常注意节惜精力、避免熬夜和过度耗损。工作压力大，肝气易郁，注意情绪疏导。";
+    }
+
     let html = "";
     html += `<h2>中医辨证分析</h2>`;
+    if(ageTip){
+        html += `<div class="result-section" style="border-left-color:#2e6b4f;background:#f0f7f2;"><b>年龄生理特点</b><p style="color:#2e5b3f;">${ageTip}</p></div>`;
+    }
     if(results.length === 0){
         html += `<div class="result-section" style="border-left-color:#8b2e2e;"><b>初步判断</b><p>症状信息较少，未出现明显偏颇证型倾向。建议结合线下面诊综合判断。</p></div>`;
     } else {
@@ -924,8 +1057,16 @@ function generateReport(){
     }
     html += `<div style="margin:16px 0;padding:12px;background:#fdf3dc;border-radius:4px;font-size:13px;color:#7a4a1a;">⚠️ 以上仅为根据问卷信息的初步辨证参考，不能替代专业中医师面诊。症状持续加重、高烧不退、剧烈疼痛请立即就医。</div>`;
 
-    html += `<h2 style="margin-top:24px;">问诊详细记录</h2>`;
-    html += `<div class="result-section"><b>基本信息</b><p>性别：${gender} ｜ 年龄：${age} ｜ 不适持续：${duration}</p></div>`;
+    html += `<h2 style="margin-top:24px;">详细答题记录</h2>`;
+    // 年龄代码转中文
+    const ageMap = {
+        "u14":"14岁以下", "a1421":"14–21岁", "a2135":"21–35岁", "a3549":"35–49岁", "a49":"49岁以上",
+        "u16":"16岁以下", "a1624":"16–24岁", "a2440":"24–40岁", "a4056":"40–56岁", "a56":"56岁以上",
+        "u18":"18岁以下", "a1830":"18–30岁", "a3045":"30–45岁", "a4560":"45–60岁", "a60":"60岁以上"
+    };
+    const ageText = ageMap[age] || age;
+
+    html += `<div class="result-section"><b>基本信息</b><p>性别：${gender} ｜ 年龄：${ageText} ｜ 不适持续：${duration}</p></div>`;
     html += `<div class="result-section"><b>主诉部位</b><p>${bodypart}</p><p style="color:#666;font-size:13px;">${branchSym}</p></div>`;
     html += `<div class="result-section"><b>症状规律</b><p>${pattern}</p></div>`;
     html += `<div class="result-section"><b>寒热</b><p>${coldheat}</p></div>`;
@@ -938,7 +1079,7 @@ function generateReport(){
     html += `<div class="result-section"><b>既往诱因</b><p>${history}</p></div>`;
     html += `<div class="result-section"><b>月经情况</b><p>${menses}</p></div>`;
     html += `<div class="result-section"><b>补充说明</b><p>${note}</p></div>`;
-    html += `<p style="font-size:12px;color:#999;margin-top:16px;text-align:center;">本记录由中医在线问诊系统生成，仅供参考，不构成诊疗建议。请携带本记录就诊专业中医师。</p>`;
+    html += `<p style="font-size:12px;color:#999;margin-top:16px;text-align:center;">本结果由中医自查辨证系统生成，仅供参考，不构成诊疗建议。症状持续加重请及时就医。</p>`;
     html += `<p style="text-align:center;margin-top:8px;font-size:11px;color:#bbb;">© 繁星 · 中医自查辨证</p>`;
 
     document.getElementById("resultArea").innerHTML = html;
