@@ -129,11 +129,11 @@
     <div class="page" data-type="base">
         <div class="q-card">
             <div class="q-title">第4题：头身体感状态（可多选，选"身体轻松"则与其他互斥）</div>
-            <div class="opt" onclick="toggleMulti(this,'normal')"><input type="checkbox" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
-            <div class="opt" onclick="toggleMulti(this,'qi')"><input type="checkbox" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
-            <div class="opt" onclick="toggleMulti(this,'tanshi')"><input type="checkbox" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
-            <div class="opt" onclick="toggleMulti(this,'xueyu')"><input type="checkbox" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
-            <div class="opt" onclick="toggleMulti(this,'tebin')"><input type="checkbox" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
+            <div class="opt"><input type="checkbox" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
+            <div class="opt"><input type="checkbox" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
+            <div class="opt"><input type="checkbox" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
+            <div class="opt"><input type="checkbox" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
+            <div class="opt"><input type="checkbox" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -236,10 +236,10 @@
     <div class="page" data-type="base">
         <div class="q-card">
             <div class="q-title">第11题：近期常出现的不适（可多选，选"都没有"则与其他互斥）</div>
-            <div class="opt" onclick="toggleMulti(this,'normal')"><input type="checkbox" name="q10" value="normal"> <span>都没有，近期无明显不适</span></div>
-            <div class="opt" onclick="toggleMulti(this,'xuexu')"><input type="checkbox" name="q10" value="xuexu"> <span>蹲下站起时头晕、眼前发黑，手足发麻、心慌心悸</span></div>
-            <div class="opt" onclick="toggleMulti(this,'re')"><input type="checkbox" name="q10" value="re"> <span>反复口舌生疮、牙龈肿痛，小便颜色偏黄</span></div>
-            <div class="opt" onclick="toggleMulti(this,'yinxu')"><input type="checkbox" name="q10" value="yinxu"> <span>午后或夜里手足心热、颧部发红，口干但不想多喝水</span></div>
+            <div class="opt"><input type="checkbox" name="q10" value="normal"> <span>都没有，近期无明显不适</span></div>
+            <div class="opt"><input type="checkbox" name="q10" value="xuexu"> <span>蹲下站起时头晕、眼前发黑，手足发麻、心慌心悸</span></div>
+            <div class="opt"><input type="checkbox" name="q10" value="re"> <span>反复口舌生疮、牙龈肿痛，小便颜色偏黄</span></div>
+            <div class="opt"><input type="checkbox" name="q10" value="yinxu"> <span>午后或夜里手足心热、颧部发红，口干但不想多喝水</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -556,32 +556,26 @@ function collectAnswers(gender){
     return ans;
 }
 
-// 多选切换（同组内 normal 与其他选项互斥）
-function toggleMulti(el, val){
-    const cb = el.querySelector('input[type="checkbox"]');
-    cb.checked = !cb.checked;
-    el.classList.toggle("selected", cb.checked);
-
-    const card = el.closest(".q-card");
+// 多选互斥：勾选状态由 checkbox 原生切换，这里只统一处理互斥与选中样式
+function syncCheckboxGroup(cb){
+    const opt = cb.closest(".opt");
+    const card = cb.closest(".q-card");
     if(!card) return;
     const group = cb.name;
 
-    if(val === "normal" && cb.checked){
-        // 选了"都没有/正常"，取消同组其他选项
+    if(cb.checked){
+        const isNormal = cb.value === "normal";
+        // 选"都没有/正常"→取消同组其他项；选具体症状→取消"都没有/正常"
         card.querySelectorAll('input[name="' + group + '"]').forEach(other=>{
-            if(other.value !== "normal"){
+            if(other === cb) return;
+            if(isNormal || other.value === "normal"){
                 other.checked = false;
-                other.closest(".opt").classList.remove("selected");
+                const o = other.closest(".opt");
+                if(o) o.classList.remove("selected");
             }
         });
-    } else if(val !== "normal" && cb.checked){
-        // 选了具体症状，取消同组的"都没有/正常"
-        const normal = card.querySelector('input[name="' + group + '"][value="normal"]');
-        if(normal){
-            normal.checked = false;
-            normal.closest(".opt").classList.remove("selected");
-        }
     }
+    if(opt) opt.classList.toggle("selected", cb.checked);
 }
 
 // 提交计算结果
@@ -679,14 +673,25 @@ function resetAll(){
     renderPage();
 }
 
-// 整个选项区域可点击选中（点文字/空白处 = 点圆圈）
+// 整个选项区域可点击选中（点文字/空白处 = 点控件本身；点控件交给原生行为，避免二次切换）
 document.querySelectorAll('.opt').forEach(opt=>{
     opt.addEventListener('click', function(e){
         const radio = this.querySelector('input[type="radio"]');
-        if(radio && e.target !== radio){
-            radio.checked = true;
+        const checkbox = this.querySelector('input[type="checkbox"]');
+
+        if(radio){
+            if(e.target !== radio) radio.checked = true;
+            return;
+        }
+        if(checkbox && e.target !== checkbox){
+            checkbox.click();   // 触发原生切换并派发 change
         }
     });
+});
+
+// 复选框勾选后同步互斥关系与选中样式
+document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.addEventListener('change', ()=> syncCheckboxGroup(cb));
 });
 
 // 首次初始化：只显示性别页
