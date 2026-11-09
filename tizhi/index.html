@@ -129,11 +129,11 @@
     <div class="page" data-type="base">
         <div class="q-card">
             <div class="q-title">第4题：头身体感状态（可多选，选"身体轻松"则与其他互斥）</div>
-            <div class="opt" onclick="toggleQ3(this,'normal')"><input type="checkbox" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
-            <div class="opt" onclick="toggleQ3(this,'qi')"><input type="checkbox" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
-            <div class="opt" onclick="toggleQ3(this,'tanshi')"><input type="checkbox" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
-            <div class="opt" onclick="toggleQ3(this,'xueyu')"><input type="checkbox" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
-            <div class="opt" onclick="toggleQ3(this,'tebin')"><input type="checkbox" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
+            <div class="opt" onclick="toggleMulti(this,'normal')"><input type="checkbox" name="q3" value="normal"> <span>身体轻松，无困乏不适</span></div>
+            <div class="opt" onclick="toggleMulti(this,'qi')"><input type="checkbox" name="q3" value="qi"> <span>容易疲惫乏力、气短懒言、不耐劳累</span></div>
+            <div class="opt" onclick="toggleMulti(this,'tanshi')"><input type="checkbox" name="q3" value="tanshi"> <span>身体沉重困倦、像裹湿布、四肢发沉</span></div>
+            <div class="opt" onclick="toggleMulti(this,'xueyu')"><input type="checkbox" name="q3" value="xueyu"> <span>面色偏暗、身体某处固定位置刺痛、容易健忘</span></div>
+            <div class="opt" onclick="toggleMulti(this,'tebin')"><input type="checkbox" name="q3" value="tebin"> <span>容易过敏、起荨麻疹、鼻炎或哮喘反复</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -210,6 +210,36 @@
             <div class="opt"><input type="radio" name="q8" value="shire"> <span>舌质偏红、舌苔黄腻</span></div>
             <div class="opt"><input type="radio" name="q8" value="yinxu"> <span>舌色偏红、舌苔少甚至无苔、舌面偏干</span></div>
             <div class="opt"><input type="radio" name="q8" value="xueyu"> <span>舌色偏暗、或有瘀点瘀斑</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P10 面色唇甲 -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第10题：面色与口唇（照镜子看）</div>
+            <div class="opt"><input type="radio" name="q9" value="normal"> <span>面色红润，口唇红润有光泽</span></div>
+            <div class="opt"><input type="radio" name="q9" value="xuexu"> <span>面色淡白或萎黄，口唇、指甲颜色偏淡</span></div>
+            <div class="opt"><input type="radio" name="q9" value="re"> <span>面色偏红、有油光，容易长红肿的痘</span></div>
+            <div class="opt"><input type="radio" name="q9" value="xueyu"> <span>面色晦暗，口唇偏紫暗，眼下容易青黑</span></div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-prev" onclick="prevPage()">上一页</button>
+            <button class="btn-next" onclick="nextPage()">下一页</button>
+        </div>
+    </div>
+
+    <!-- P11 近期不适（可多选） -->
+    <div class="page" data-type="base">
+        <div class="q-card">
+            <div class="q-title">第11题：近期常出现的不适（可多选，选"都没有"则与其他互斥）</div>
+            <div class="opt" onclick="toggleMulti(this,'normal')"><input type="checkbox" name="q10" value="normal"> <span>都没有，近期无明显不适</span></div>
+            <div class="opt" onclick="toggleMulti(this,'xuexu')"><input type="checkbox" name="q10" value="xuexu"> <span>蹲下站起时头晕、眼前发黑，手足发麻、心慌心悸</span></div>
+            <div class="opt" onclick="toggleMulti(this,'re')"><input type="checkbox" name="q10" value="re"> <span>反复口舌生疮、牙龈肿痛，小便颜色偏黄</span></div>
+            <div class="opt" onclick="toggleMulti(this,'yinxu')"><input type="checkbox" name="q10" value="yinxu"> <span>午后或夜里手足心热、颧部发红，口干但不想多喝水</span></div>
         </div>
         <div class="btn-group">
             <button class="btn-prev" onclick="prevPage()">上一页</button>
@@ -336,7 +366,7 @@ const db = {
     },
     xuexu:{
         name:"血虚倾向",
-        desc:"血液亏虚，脏腑失养，面色淡白、头晕眼花、经期量少色淡、体虚乏力。",
+        desc:"血液亏虚，脏腑失养，面色淡白或萎黄、头晕眼花、心悸、手足发麻，女性常见经量少、色淡。",
         tip:"养护建议：杜绝长期熬夜耗血；减少长时间看电子屏幕（久视伤血）；适量食用红枣、猪肝、黑芝麻养血。"
     },
     xueyu:{
@@ -346,7 +376,7 @@ const db = {
     },
     re:{
         name:"内热倾向",
-        desc:"体内郁热内生，容易上火、燥热、经期提前量多、心烦易怒。",
+        desc:"体内郁热内生，容易上火、口舌生疮、小便偏黄、心烦燥热，女性可见经期提前、量多。",
         tip:"养护建议：清淡饮食、多喝温水；减少熬夜燥热，忌口辛辣烧烤。"
     },
     tebin:{
@@ -355,6 +385,72 @@ const db = {
         tip:"养护建议：排查并远离已知过敏原；季节交替注意防护；少食辛辣腥发食物，增强体质。"
     }
 }
+
+// ==== SCORING-CORE-START：纯计分逻辑，不依赖 DOM，可单独抽出跑测试 ====
+// 计分参数：改这里即可换标定
+const SCORE_CFG = {
+    wPrimary: 0.6,      // 复合选项里"主证型"的权重（书写在前者为主）
+    wSecondary: 0.4,    // 复合选项里"次证型"的权重
+    minEvidence: 1.0,   // 判定某证型所需的最低累计证据权重
+    minCoverage: 2,     // 判定主体质所需的覆盖题数（只在1道题里出现的证型只能列为倾向）
+    mainFloor: 0.5,     // 判定主体质所需的匹配度下限
+    subRatio: 0.6,      // 兼夹阈值：相对最高匹配度的比例
+    normalGuard: 0.8    // 判定平和质所需的平和匹配度
+};
+
+// 个别复合选项如需单独指定拆分权重，在此覆盖；键名为 "题目名:选项值"
+const OPTION_WEIGHT_OVERRIDE = {
+    // "q6:ganyu,yinxu": { yinxu: 0.5, ganyu: 0.5 }
+};
+
+// 单个选项对各证型的权重：单证型记满分；复合选项按主次拆分，选项内总权重仍为1
+function weightsFor(qname, value){
+    const ov = OPTION_WEIGHT_OVERRIDE[qname + ":" + value];
+    if(ov) return ov;
+    const keys = String(value).split(",").filter(Boolean);
+    if(keys.length === 0) return {};
+    if(keys.length === 1) return { [keys[0]]: 1 };
+    if(keys.length === 2) return { [keys[0]]: SCORE_CFG.wPrimary, [keys[1]]: SCORE_CFG.wSecondary };
+    const rest = (1 - SCORE_CFG.wPrimary) / (keys.length - 1);
+    const out = { [keys[0]]: SCORE_CFG.wPrimary };
+    keys.slice(1).forEach(k=>{ out[k] = rest; });
+    return out;
+}
+
+// ans 形如 { q1:{multi:false, options:["normal","yangxu"], checked:["yangxu"]}, ... }
+// 返回每个证型的命中权重、最大可得权重、覆盖题数与匹配度
+function computeScores(ans){
+    const earned = {}, max = {}, cover = {};
+    Object.keys(db).forEach(k=>{ earned[k]=0; max[k]=0; cover[k]=0; });
+
+    Object.keys(ans).forEach(q=>{
+        const item = ans[q];
+        const perTypeMax = {};
+        // 该题对每个证型最多能给出多少权重
+        item.options.forEach(v=>{
+            const w = weightsFor(q, v);
+            Object.keys(w).forEach(k=>{
+                if(!(k in earned)) return;
+                perTypeMax[k] = item.multi ? (perTypeMax[k]||0) + w[k] : Math.max(perTypeMax[k]||0, w[k]);
+            });
+        });
+        Object.keys(perTypeMax).forEach(k=>{ max[k] += perTypeMax[k]; cover[k] += 1; });
+        // 实际命中
+        item.checked.forEach(v=>{
+            const w = weightsFor(q, v);
+            Object.keys(w).forEach(k=>{ if(k in earned) earned[k] += w[k]; });
+        });
+    });
+
+    return Object.keys(db).map(k=>({
+        k: k,
+        earned: earned[k],
+        max: max[k],
+        cover: cover[k],
+        norm: max[k] > 0 ? earned[k] / max[k] : 0
+    })).filter(x=>x.max > 0);   // 题库未覆盖的证型不参与判定
+}
+// ==== SCORING-CORE-END ====
 
 // 全局变量
 let currentPage = 0;
@@ -442,38 +538,45 @@ function prevPage(){
     }
 }
 
-// 给指定题目名加分
-function addScore(name, scores){
-    // 支持单选radio和多选checkbox
-    const els = document.querySelectorAll(`input[name="${name}"]:checked`);
-    els.forEach(el=>{
-        const vList = el.value.split(",");
-        vList.forEach(key=>{
-            if(scores[key] !== undefined){
-                scores[key] += 1;
-            }
-        });
+// 从页面收集已作答内容（题型由是否存在 checkbox 判定）
+function collectAnswers(gender){
+    const qs = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"];
+    if(gender === "female") qs.push("m1","m2","m3");
+
+    const ans = {};
+    qs.forEach(q=>{
+        const opts = Array.from(document.querySelectorAll('input[name="' + q + '"]'));
+        if(!opts.length) return;
+        ans[q] = {
+            multi: opts.some(o=>o.type === "checkbox"),
+            options: opts.map(o=>o.value),
+            checked: opts.filter(o=>o.checked).map(o=>o.value)
+        };
     });
+    return ans;
 }
 
-// 第4题多选切换（normal与其他互斥）
-function toggleQ3(el, val){
+// 多选切换（同组内 normal 与其他选项互斥）
+function toggleMulti(el, val){
     const cb = el.querySelector('input[type="checkbox"]');
     cb.checked = !cb.checked;
     el.classList.toggle("selected", cb.checked);
-    // 互斥逻辑
+
     const card = el.closest(".q-card");
+    if(!card) return;
+    const group = cb.name;
+
     if(val === "normal" && cb.checked){
-        // 选了身体轻松，取消其他
-        card.querySelectorAll('input[name="q3"]').forEach(other=>{
+        // 选了"都没有/正常"，取消同组其他选项
+        card.querySelectorAll('input[name="' + group + '"]').forEach(other=>{
             if(other.value !== "normal"){
                 other.checked = false;
                 other.closest(".opt").classList.remove("selected");
             }
         });
     } else if(val !== "normal" && cb.checked){
-        // 选了其他，取消身体轻松
-        const normal = card.querySelector('input[name="q3"][value="normal"]');
+        // 选了具体症状，取消同组的"都没有/正常"
+        const normal = card.querySelector('input[name="' + group + '"][value="normal"]');
         if(normal){
             normal.checked = false;
             normal.closest(".opt").classList.remove("selected");
@@ -489,53 +592,69 @@ function submitTest(){
         return;
     }
 
-    const scores = {};
-    Object.keys(db).forEach(k=>scores[k]=0);
-
     // 必选校验
     const genderVal = document.querySelector('input[name="gender"]:checked')?.value;
     if(!genderVal){showToast("请先选择性别");return;}
 
-    // 基础题计分
-    const qs = ["q1","q2","q3","q4","q5","q6","q7","q8"];
-    qs.forEach(q=>addScore(q, scores));
+    // 计分：比例分 + 复合选项拆分 + 最低证据门槛
+    const rows = computeScores(collectAnswers(genderVal));
+    if(location.search.indexOf("debug") > -1) console.table(rows);
 
-    // 女性专项计分
-    if(genderVal === "female"){
-        const mList = ["m1","m2","m3"];
-        mList.forEach(m=>addScore(m, scores));
-    }
+    // 有资格参与判定 = 累计证据达到下限
+    const eligible = rows.filter(x=>x.earned >= SCORE_CFG.minEvidence && x.norm > 0).sort((a,b)=>b.norm - a.norm);
+    const normalRow = rows.find(x=>x.k === "normal");
+    const normalOk = !!(normalRow && normalRow.cover >= SCORE_CFG.minCoverage && normalRow.norm >= SCORE_CFG.normalGuard);
 
-    // 排序、主兼夹判定
-    const sortedList = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0);
+    const candidates = eligible.filter(x=>x.k !== "normal");
     let mainList = [], subList = [];
-    if(sortedList.length>0){
-        const top = sortedList[0][1];
-        sortedList.forEach(([k,s])=>{
-            if(s === top) mainList.push(k);
-            else if(s >= top * 0.6) subList.push(k);
-        })
+    if(candidates.length){
+        const top = candidates[0].norm;
+        // 主体质：匹配度达下限、且至少有 minCoverage 道题覆盖
+        mainList = candidates.filter(x=> Math.abs(x.norm - top) < 1e-9
+            && x.cover >= SCORE_CFG.minCoverage
+            && x.norm >= SCORE_CFG.mainFloor);
+        if(mainList.length){
+            subList = candidates.filter(x=> !mainList.includes(x) && x.norm >= top * SCORE_CFG.subRatio);
+        }else{
+            subList = candidates.filter(x=> x.norm >= top * SCORE_CFG.subRatio);
+        }
     }
 
     // 渲染报告
     let html = "";
-    if(mainList.length===1 && mainList[0]==="normal"){
-        html += `<span class="tag tag-main">平和质（健康均衡）</span>`;
-        html += `<div class="item-report"><strong>${db.normal.name}</strong><p>${db.normal.desc}</p><p>${db.normal.tip}</p></div>`;
-    }else if(mainList.length > 0){
-        html += `<div>${mainList.map(k=>`<span class="tag tag-main">主体质：${db[k].name}</span>`).join("")}</div>`;
+    const showList = [...mainList, ...subList];
+
+    if(!showList.length){
+        if(normalOk){
+            html += `<span class="tag tag-main">平和质（健康均衡）</span>`;
+            html += `<div class="item-report"><strong>${db.normal.name}</strong><p>${db.normal.desc}</p><p>${db.normal.tip}</p></div>`;
+        }else{
+            // 兜底：无有效证据
+            html += `<p style="color:#888;">本次回答未能收集到判定体质所需的证据，建议面诊中医师辨证。</p>`;
+        }
+    }else{
+        if(normalOk && mainList.length === 0){
+            html += `<div><span class="tag tag-sub">基础：平和质（整体偏均衡）</span></div>`;
+        }
+        if(mainList.length){
+            html += `<div>${mainList.map(x=>`<span class="tag tag-main">主体质：${db[x.k].name}</span>`).join("")}</div>`;
+        }else{
+            html += `<p style="color:#8a6a3a;font-size:14px;margin-bottom:8px;">未达到主体质判定标准（覆盖题数或匹配度不足），以下为倾向参考。</p>`;
+        }
         if(subList.length){
-            html += `<div style="margin-top:8px;">${subList.map(k=>`<span class="tag tag-sub">兼夹体质：${db[k].name}</span>`).join("")}</div>`;
+            html += `<div style="margin-top:8px;">${subList.map(x=>`<span class="tag tag-sub">${mainList.length ? "兼夹体质" : "倾向"}：${db[x.k].name}</span>`).join("")}</div>`;
         }
         html += `<div style="margin-top:16px;">`;
-        const allKeys = [...new Set([...mainList,...subList])];
-        allKeys.forEach(k=>{
-            html += `<div class="item-report"><strong>${db[k].name}</strong><p>${db[k].desc}</p><p>${db[k].tip}</p></div>`;
+        showList.forEach(x=>{
+            html += `<div class="item-report"><strong>${db[x.k].name}</strong><p style="font-size:13px;color:#8a7a5a;">匹配度 ${Math.round(x.norm * 100)}%（${x.cover} 题覆盖，命中 ${x.earned.toFixed(1)}/${x.max.toFixed(1)}）</p><p>${db[x.k].desc}</p><p>${db[x.k].tip}</p></div>`;
         });
         html += `</div>`;
-    }else{
-        // 兜底：理论上不会走到这里，但防止异常空白
-        html += `<p style="color:#888;">未能识别出明显体质倾向，建议面诊中医师辨证。</p>`;
+    }
+
+    // 题库未覆盖的证型（max=0）：明确提示，避免"没评估"被误读成"没问题"
+    const missing = Object.keys(db).filter(k=> !rows.some(x=>x.k === k));
+    if(missing.length){
+        html += `<p style="font-size:12px;color:#b08968;margin-top:12px;">本次未评估：${missing.map(k=>db[k].name).join("、")}（当前题库中无对应题目）</p>`;
     }
 
     html += `<p class="tip-text">温馨提示：本自测仅为中医体质倾向性科普参考，体质多为复合兼夹状态，无法替代专业医师辨证，身体不适请及时线下就医。</p>`;
@@ -550,6 +669,8 @@ function submitTest(){
 // 重置全部
 function resetAll(){
     document.querySelectorAll("input[type=radio]").forEach(i=>i.checked=false);
+    document.querySelectorAll("input[type=checkbox]").forEach(i=>i.checked=false);
+    document.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
     document.getElementById("container").style.display = "block";
     document.getElementById("result").style.display = "none";
     currentPage = 0;
