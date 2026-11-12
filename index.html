@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中医体质自测 · 九体＋五运六气合判</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f0e8d6'/%3E%3Crect x='6' y='6' width='20' height='20' fill='none' stroke='%23a83226' stroke-width='2'/%3E%3Cpath d='M11 21V11h4.6a3.4 3.4 0 0 1 0 6.8H11' fill='none' stroke='%232c2c2c' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg1:#f5efe0; --bg2:#ede4cc; --paper:#f0e8d6;
+  --card:#faf6ea; --card2:#fffdf5;
+  --ink:#2c2c2c; --ink2:#8a7a5a;
+  --line:#d4c5a0; --line2:#c9b88e; --line3:#e0d3b4;
+  --brown:#b8a682; --tan:#d8c9a0; --tan2:#d8c9a8; --tanink:#5c4a28;
+  --seal:#a83226; --seal2:#8b2820; --sealsoft:#e5d8b8;
+  --warnbg:#fdf3dc; --warnline:#c9a96e; --warnink:#7a4a1a;
+  --sans:system-ui,-apple-system,"Microsoft YaHei","PingFang SC",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0 auto; max-width:800px; padding:44px 16px 16px;
+  background:var(--paper); background-image:radial-gradient(ellipse at top,var(--bg1) 0%,var(--bg2) 100%);
+  background-attachment:fixed; color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:800px; margin:0 auto}
+/* 抬头 */
+.masthead{text-align:center; border-bottom:1px solid var(--brown); padding-bottom:12px; margin:0 0 20px}
+.masthead h1{font-size:26px; line-height:1.4; margin:0 0 6px; letter-spacing:.28em; text-indent:.28em; font-weight:700}
+.masthead .sub{margin:0; color:var(--ink2); font-size:13px; line-height:1.8; letter-spacing:.02em}
+.masthead .meta{margin:8px 0 0; color:var(--brown); font-size:11px; letter-spacing:.1em}
+/* 必填/旧卷首（保留兼容） */
+.preface{background:var(--card); border-left:3px solid var(--seal); padding:14px 16px; margin:0 0 20px}
+.preface p{margin:0 0 8px; font-size:15px}
+.preface p:last-child{margin:0}
+.gate{display:grid; grid-template-columns:1fr; gap:10px; margin:0 0 24px; padding:14px 16px; border:1px solid var(--line)}
+.gate label{display:block; font-size:14px; color:var(--ink2); margin-bottom:6px}
+.gate select{width:100%; font-family:var(--sans); font-size:16px; padding:9px 10px; background:var(--card2); color:var(--ink); border:1px solid var(--line2); border-radius:4px}
+/* 声明条 */
+.warn{background:var(--warnbg); border:1px solid var(--warnline); border-radius:4px; padding:12px; color:var(--warnink); font-size:14px; line-height:1.8; margin:0 0 18px}
+.warn b{font-weight:700; letter-spacing:.06em}
+/* 逐题：进度与题头 */
+.headline{display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:13px; color:var(--ink2); letter-spacing:.06em; margin:0 0 8px}
+.headline .seg{font-weight:700; color:var(--ink)}
+.headline .stage{color:var(--seal); letter-spacing:.1em}
+.headline .pct{font-variant-numeric:tabular-nums}
+.track{height:6px; background:var(--tan2); border-radius:99px; overflow:hidden; margin:0 0 20px}
+.track i{display:block; height:100%; background:var(--ink); width:0; transition:width .4s ease}
+/* 题卡 */
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:4px;
+  box-shadow:0 2px 12px rgba(60,40,15,.1); padding:24px 20px; min-height:260px;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.card[hidden]{display:none}
+.card .kicker{display:block; font-size:12px; letter-spacing:.12em; color:var(--ink2)}
+.card h3{font-size:18px; line-height:1.7; margin:10px 0 20px; font-weight:700; letter-spacing:2px; color:var(--ink)}
+.card .note{font-size:13px; color:var(--ink2); margin:0 0 14px; line-height:1.75}
+.choices{display:grid; grid-template-columns:1fr}
+.choice{
+  display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:14px 6px;
+  background:transparent; border:0; border-bottom:1px solid var(--line3); border-radius:0; cursor:pointer;
+  font-family:var(--sans); font-size:16px; line-height:1.6; color:var(--ink); text-align:left;
+  transition:background .18s ease, color .18s ease;
+}
+.choice:hover{background:#f2ead2}
+.choice.on{background:#f7e7cf; box-shadow:inset 3px 0 0 var(--seal); color:#5c2018; font-weight:700}
+.choice:focus-visible{outline:2px solid var(--seal); outline-offset:-2px}
+/* 五级程度：横排刻度，不做勾选框 */
+.scale{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:4px 0 0}
+.segBtn{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  min-height:56px; padding:14px 2px; border:0; border-radius:4px; cursor:pointer;
+  font-family:var(--sans); color:#5c4a28; transition:background .18s ease, box-shadow .18s ease, color .18s ease;
+}
+.segBtn b{font-size:15px; font-weight:700; letter-spacing:1px}
+.segBtn i{font-style:normal; font-size:10px; opacity:.7; line-height:1.2}
+.segBtn.t1{background:#fbf5e4}
+.segBtn.t2{background:#f5ead0}
+.segBtn.t3{background:#eedfbc}
+.segBtn.t4{background:#e2cea0}
+.segBtn.t5{background:#d4bb88}
+.segBtn:hover{box-shadow:inset 0 0 0 1px #a89060}
+.segBtn.on{background:var(--seal); color:#f7efe4; box-shadow:0 3px 12px rgba(168,50,38,.26)}
+.segBtn.on i{opacity:.9}
+.segBtn:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.scale-note{margin:12px 0 0; font-size:13px; color:var(--ink2); min-height:20px; line-height:1.6}
+@media (max-width:430px){ .segBtn i{display:none} }
+/* 底部按钮 */
+.nav{position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--line); display:flex; gap:12px; align-items:center; padding:12px 0 10px; margin-top:22px; flex-wrap:wrap}
+.nav .counter{flex:1 1 auto; min-width:96px; font-size:13px; color:var(--ink2)}
+.nav button{flex:1 1 0}
+button.primary{
+  font-family:var(--sans); font-size:16px; padding:14px; min-height:48px; border:0; border-radius:4px;
+  background:var(--seal); color:#f5efe0; cursor:pointer; letter-spacing:4px; transition:background .2s ease;
+}
+button.primary:hover{background:var(--seal2)}
+button.primary:disabled{background:#c9b8a0; cursor:not-allowed}
+button.ghost{
+  font-family:var(--sans); font-size:16px; padding:14px; min-height:48px; border:0; border-radius:4px;
+  background:var(--tan); color:var(--tanink); cursor:pointer; letter-spacing:2px; transition:background .2s ease;
+}
+button.ghost:hover{background:#cdbc93}
+button.ghost:disabled{opacity:.5; cursor:not-allowed}
+/* 结果区 */
+#result{display:none}
+.verdict{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:20px; margin:0 0 16px}
+.verdict .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
+.tags{margin:0 0 10px; display:flex; flex-wrap:wrap; gap:8px}
+.tag{display:inline-block; padding:6px 12px; border-radius:2px; font-size:14px; letter-spacing:1px}
+.tag-main{background:var(--seal); color:#f5efe0}
+.tag-sub{background:var(--tan); color:var(--tanink)}
+.verdict h3{font-size:26px; margin:0; line-height:1.4; letter-spacing:3px}
+.verdict h3 em{font-style:normal; color:var(--seal)}
+.verdict .also{font-size:14px; color:var(--ink2); margin:9px 0 0; line-height:1.8}
+.bars{margin:0 0 16px; background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:18px 20px}
+.bar-row{margin:0 0 12px}
+.bar-head{display:flex; justify-content:space-between; font-size:14px; line-height:1.6}
+.bar-head .v{font-variant-numeric:tabular-nums; color:var(--ink2)}
+.gauge{position:relative; height:8px; background:var(--sealsoft); border-radius:99px; margin-top:5px; overflow:visible}
+.gauge i{position:absolute; left:0; top:0; bottom:0; background:var(--seal); border-radius:99px}
+.gauge i.hot{background:var(--seal2)}
+.gauge b{position:absolute; top:-3px; bottom:-3px; width:1px; background:var(--ink2); opacity:.55}
+.thr{font-size:12px; color:var(--ink2); margin:8px 0 0; line-height:1.7}
+/* 展开行 */
+.fold{border:1px solid var(--line); border-radius:4px; background:var(--card); margin:0 0 10px; overflow:hidden}
+.fold-h{
+  width:100%; text-align:left; background:transparent; border:0; cursor:pointer;
+  font-family:var(--sans); color:var(--ink); padding:14px 18px; display:flex; gap:12px; align-items:baseline; min-height:48px;
+}
+.fold-h .t{flex:0 0 auto; font-weight:700; font-size:15px; letter-spacing:1px}
+.fold-h .s{flex:1 1 auto; min-width:0; font-size:14px; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.fold-h .x{flex:0 0 auto; font-size:13px; color:var(--ink2)}
+.fold-b{display:none; padding:0 18px 16px; font-size:15px; line-height:1.9}
+.fold-b p{margin:0 0 9px}
+.fold.open .fold-b{display:block}
+.fold.open .fold-h .x{color:var(--seal)}
+.fold-h:hover .t{color:var(--seal)}
+.fold-h:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.tagline{font-size:13px; color:var(--ink2); margin:0 0 6px}
+/* 清单 */
+.list-group{margin:0 0 12px; padding:14px; background:#f5ecd4; border-left:3px solid var(--seal); border-radius:0 4px 4px 0}
+.list-group .who{font-size:14px; font-weight:700; margin:0 0 6px; color:#5c2018}
+.list-good,.list-bad{margin:0 0 5px; font-size:15px; line-height:1.85}
+.list-good b,.list-bad b{font-weight:700; margin-right:6px}
+.list-good b{color:#5c4a28}
+.list-bad b{color:var(--seal)}
+.item-report{margin:0 0 10px; padding:14px; border-left:3px solid var(--seal); background:#f5ecd4; border-radius:0 4px 4px 0}
+.item-report strong{color:#5c2018}
+.foot{margin-top:26px; border-top:1px solid var(--line); padding-top:14px; font-size:13px; color:var(--ink2); line-height:1.9}
+.foot p{margin:0 0 8px}
+.row-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+/* 旧逐题样式（兼容保留） */
+.intro{margin:0 0 8px}
+.intro .hint{font-size:14px; color:var(--ink2); line-height:1.8; margin:0 0 16px}
+.bar{position:sticky; bottom:0; background:var(--paper); border-top:1px solid var(--line); padding:12px 0 10px; margin-top:24px; display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.prog{flex:1 1 auto; min-width:140px; font-size:13px; color:var(--ink2)}
+/* 浮层提示 */
+.toast{
+  position:fixed; left:50%; top:24%; transform:translateX(-50%) translateY(-16px);
+  background:rgba(30,25,15,.92); color:#f5efe0; padding:12px 24px; border-radius:2px;
+  font-size:14px; letter-spacing:1px; opacity:0; pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease; z-index:60; white-space:nowrap;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+#deck{position:relative}
+.card.shake{animation:shake .4s ease; border-color:#c0392b}
+@media (min-width:768px){
+  body{padding:52px 24px 20px}
+  .masthead h1{font-size:30px}
+  .card h3{font-size:19px}
+  .verdict h3{font-size:32px}
+}
+@media print{
+  .nav,.row-actions,.gate,button,.toast{display:none!important}
+  body{background:#fff; background-image:none}
+  .fold-b{display:block!important}
+  .card,.verdict,.bars{box-shadow:none}
+}
+/* ===== 出生日期与运气卡（新增层） ===== */
+.birth{display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:10px; margin:6px 0 0}
+.birth select{width:100%; min-width:0; font-family:var(--sans); font-size:16px; padding:12px 6px; min-height:48px;
+  background:var(--card2); color:var(--ink); border:1px solid var(--line2); border-radius:4px; -webkit-appearance:none; appearance:none}
+.birth select:focus-visible{outline:2px solid var(--seal); outline-offset:1px}
+.birth-note{margin:14px 0 0; padding:11px 12px; background:#f5ecd4; border-left:3px solid var(--seal); font-size:14px; line-height:1.8; color:#5c2018}
+.birth-note b{font-weight:700}
+.birth-prev{display:flex; gap:9px; align-items:flex-start; margin:12px 0 0; font-size:14px; line-height:1.7; color:var(--ink2)}
+.birth-prev[hidden]{display:none}
+.birth-prev input{width:20px; height:20px; margin:2px 0 0; flex:0 0 auto}
+.luck{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:20px; margin:0 0 16px}
+.luck .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
+.luck .big{font-size:25px; font-weight:700; letter-spacing:2px; margin:0 0 4px; color:var(--ink)}
+.luck .subline{font-size:13px; color:var(--ink2); margin:0 0 12px; line-height:1.7}
+.luck dl{display:grid; grid-template-columns:auto 1fr; gap:7px 14px; margin:0; font-size:15px; line-height:1.7}
+.luck dt{color:var(--ink2); font-size:14px; white-space:nowrap}
+.luck dd{margin:0; color:var(--ink)}
+.luck .p{margin:14px 0 0; font-size:15px; line-height:1.9}
+.luck .p b{color:#5c2018}
+.luck .chips{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 0}
+.luck .chip{font-size:13px; padding:3px 10px; border:1px solid var(--line2); border-radius:2px; color:#5c4a28; background:#f5ecd4}
+.luck .fine{margin:12px 0 0; font-size:12px; color:var(--ink2); line-height:1.7}
+.joint{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:20px; margin:0 0 16px}
+.joint .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 12px}
+.joint .kv{display:grid; grid-template-columns:76px 1fr; gap:10px; align-items:baseline; margin:0 0 8px; font-size:15px; line-height:1.7}
+.joint .kv span{color:var(--ink2); font-size:14px}
+.joint .kv strong{font-weight:700; color:var(--ink); min-width:0}
+.joint .verdict-1{font-size:19px; line-height:1.6; font-weight:700; letter-spacing:1px; margin:14px 0 8px; color:var(--seal)}
+.joint .p{margin:0 0 9px; font-size:15px; line-height:1.9}
+@media (max-width:430px){ .joint .kv{grid-template-columns:64px 1fr} .luck .big{font-size:21px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <h1>中医体质自测</h1>
+    <p class="sub">九种体质 · 判定 27 题＋补充 7 题 · 出生运气对照</p>
+    <p class="meta">GB/T 46939—2025　＋　五运六气（大寒换年）</p>
+  </header>
+
+  <div class="warn"><b>重要声明</b>　本问卷仅为健康科普参考，<b>不能替代专业中医师面诊诊断</b>，不构成诊疗、用药建议，如有不适请及时就医。判定题按「近一年大多数时候」答，补充题按现在的情况答。出生年月日只用来推五运六气，按大寒换年，只算到日、不算时辰。</div>
+
+  <section id="deckWrap">
+    <div class="headline">
+      <span class="seg" id="seg">第 1 题</span>
+      <span class="stage" id="stage">性别</span>
+      <span class="pct" id="pct">0%</span>
+    </div>
+    <div class="track"><i id="fill"></i></div>
+    <div id="deck"></div>
+    <nav class="nav">
+      <button class="ghost" id="prev" disabled>上一题</button>
+      <button class="primary" id="next">下一题</button>
+    </nav>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <section id="result" aria-live="polite"></section>
+
+</div>
+
+<script>
+/* ================= 判定层 27 题（GB/T 46939—2025，题干照原文） ================= */
+const OPTS5 = ["没有（根本不）","很少（有一点）","有时（有些）","经常（相当）","总是（非常）"];
+
+const Q27 = [
+ {id:"S01", t:"您精力充沛吗？", k:[["pinghe",0]]},
+ {id:"S02", t:"您容易疲乏吗？", k:[["pinghe",1],["qixu",0]]},
+ {id:"S03", t:"您感到闷闷不乐、情绪低沉吗？", k:[["pinghe",1],["qiyu",0]]},
+ {id:"S04", t:"您比一般人耐受不了寒冷（冬天的寒冷，夏天的冷空调、电扇等）吗？", k:[["pinghe",1],["yangxu",0]]},
+ {id:"S05", t:"您容易气短（呼吸短促，接不上气）吗？", k:[["qixu",0]]},
+ {id:"S06", t:"您容易心慌吗？", k:[["qixu",0]]},
+ {id:"S07", t:"您胃脘部、背部或腰膝部怕冷吗？", k:[["yangxu",0]]},
+ {id:"S08", t:"您感到怕冷、衣服比别人穿得多吗？", k:[["yangxu",0]]},
+ {id:"S09", t:"您感觉身体、脸上发热吗？", k:[["yinxu",0]]},
+ {id:"S10", t:"您皮肤或口唇干吗？", k:[["yinxu",0]]},
+ {id:"S11", t:"您面部两颧潮红或偏红吗？", k:[["yinxu",0]]},
+ {id:"S12", t:"您感到身体沉重不轻松或不爽快吗？", k:[["tanshi",0]]},
+ {id:"S13", t:"您腹部肥满松软吗？", k:[["tanshi",0]]},
+ {id:"S14", t:"您嘴里有黏黏的感觉吗？", k:[["tanshi",0]]},
+ {id:"S15", t:"您面部或鼻部有油腻感或者油亮发光吗？", k:[["shire",0]]},
+ {id:"S16", t:"您小便时尿道有发热感、尿色浓（深）吗？", k:[["shire",0]]},
+ {id:"S17", t:"您带下色黄（白带颜色发黄）吗？", k:[["shire",0]], g:"f"},
+ {id:"S18", t:"您的阴囊部位潮湿吗？", k:[["shire",0]], g:"m"},
+ {id:"S19", t:"您身体上有哪里疼痛吗？", k:[["xueyu",0]]},
+ {id:"S20", t:"您面色晦暗或容易出现褐斑吗？", k:[["xueyu",0]]},
+ {id:"S21", t:"您口唇颜色偏暗吗？", k:[["xueyu",0]]},
+ {id:"S22", t:"您容易精神紧张、焦虑不安吗？", k:[["qiyu",0]]},
+ {id:"S23", t:"您多愁善感、感情脆弱吗？", k:[["qiyu",0]]},
+ {id:"S24", t:"您没有感冒时也会打喷嚏吗？", k:[["tebing",0]]},
+ {id:"S25", t:"您容易过敏（对药物、食物、气味、花粉或在季节交替、气候变化时）吗？", k:[["tebing",0]]},
+ {id:"S26", t:"您的皮肤容易起荨麻疹（风团、风疹块、风疙瘩）吗？", k:[["tebing",0]]},
+ {id:"S27", t:"您的皮肤一抓就红，并出现抓痕吗？", k:[["tebing",0]]}
+];
+
+/* ================= 补充层 7 题（季节改按当日日期自动判定，不再作答） ================= */
+const Q8 = [
+ {id:"P29", t:"你平时的运动量大概是？", o:["几乎不运动","每周 1—2 次","每周 3 次以上","主要靠体力工作，没有专门锻炼"]},
+ {id:"P30", t:"运动或爬楼时，有没有出现过胸闷、心慌、眩晕、异常疲乏、两腿无力？", o:["有过","没有"]},
+ {id:"P31", t:"你通常几点入睡？", o:["23 点前","23 点—凌晨 1 点","凌晨 1 点以后"]},
+ {id:"P32", t:"你的三餐更接近哪一种？", o:["常吃外卖，偏油腻","常有宵夜","偏爱甜食、黏糯主食","相对规律，吃到七分饱"]},
+ {id:"P33", t:"你多数时间待在哪种环境？", o:["潮湿（临水、返潮、地下室）","干燥（长期空调暖气）","空调房久坐","临街、绿化多，花粉季明显"]},
+ {id:"P34", t:"每天大约坐着多久（不含睡眠）？", o:["不到 4 小时","4—8 小时","超过 8 小时"]},
+ {id:"P35", t:"你主要对什么过敏？", o:["花粉","尘螨（枕被、地毯、窗帘）","食物","说不清／多种都有"], only:"tebing"}
+];
+
+/* ================= 体质名与判定参数 ================= */
+const NAME = {pinghe:"平和质",qixu:"气虚质",yangxu:"阳虚质",yinxu:"阴虚质",tanshi:"痰湿质",shire:"湿热质",xueyu:"血瘀质",qiyu:"气郁质",tebing:"特禀质"};
+const ORDER = ["pinghe","qixu","yangxu","yinxu","tanshi","shire","xueyu","qiyu","tebing"];
+const N = {pinghe:4,qixu:3,yangxu:3,yinxu:3,tanshi:3,shire:3,xueyu:3,qiyu:3,tebing:4};
+
+/* ================= 调养文案（ZYTZ-TY-001～049，原文照录） ================= */
+const COPY = {
+ pinghe:{
+  j:{no:"ZYTZ-TY-004", x:"宜保持平和的心态，尽量适应四时的阴阳变化规律。如春季阳气生发，应去空气新鲜的户外进行活动，做到心胸开阔，情绪乐观；夏季天气炎热，易急躁上火，应尽量保持平稳之心情；秋季人们常会变得忧思悲伤，要多与他人交流沟通，保持乐观豁达的心态；冬季天气寒冷，万物藏，保养精神要以安定清静为根本，让心境处于淡泊宁静的状态。"},
+  y:{no:"ZYTZ-TY-005", x:"形成良好的运动健身习惯。可根据个人爱好和耐受程度及四季寒热温凉的不同，选择运动健身项目，如运动量较小的郊游、放风筝、踢毽子等，运动量适中的跳绳、登高、骑马、射箭等。还有些健身功法，如五禽戏、太极拳、八段锦、易筋经、形意拳等。尽量避免锻炼太过以耗正气，避免汗出太过以伤阴津。"},
+  s:{no:"ZYTZ-TY-006", x:"平和质饮食调养的第一原则是膳食平衡，要求食物多样化；在平衡膳食的基础上，还应注意气味调和，因时施膳，根据不同的季节选择适宜的饮食。饮食宜粗细合理搭配，多吃五谷杂粮、蔬菜瓜果，少食过于油腻及辛辣食品；不要过饥过饱，也不要进食过冷过烫或不洁净食物；注意戒烟限酒。"},
+  q:{no:"ZYTZ-TY-007", x:"起居宜规律。尽量做到春夏季「夜卧早起」，秋季「早卧早起」，冬季「早卧晚起」，以应春生、夏长、秋收、冬藏的物候规律，保持睡眠的规律与充足。劳逸相结合，穿戴求自然，饭后宜缓行百步，不能食后即睡。"},
+  f:{no:"ZYTZ-TY-041", good:"", bad:"", note:"原书未列具体食物清单，只给原则：粗细搭配、五谷杂粮、蔬菜瓜果，少油腻辛辣、戒烟限酒。"}
+ },
+ qixu:{
+  j:{no:"ZYTZ-TY-008", x:"心态宜乐观。气虚质性格偏内向，因此要做自我调整，培养豁达乐观的态度，且不可过度劳神。宜欣赏节奏明快的音乐。"},
+  y:{no:"ZYTZ-TY-009", x:"运动宜柔缓。宜采用低强度的运动方式，适当增加锻炼次数，而减少每次锻炼的总负荷量，控制好运动时间，循序渐进地进行。不宜做大负荷运动和大出汗的运动，避免剧烈运动，忌用猛力，以免耗伤元气。可选择比较柔和的传统健身项目，如八段锦。"},
+  s:{no:"ZYTZ-TY-010", x:"宜选用性平偏温、健脾益气的食物，少吃或不吃耗气的食物。不宜多食生冷苦寒、辛辣燥热的食物。由于气虚者多有脾胃虚弱，因此饮食不宜过于滋腻，不能蛮补，否则易导致脾胃呆滞而出现腹胀、食欲不振等。"},
+  q:{no:"ZYTZ-TY-011", x:"起居勿过劳。提倡劳逸结合，不要过于劳作，以免损伤正气，并且要注意规律作息。居室环境应采用明亮的暖色调。气虚质适应寒暑变化之能力较差，不耐受风、寒、暑热的气候。在夏季烈日炎热之时，要注意加强防护，同时也要注意不宜过于贪凉，不要让室内外温度相差太大。夏季午间应适当休息，保持充足的睡眠。"},
+  f:{no:"ZYTZ-TY-042", good:"牛肉、鸡肉、鸡蛋、鹑蛋；大米、山药、莲子、白扁豆、黄豆、豆腐；南瓜、大枣、胡萝卜、香菇", bad:"空心菜、槟榔、生萝卜"}
+ },
+ yangxu:{
+  j:{no:"ZYTZ-TY-012", x:"心态要阳光。阳虚质性格沉静、内向。因此要加强精神调养，宜保持积极向上的心态，尽量避免和减少悲伤、惊恐等不良情绪的影响。"},
+  y:{no:"ZYTZ-TY-013", x:"运动避风寒。宜在阳光充足的环境下适当进行舒缓柔和的户外活动，日光浴、空气浴是较好的强身壮阳之法。根据「春夏养阳，秋冬养阴」的观点，锻炼时间最好选择春夏，一天中又以阳光充足的上午为最好时机，其他时间锻炼则应当在室内进行。冬季要避寒就温，春夏季多晒太阳，每次不得少于 30 分钟。"},
+  s:{no:"ZYTZ-TY-014", x:"宜选用甘温补脾阳、温肾阳为主的食物。少食生冷、苦寒、黏腻食物。即使在盛夏也不要过食寒凉之品。"},
+  q:{no:"ZYTZ-TY-015", x:"起居要保暖。由于机体阳气不足，失于温煦，故在日常起居中要注意避寒取暖，养护阳气。特别是冬季要适当多穿衣服，尽量吃温热的食物，尤其要注意背部、腰部和下肢的保暖。居住环境以温和的暖色调为宜。不宜在阴暗、潮湿、寒冷的环境下长期工作和生活。白天应保持一定的活动量，激发体内阳气。睡觉前尽量不要饮水，睡前将小便排净。"},
+  f:{no:"ZYTZ-TY-043", good:"羊肉、虾、带鱼、黄鳝；糯米、高粱；核桃、栗子、腰果、松子、荔枝、龙眼、生姜、韭菜、茴香", bad:"田螺、螃蟹、海带、紫菜、芹菜、苦瓜、冬瓜、西瓜、香蕉、柿子、甘蔗、梨、绿豆、蚕豆、绿茶、冷冻饮料"}
+ },
+ yinxu:{
+  j:{no:"ZYTZ-TY-016", x:"心态要淡泊。阴虚质宜加强自我修养、培养自己的耐性，尽量减少与人争执、动怒，可在安静、优雅环境中练习书法、绘画等。"},
+  y:{no:"ZYTZ-TY-017", x:"运动勿太过。阴虚质由于体内津液精血等不足，运动的时候往往容易出现口干舌燥、面色潮红、小便少等症状，因此宜做中小强度、间断性的运动项目，注意控制出汗量、及时补充水分；不宜进行大强度、大运动量的锻炼，避免在炎热的夏天或闷热的环境中运动。"},
+  s:{no:"ZYTZ-TY-018", x:"宜选用甘凉滋润的食物。少食温燥、辛辣、香浓的食物。"},
+  q:{no:"ZYTZ-TY-019", x:"应保证充足的睡眠时间，避免过分熬夜，以藏养阴气。高度紧张的工作、剧烈运动、高温酷暑的环境等均应尽量避免，不宜洗桑拿、泡温泉。"},
+  f:{no:"ZYTZ-TY-044", good:"鸭肉、猪瘦肉、海参、鳖；黑芝麻、小麦；百合、枸杞子、桑椹、梨、荸荠、甘蔗；蜂蜜、银耳、燕窝", bad:"羊肉、韭菜、茴香、辣椒、葱、蒜、葵花子、酒、咖啡、浓茶、荔枝、龙眼、樱桃、杏、大枣、核桃、栗子"}
+ },
+ tanshi:{
+  j:{no:"ZYTZ-TY-020", x:"心态要积极。痰湿质性格温和，处事稳重，多善于忍耐。但由于痰湿内蕴，阻遏阳气，易产生疲倦感，因此宜多参加社会活动、培养广泛的兴趣爱好。"},
+  y:{no:"ZYTZ-TY-021", x:"运动应持久。痰湿质形体多肥胖，身重易倦，故应根据自己的具体情况循序渐进，长期坚持运动锻炼。要加强机体物质代谢，应当做较长时间的有氧运动。一般热身 15 分钟左右，开始慢慢增加频率，运动量 1 小时为最佳。运动时间应当在下午 2∶00—4∶00 自然界阳气极盛之时，且运动环境应温暖宜人。"},
+  s:{no:"ZYTZ-TY-022", x:"宜选用健脾助运、祛湿化痰的食物，少食肥、甜、油、黏的食物。吃饭不宜过饱，要吃七分饱，忌暴饮暴食和进食速度过快。"},
+  q:{no:"ZYTZ-TY-023", x:"起居避潮湿。不宜在潮湿环境中久留。居住环境宜温暖干燥，衣着应透气散湿，面料以棉、麻、丝等天然纤维为主，有利于汗液蒸发，祛除体内湿气。痰湿质嗜睡，所以应适当减少睡眠时间，不要过于安逸，晚上睡觉枕头不宜过高。应多进行户外活动，以舒展阳气，通达气机。平时还应定期检查血糖、血脂、血压。"},
+  f:{no:"ZYTZ-TY-045", good:"鲤鱼、鲫鱼、鲈鱼、海带、文蛤；扁豆、薏苡仁、赤小豆、山药；冬瓜、荷叶、白萝卜、生姜、荠菜、紫菜", bad:""}
+ },
+ shire:{
+  j:{no:"ZYTZ-TY-024", x:"情绪宜稳定。湿热质宜稳定情绪，尽量避免烦恼，可选择不同形式的兴趣爱好。"},
+  y:{no:"ZYTZ-TY-025", x:"宜做强度较大的运动，如中长跑、游泳、各种球类、武术等。夏季应避免在烈日下长时间活动。在秋高气爽的季节，选择爬山登高，更有助于祛除湿热。"},
+  s:{no:"ZYTZ-TY-026", x:"宜食用甘寒或苦寒的清热利湿食物。少食肥厚油腻之品，以及辛温助热的食物。"},
+  q:{no:"ZYTZ-TY-027", x:"起居避湿热。居室宜干燥、通风良好，避免居处潮热，可在室内用除湿器或空调改善湿热的环境。选择款式宽松、透气性好的天然棉、麻、丝质服装。注意个人卫生，预防皮肤病变。保持充足而有规律的睡眠，避免服用兴奋饮料，保持二便通畅，防止湿热积聚。烟草为辛热秽浊之物，易于生热助湿；酒为熟谷之液，性热而质湿，嗜烟好酒可以积热生湿，是导致湿热质的重要成因，所以湿热质必须限烟戒酒。"},
+  f:{no:"ZYTZ-TY-046", good:"泥鳅、田螺、鸭肉；绿豆（芽）、绿豆糕、赤小豆；马齿苋、芹菜、黄瓜、苦瓜、西瓜、冬瓜、丝瓜、莲藕、荸荠、梨、薏苡仁、莲子；绿茶、花茶", bad:"羊肉、动物内脏、韭菜、生姜、辣椒、胡椒、花椒，以及火锅、烹炸、烧烤"}
+ },
+ xueyu:{
+  j:{no:"ZYTZ-TY-028", x:"情绪避烦躁。血瘀质易烦健忘，应努力克服烦躁情绪，遇事宜沉稳，保持精神舒畅。如此才可使气血和畅，有益于改善血瘀质。"},
+  y:{no:"ZYTZ-TY-029", x:"经络气血运行不畅，应多采用有益于促进气血运行的运动项目，并持之以恒。如各种舞蹈、步行健身法、徒手健身操、易筋经、保健功、导引、按摩、太极拳、太极剑、五禽戏或八段锦等。不宜做大强度、大负荷的体育锻炼，而应采用中小负荷、多次数的锻炼。"},
+  s:{no:"ZYTZ-TY-031", x:"宜选用具有调畅气血作用的食物。少食收涩、寒凉、冰冻之物，以及高脂肪、高胆固醇、油腻食物。"},
+  q:{no:"ZYTZ-TY-032", x:"起居要避寒，劳逸相结合。居室宜温暖舒适，不宜在阴暗、寒冷的环境中长期工作和生活。因为血得温则行，得寒则凝，血瘀质要避免寒冷刺激。衣着宜宽松，注意保暖，保持大便通畅。日常生活规律，注意动静结合，避免长时间打麻将、久坐、看电视等。宜在阳光充足的时候进行户外活动。"},
+  f:{no:"ZYTZ-TY-047", good:"黑豆、燕麦、小米；生山楂、柠檬、金橘、番木瓜、油菜、丝瓜、黑木耳；玫瑰花、月季花、合欢花、醋、红糖、桂皮、小茴香、八角茴香", bad:"乌梅、柿子、石榴、苦瓜、花生米；蛋黄、虾、猪头肉、奶酪"}
+ },
+ qiyu:{
+  j:{no:"ZYTZ-TY-033", x:"心态要开朗。气郁质性格不稳定，情绪常处于忧郁状态，根据「喜胜忧」的原则，应鼓励主动寻求快乐，常看喜剧、滑稽剧、听相声，以及富有鼓励、激励意义的影视剧，勿看悲剧、苦剧。"},
+  y:{no:"ZYTZ-TY-034", x:"运动可以促进气血的流通和运行。宜每天坚持适量的体育锻炼，多参加集体性活动，也可以多参加合唱、下棋、打牌等娱乐活动。集体性活动有助于和人群交流、调畅情志，对气郁质有积极的调理作用。"},
+  s:{no:"ZYTZ-TY-035", x:"宜选用具有理气解郁作用的食物。少食收敛酸涩的食物。"},
+  q:{no:"ZYTZ-TY-036", x:"居住环境宜温暖，有利于气血调畅。居室和衣着宜选用暖色系，如粉色、红色、黄色、橘色、天蓝色等。衣着宜柔软、透气、舒适。花鸟鱼虫可以移情易性，可通过养花、养鸟等放松心情，调畅气血。气郁质容易失眠多梦，睡觉前可以用温开水泡脚，以促进气血运行，缓解疲劳，有利于快速入睡。避免熬夜，睡前不宜喝茶、咖啡和可可等饮料，也不宜聊天、看惊险刺激的节目。"},
+  f:{no:"ZYTZ-TY-048", good:"小麦、大麦、刀豆；金橘、柑橘、柚子、黄花菜、薄荷、佛手、萝卜、香菜、洋葱、芹菜、海带；开心果、胡椒、橘皮、紫苏", bad:"石榴、乌梅、青梅、杨梅、草莓、阳桃、酸枣、李子、柠檬、南瓜、泡菜"}
+ },
+ tebing:{
+  j:{no:"ZYTZ-TY-037", x:"情绪勿紧张。特禀质的人因对过敏原敏感，容易产生紧张、焦虑等情绪，因此在尽量避免过敏原的同时，还应避免紧张情绪。"},
+  y:{no:"ZYTZ-TY-038", x:"运动宜适当。由于特禀质的形成与先天禀赋有关，所以可练「六字诀」中的「吹」字功，以培补肾精肾气。宜进行慢跑、散步等户外活动，也可选择下棋、瑜伽等室内活动。不宜选择大运动量的活动，避免春天或季节交替时长时间在野外锻炼。运动时注意避风寒，如出现哮喘、憋闷现象应及时停止运动。"},
+  s:{no:"ZYTZ-TY-039", x:"调养原则是均衡饮食、粗细粮搭配适当、合理配伍荤素。宜多食能抗过敏的食物，尽量少食辛辣、腥发食物，不应食用含致敏物质的食品，还要少食油腻、甜食，勿食冰冷食物。"},
+  q:{no:"ZYTZ-TY-040", x:"起居避过敏。在陌生环境中要注意减少户外活动，避免接触各种致敏的动植物。在季节更替之时要及时增减衣被，增强机体对环境的适应能力。在春季花开季节，尽量避免过多的室外活动。对花粉过敏者，可以提前 1 个月进行保健治疗，防患于未然，也要尽量避免去花卉集中的地方，尽量不要在室内养鲜花。起居要有规律，保持充足的睡眠时间。居室宜通风良好。枕头、棉被、床垫、地毯、窗帘、衣橱易附有尘螨，可引起过敏，应经常清洗、日晒。"},
+  f:{no:"ZYTZ-TY-049", good:"乌梅、金橘、马齿苋", bad:"辛辣、腥发、油腻、甜食、冰冷（原书未列具体品名）", note:"原书此类只列灵芝、生黄芪，均为药名，按口径不录。"}
+ }
+};
+
+/* 通用总纲与安全线 */
+const GENERAL = {
+  open:{no:"ZYTZ-TY-001", x:"中医养生主张因人、因时、因地制宜，总的原则是协调阴阳、顺应自然、谨慎起居、和调脏腑、通畅经络、形神共养……落实到养生就是「因人施养、因体施保」。养生应根据不同的体质类型，实施个体化保健。"},
+  adjustable:{no:"ZYTZ-TY-002", x:"体质既具有相对稳定性，也具有动态可变性和可调性。通过精神调摄、运动调养、饮食调理、起居调护等综合调理，可调整体质偏颇，达到个体化养生的目的。"},
+  safety:{no:"ZYTZ-TY-030", x:"运动时要特别注意自己的感觉，如有下列情况之一，应当停止运动，到医院进一步检查：胸闷或绞痛，呼吸困难，特别疲劳，恶心，眩晕，头痛，两腿无力，行走困难，脉搏显著加快等。"}
+};
+
+/* 季节层：通用四时（NJG-TY）+ 体质修正格 */
+const SEASON = [
+ {k:"spring", name:"春", no:"NJG-TY-006", x:"夜卧早起，广步于庭，被发缓形，以使志生。衣着宽松，让情绪舒展；逆之则伤肝。"},
+ {k:"summer", name:"夏", no:"NJG-TY-007", x:"夜卧早起，无厌于日，使志勿怒，使气得泄。别一味躲太阳，别动怒，让气有出路。"},
+ {k:"autumn", name:"秋", no:"NJG-TY-008", x:"早卧早起，与鸡俱兴，使志安宁，收敛神气，无外其志。情绪收敛不外放。"},
+ {k:"winter", name:"冬", no:"NJG-TY-009", x:"早卧晚起，必待日光，去寒就温，无泄皮肤。等太阳出来再活动，保暖，别出大汗。"}
+];
+const SEASON_RULE = {no:"NJG-TY-011", x:"夫四时阴阳者，万物之根本也。所以圣人春夏养阳，秋冬养阴，以从其根。"};
+const SEASON_SPAN = ["2 月中—4 月", "5—7 月", "8—10 月", "11 月—次年 2 月上"];
+/* 季节按当日日期自动判定。口径与原来的季节题一致：2 月 15 日起春、5 月起夏、8 月起秋、11 月起冬;
+   改由日期判定，是为了让用户少答一题，同时结果页能报出「现在是哪个季节」。 */
+function seasonNow(d) {
+  d = d || new Date();
+  const m = d.getMonth() + 1, day = d.getDate();
+  if (m === 2) return day >= 15 ? 0 : 3;      // 2 月上仍算冬
+  if (m === 3 || m === 4) return 0;
+  if (m >= 5 && m <= 7) return 1;
+  if (m >= 8 && m <= 10) return 2;
+  return 3;                                   // 11、12、1 月
+}
+function seasonToday(d) { d = d || new Date(); return (d.getMonth() + 1) + " 月 " + d.getDate() + " 日"; }
+/* 体质×季节修正（只有原书明写才填，其余留空） */
+const SEASON_FIX = {
+ pinghe:["ZYTZ-TY-004 春季去户外活动，心胸开阔、情绪乐观","ZYTZ-TY-004 夏季易急躁上火，尽量保持平稳心情","ZYTZ-TY-004 秋季多与交流沟通，保持乐观豁达","ZYTZ-TY-004 冬季保养精神以安定清静为根本"],
+ qixu:["","ZYTZ-TY-011 夏季勿过于贪凉，室内外温差别太大，午间适当休息","",""],
+ yangxu:["ZYTZ-TY-013 春夏多晒太阳，一天中以上午为佳，每次不少于 30 分钟","ZYTZ-TY-013 春夏多晒太阳、首选上午","","NJG-TY-009 必待日光＋ZYTZ-TY-015 注意背部、腰部、下肢保暖"],
+ yinxu:["","ZYTZ-TY-019 避高温酷暑、不洗桑拿泡温泉；ZYTZ-TY-017 别在炎热或闷热环境里运动","",""],
+ tanshi:["","ZYTZ-TY-023 避潮湿，居住环境宜温暖干燥","",""],
+ shire:["","ZYTZ-TY-025 夏季避免在烈日下长时间活动","ZYTZ-TY-025 秋高气爽时爬山登高，有助祛除湿热",""],
+ xueyu:["","","","ZYTZ-TY-032 避寒保暖（血得温则行，得寒则凝）"],
+ qiyu:["","","",""],
+ tebing:["ZYTZ-TY-040 花粉季减少室外活动，可提前 1 个月防护；ZYTZ-TY-038 春季、季节交替别长时间野外锻炼","","ZYTZ-TY-038 季节交替别长时间野外锻炼；ZYTZ-TY-040 避接触致敏动植物","ZYTZ-TY-038 避接触各种致敏的动植物"],
+};
+</script>
+<script>
+/* ================= 五运六气：出生年推演（大寒换年） =================
+   与本项目《五运六气查询》页同源；规则见 03_03_运气条文库《运气推演规则表》
+   （RY-YQ-001～014、NJG-YQ-001～006），先天倾向标签取《运气病候素材》
+   各条「证候倾向」栏（ZH-01～22）。
+   口径：① 运气年以当年真实大寒交司日为界，不按元旦、不按立春；
+        ② 只按公历日期判定，不含时辰、不含出生地；
+        ③ 本层不评分、不改九体判定与主体质，只输出底色标签与对照解读。 */
+
+const YQ_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const YQ_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+/* 十干化运：甲己土、乙庚金、丙辛水、丁壬木、戊癸火（NJG-YQ-001） */
+const YQ_YUN_OF_GAN = {'甲':'土','己':'土','乙':'金','庚':'金','丙':'水','辛':'水','丁':'木','壬':'木','戊':'火','癸':'火'};
+const YQ_YANG = {'甲':1,'丙':1,'戊':1,'庚':1,'壬':1};
+
+/* 十二支司天与对化在泉（NJG-YQ-002 / RY-YQ-006） */
+const YQ_SITIAN_OF_ZHI = {
+  '子':'少阴君火','午':'少阴君火','丑':'太阴湿土','未':'太阴湿土',
+  '寅':'少阳相火','申':'少阳相火','卯':'阳明燥金','酉':'阳明燥金',
+  '辰':'太阳寒水','戌':'太阳寒水','巳':'厥阴风木','亥':'厥阴风木'
+};
+const YQ_DUIHUA = {
+  '少阴君火':'阳明燥金','阳明燥金':'少阴君火','太阴湿土':'太阳寒水',
+  '太阳寒水':'太阴湿土','少阳相火':'厥阴风木','厥阴风木':'少阳相火'
+};
+
+/* 客气次序与主气六步（主气年年不变：风木→君火→相火→湿土→燥金→寒水） */
+const YQ_KEQI = ['厥阴风木','少阴君火','太阴湿土','少阳相火','阳明燥金','太阳寒水'];
+const YQ_ZHUQI = ['厥阴风木','少阴君火','少阳相火','太阴湿土','阳明燥金','太阳寒水'];
+
+const YQ_ELEM = {'厥阴风木':'木','少阴君火':'火','少阳相火':'火','太阴湿土':'土','阳明燥金':'金','太阳寒水':'水'};
+const YQ_SHENG = {'木':'火','火':'土','土':'金','金':'水','水':'木'};
+const YQ_KE = {'木':'土','土':'水','水':'火','火':'金','金':'木'};
+
+/* 年支方位五行（岁会只认四正与四季）、平气用的十二支全表 */
+const YQ_ZHI_FANGWEI = {'子':'水','午':'火','卯':'木','酉':'金','辰':'土','戌':'土','丑':'土','未':'土'};
+const YQ_ZHI_ELEM_FULL = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+
+/* 五运纪名（RY-YQ-003） */
+const YQ_JI = {
+  '木':{tai:'发生',bu:'委和',ping:'敷和'},
+  '火':{tai:'赫曦',bu:'伏明',ping:'升明'},
+  '土':{tai:'敦阜',bu:'卑监',ping:'备化'},
+  '金':{tai:'坚成',bu:'从革',ping:'审平'},
+  '水':{tai:'流衍',bu:'涸流',ping:'顺静'}
+};
+
+/* 五行与六气所落脏腑（五运→藏，六气→藏；JB-08、《天元纪大论》） */
+const YQ_YUN_ZANG = {'木':'肝胆','火':'心与小肠','土':'脾胃','金':'肺与大肠','水':'肾与膀胱'};
+const YQ_QI_ZANG = {'厥阴风木':'肝胆','少阴君火':'心与小肠','太阴湿土':'脾胃','少阳相火':'三焦与心包','阳明燥金':'肺与大肠','太阳寒水':'肾与膀胱'};
+
+/* 六气主时段（主气六步，年年不变；RY-YQ-007） */
+const YQ_QI_SEG = {
+  '厥阴风木':'大寒—春分（初之气）','少阴君火':'春分—小满（二之气）','少阳相火':'小满—大暑（三之气）',
+  '太阴湿土':'大暑—秋分（四之气）','阳明燥金':'秋分—小雪（五之气）','太阳寒水':'小雪—大寒（终之气）'
+};
+
+/* 岁运白话：气交变大论「岁X太过，Y气流行，Z受邪」一层，不用原文病候句 */
+const YQ_YUN_PLAIN = {
+  '木太过':'木气偏过，风气偏胜，土（脾胃）受其制；情绪容易急，消化容易跟不上。',
+  '火太过':'火气偏过，暑热偏胜，金（肺）受其制；容易燥热、口干、心烦。',
+  '土太过':'土气偏过，雨湿偏胜，水（肾）受其制；容易困重、腹胀、湿黏不爽。',
+  '金太过':'金气偏过，燥气偏胜，木（肝）受其制；容易干燥、气机不畅、隐隐作痛。',
+  '水太过':'水气偏过，寒气偏胜，火（心）受其制；底子偏寒，容易怕冷、水湿不化。',
+  '木不及':'木气不足，燥气来乘，生发之气不够；容易疲乏、胁腹发胀、大便偏稀。',
+  '火不及':'火气不足，寒气来乘，长养之气不够；气机容易滞住，胸胁腰背怕冷发紧。',
+  '土不及':'土气不足，风气来乘，运化之气不够；容易疲乏、腹胀、食少、大便不成形。',
+  '金不及':'金气不足，火气来乘，收敛之气不够；容易气短、喷嚏鼻涕、口疮。',
+  '水不及':'水气不足，湿气来乘，封藏之气不够；容易腰膝不适、身重、下肢发凉发肿。'
+};
+
+/* 六气白话（六元本元：某气之上，某气主之；落脏腑见 JB-08） */
+const YQ_QI_PLAIN = {
+  '厥阴风木':'风气当令，落于肝胆；气机容易上头，胁肋容易胀。',
+  '少阴君火':'热气当令，落于心与小肠；容易烦热、咽干、睡不沉。',
+  '太阴湿土':'湿气当令，落于脾胃；容易身重、腹胀、舌苔厚。',
+  '少阳相火':'火气当令，落于三焦与心包；容易口苦、上火、郁热。',
+  '阳明燥金':'燥气当令，落于肺与大肠；容易干燥、便干、皮肤干。',
+  '太阳寒水':'寒气当令，落于肾与膀胱；容易怕冷、腰腹冷、小便清长。'
+};
+
+/* 先天倾向映射：取《运气病候素材》「证候倾向」栏，只作倾向标签、不引病候原文
+   岁运五类共十条（ZH-01～10），六气六类（ZH-11～16 在泉、ZH-17～22 司天） */
+const YQ_YUN_TEND = {
+  '木太过':['qixu','qiyu'], '火太过':['shire','yinxu'], '土太过':['tanshi','yangxu'],
+  '金太过':['qiyu','xueyu'], '水太过':['yangxu','tanshi'],
+  '木不及':['qixu','yangxu'], '火不及':['xueyu','qiyu'], '土不及':['qixu','qiyu'],
+  '金不及':['qixu','shire'], '水不及':['yangxu','tanshi']
+};
+const YQ_QI_TEND = {
+  '厥阴风木':['qiyu','qixu'], '少阴君火':['shire','yinxu'], '太阴湿土':['tanshi','yangxu'],
+  '少阳相火':['shire',null], '阳明燥金':['qiyu','yinxu'], '太阳寒水':['yangxu','xueyu']
+};
+
+/* 各体质对应的「易显之气」，用于提示哪一段时段、哪一类年份更该留意 */
+const YQ_TRIGGER = {
+  qixu:'太阴湿土', yangxu:'太阳寒水', yinxu:'少阴君火', tanshi:'太阴湿土',
+  shire:'少阳相火', xueyu:'阳明燥金', qiyu:'厥阴风木', tebing:'厥阴风木'
+};
+
+/* ===== 大寒交司时刻：低精度太阳视黄经（黄经 300° 为大寒），误差 2–10 分钟，足以定日 ===== */
+const YQ_RAD = Math.PI / 180;
+function YQ_toJD(y, m, d, h){
+  if(m <= 2){ y -= 1; m += 12; }
+  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + h / 24 + B - 1524.5;
+}
+function YQ_jdToUTC(jd){
+  const z = Math.floor(jd + 0.5), f = jd + 0.5 - z;
+  let A = z;
+  if(z >= 2299161){ const a = Math.floor((z - 1867216.25) / 36524.25); A = z + 1 + a - Math.floor(a / 4); }
+  const B = A + 1524, C = Math.floor((B - 122.1) / 365.25), D = Math.floor(365.25 * C), E = Math.floor((B - D) / 30.6001);
+  const day = B - D - Math.floor(30.6001 * E) + f, m = (E < 14) ? E - 1 : E - 13, y = (m > 2) ? C - 4716 : C - 4715;
+  const dd = Math.floor(day), hh = (day - dd) * 24;
+  return {y:y, m:m, d:dd, h:hh};
+}
+function YQ_sunLon(jd){
+  const T = (jd - 2451545.0) / 36525.0;
+  const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+  const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+  const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M * YQ_RAD)
+        + (0.019993 - 0.000101 * T) * Math.sin(2 * M * YQ_RAD)
+        + 0.000289 * Math.sin(3 * M * YQ_RAD);
+  let lon = L0 + C;
+  const om = 125.04452 - 1934.136261 * T;
+  lon += -0.00569 - 0.00478 * Math.sin(om * YQ_RAD);
+  return ((lon % 360) + 360) % 360;
+}
+function YQ_solveLon(target, y, m, d){
+  let jd = YQ_toJD(y, m, d, 0);
+  for(let i = 0; i < 6; i++){
+    let dlt = target - YQ_sunLon(jd);
+    while(dlt > 180) dlt -= 360;
+    while(dlt < -180) dlt += 360;
+    jd += dlt / 0.9856473;
+  }
+  return jd;
+}
+const YQ_DAHAN_CACHE = {};
+function YQ_daHan(year){
+  if(YQ_DAHAN_CACHE[year]) return YQ_DAHAN_CACHE[year];
+  const u = YQ_jdToUTC(YQ_solveLon(300, year, 1, 20));
+  const t = new Date(Date.UTC(u.y, u.m - 1, u.d, 0));
+  t.setUTCMinutes(Math.round(u.h * 60) + 480);
+  const r = {y:t.getUTCFullYear(), m:t.getUTCMonth() + 1, d:t.getUTCDate(), h:t.getUTCHours(), mi:t.getUTCMinutes()};
+  YQ_DAHAN_CACHE[year] = r;
+  return r;
+}
+const YQ_JQ_CACHE = {};
+function YQ_jieqi(year, target, am, ad){
+  const key = year + '|' + target;
+  if(YQ_JQ_CACHE[key]) return YQ_JQ_CACHE[key];
+  const u = YQ_jdToUTC(YQ_solveLon(target, year, am, ad));
+  const t = new Date(Date.UTC(u.y, u.m - 1, u.d, 0));
+  t.setUTCMinutes(Math.round(u.h * 60) + 480);
+  const r = {y:t.getUTCFullYear(), m:t.getUTCMonth() + 1, d:t.getUTCDate(), h:t.getUTCHours(), mi:t.getUTCMinutes()};
+  YQ_JQ_CACHE[key] = r;
+  return r;
+}
+function YQ_cst(o){ return new Date(Date.UTC(o.y, o.m - 1, o.d, (o.h || 0) - 8, o.mi || 0)); }
+function YQ_stepBounds(year){
+  const out = [YQ_cst(YQ_daHan(year))];
+  [[0,3,20],[60,5,21],[120,7,23],[180,9,23],[240,11,22]].forEach(p => out.push(YQ_cst(YQ_jieqi(year, p[0], p[1], p[2]))));
+  out.push(YQ_cst(YQ_daHan(year + 1)));
+  return out;
+}
+function YQ_stepTimes(year){
+  const dh = YQ_daHan(year), dh2 = YQ_daHan(year + 1);
+  const cf = YQ_jieqi(year, 0, 3, 20), xm = YQ_jieqi(year, 60, 5, 21), ds = YQ_jieqi(year, 120, 7, 23),
+        qf = YQ_jieqi(year, 180, 9, 23), xx = YQ_jieqi(year, 240, 11, 22);
+  const md = o => o.m + '/' + o.d;
+  return [md(dh)+'—'+md(cf), md(cf)+'—'+md(xm), md(xm)+'—'+md(ds), md(ds)+'—'+md(qf), md(qf)+'—'+md(xx), md(xx)+'—'+md(dh2)];
+}
+function YQ_hhmm(o){ return ('0' + o.h).slice(-2) + ':' + ('0' + o.mi).slice(-2); }
+
+function YQ_mod(n, m){ return ((n % m) + m) % m; }
+function YQ_ganzhi(year){ const n = YQ_mod(year - 1984, 60); return YQ_GAN[n % 10] + YQ_ZHI[n % 12]; }
+
+/* 生日 → 运气年：交司日之前归上一年；出生日恰为大寒当日且确知在交司前，勾选后一律归上一年 */
+function YQ_birthYear(y, m, d, prev){
+  if(prev) return y - 1;
+  const h = YQ_daHan(y);
+  return (y * 10000 + m * 100 + d < h.y * 10000 + h.m * 100 + h.d) ? y - 1 : y;
+}
+
+function YQ_calc(year){
+  const gz = YQ_ganzhi(year), gan = gz.charAt(0), zhi = gz.charAt(1);
+  const yunElem = YQ_YUN_OF_GAN[gan], tai = !!YQ_YANG[gan];
+  const sitian = YQ_SITIAN_OF_ZHI[zhi], zaiquan = YQ_DUIHUA[sitian];
+
+  /* 客气六步：在泉固定终之气，司天固定三之气，其余顺推 */
+  const k0 = YQ_KEQI.indexOf(zaiquan), keqi = [];
+  for(let i = 0; i < 6; i++) keqi.push(YQ_KEQI[YQ_mod(k0 - 5 + i, 6)]);
+
+  const stimes = YQ_stepTimes(year), steps = [];
+  for(let j = 0; j < 6; j++){
+    steps.push({no:j+1, zhu:YQ_ZHUQI[j], ke:keqi[j], time:stimes[j]});
+  }
+
+  const sitElem = YQ_ELEM[sitian], zaElem = YQ_ELEM[zaiquan], zhiElem = YQ_ZHI_FANGWEI[zhi];
+  const flags = [];
+  if(sitElem === yunElem) flags.push('天符');
+  if(zhiElem === yunElem) flags.push('岁会');
+  if(sitElem === yunElem && zhiElem === yunElem) flags.push('太一天符');
+  if(tai && zaElem === yunElem) flags.push('同天符');
+  if(!tai && zaElem === yunElem) flags.push('同岁会');
+
+  /* 平气：太过被抑、不及得助（RY-YQ-004；年支同气用巳亥全表） */
+  let pingQi = false, pingNote = '';
+  if(tai){
+    if(yunElem === '金' && (sitian === '少阴君火' || sitian === '少阳相火')){ pingQi = true; pingNote = '坚成之纪逢' + sitian + '司天，二火抑金，复为平气'; }
+    else if(yunElem === '火' && sitian === '太阳寒水'){ pingQi = true; pingNote = '赫曦之纪逢寒水司天，水抑其火，复为平气'; }
+  } else {
+    if(sitElem === yunElem){ pingQi = true; pingNote = '不及之运得司天同气之助，同正' + yunElem; }
+    else if(YQ_ZHI_ELEM_FULL[zhi] === yunElem){ pingQi = true; pingNote = '不及之运得年支' + zhi + '同气之助，气乃平'; }
+    else if(zaElem === yunElem){ pingQi = true; pingNote = '与在泉同气（同岁会），亦气之平'; }
+  }
+
+  const yunName = pingQi ? YQ_JI[yunElem].ping : (tai ? YQ_JI[yunElem].tai : YQ_JI[yunElem].bu);
+
+  return {
+    year: year, gz: gz, gan: gan, zhi: zhi,
+    yunElem: yunElem, tai: tai, yunName: yunName,
+    sitian: sitian, zaiquan: zaiquan, keqi: keqi, steps: steps,
+    flags: flags, pingQi: pingQi, pingNote: pingNote,
+    dahan: YQ_daHan(year), dahanText: YQ_daHan(year).m + '/' + YQ_daHan(year).d + ' ' + YQ_hhmm(YQ_daHan(year))
+  };
+}
+
+/* 出生日落在运气年的第几之气（0–5） */
+function YQ_stepIndex(year, m, d){
+  const bounds = YQ_stepBounds(year);
+  const t = new Date(year, m - 1, d, 12, 0, 0);
+  for(let i = 0; i < 6; i++){ if(t >= bounds[i] && t < bounds[i+1]) return i; }
+  return 5;
+}
+
+/* 先天底色打分：中运 3 / 司天 2 / 在泉 2 / 出生所在步客气 1；每条第二个标签取半权
+   满分 12，换成 0–100 的参考值；只用于排行与图上落点，不进九体判定 */
+function YQ_innate(L, stepNo){
+  const pts = {};
+  const add = (k, w) => { if(!k) return; pts[k] = (pts[k] || 0) + w; };
+  const yt = YQ_YUN_TEND[L.yunElem + (L.tai ? '太过' : '不及')] || [];
+  add(yt[0], 3); add(yt[1], 1.5);
+  const st = YQ_QI_TEND[L.sitian] || [];
+  add(st[0], 2); add(st[1], 1);
+  const za = YQ_QI_TEND[L.zaiquan] || [];
+  add(za[0], 2); add(za[1], 1);
+  /* 出生步客气：三之气即司天、终之气即在泉，凡与二者同气者不再重复加一次 */
+  const keQi = (L.steps[stepNo] || {}).ke;
+  if(keQi && keQi !== L.sitian && keQi !== L.zaiquan){
+    const ke = YQ_QI_TEND[keQi] || [];
+    add(ke[0], 1);
+  }
+
+  const rank = Object.keys(pts).map(k => ({k: k, s: Math.round(pts[k] / 12 * 100)})).sort((a, b) => b.s - a.s);
+  const top = rank[0] || null;
+  const second = rank[1] || null;
+  const keep = rank.filter((x, i) => i === 0 || (x.s >= 20 && x.s >= top.s * 0.55));
+  return {all: rank, top: top, second: (keep.length > 1 ? second : null), marks: keep};
+}
+
+/* 今天的运气年 */
+function YQ_todayYear(){
+  const now = new Date(), y = now.getFullYear();
+  return (now < YQ_cst(YQ_daHan(y))) ? y - 1 : y;
+}
+
+/* 汇总：供结果页调用 */
+function YQ_build(){
+  if(!birth.y || !birth.m || !birth.d) return null;
+  const year = YQ_birthYear(birth.y, birth.m, birth.d, birth.prev);
+  const L = YQ_calc(year);
+  L.stepNo = YQ_stepIndex(year, birth.m, birth.d);
+  L.innate = YQ_innate(L, L.stepNo);
+  return L;
+}
+
+/* ================= 结果页：先天底色与合判 ================= */
+function YQ_birthText(){
+  return birth.y + ' 年 ' + birth.m + ' 月 ' + birth.d + ' 日';
+}
+function YQ_stepText(step){
+  return '第 ' + step.no + ' 之气（' + step.time + '）· 主气 ' + step.zhu + ' · 客气 ' + step.ke;
+}
+function YQ_kindOf(R, inn){
+  const A = (inn.marks || []).map(x => x.k);
+  if(!R.main) return 'none';
+  if(R.main === 'pinghe') return 'pinghe';
+  if(A.indexOf(R.main) >= 0) return 'same';
+  if(R.mixed.some(k => A.indexOf(k) >= 0)) return 'part';
+  return 'diff';
+}
+function YQ_jointText(kind, innName, mainName){
+  const T = {
+    same:['同向：先天与后天指同一个方向',
+      '问卷判出的' + mainName + '，和出生运气给的底色一致。这类偏颇多半不是一阵子作息熬出来的，而是底子本来如此——调养见效偏慢，重在长期守，不宜来回换方向。',
+      '按主体质那一套做就够了；先天这一层只是解释它为什么难改，不额外加任务。'],
+    part:['部分同向：先天那层之上，又叠了一层后天的',
+      '主体质' + mainName + '不在先天底色里，但兼夹体质和' + innName + '相接。可以理解成两层：先天是一层，后天因素又在上面叠了一层。',
+      '先天那层照着底色守，叠上来那层按兼夹处理，两件事分开做，不必合成一句“我体质差”。'],
+    diff:['不同向：后天的偏颇盖过了先天底色',
+      '先天底色是' + innName + '，问卷判出的是' + mainName + '。常见于作息、饮食、环境、病程这类后天因素把底色盖过去；也可能这层底色本就不显。',
+      '调养以' + mainName + '为主，' + innName + '只作背景，不必因为它去硬补。'],
+    none:['问卷没判出明显偏颇，先天仍有底色',
+      '九体都未到判定线，而先天底色是' + innName + '。说明这层底色目前没被触发，或后天养护已经把它压住了。它是“易感方向”，不是现在的病。',
+      '不必照' + innName + '去调，留意它容易显出来的时段就好。'],
+    pinghe:['目前平和，先天仍留着一层底色',
+      '问卷判为平和（或基本平和），先天底色却偏向' + innName + '。说明后天养护把这一层压住了，这是好事。',
+      '按平和质那套维持即可；逢此类气当令的年份与时段，多留一分心。']
+  };
+  const t = T[kind] || T.none;
+  return {h:t[0], a:t[1], b:t[2]};
+}
+function YQ_triggerLine(k){
+  const qi = YQ_TRIGGER[k];
+  if(!qi) return '';
+  return '这类底色容易显出来的时段：逢' + qi + '司天或在泉的年份，以及每年' + YQ_QI_SEG[qi] + '前后。';
+}
+
+function renderLuck(R){
+  lastLuck = YQ_build();
+  if(!lastLuck) return;
+  const L = lastLuck, inn = L.innate, step = L.steps[L.stepNo];
+  const out = $("#result");
+
+  /* ① 出生运气卡 */
+  const card = el("div", "luck");
+  let h = '<p class="lead">先天气化底色（出生运气 · 大寒换年）</p>';
+  h += '<p class="big">' + esc(String(L.year)) + '　' + esc(L.gz) + ' 年</p>';
+  h += '<p class="subline">出生 ' + esc(YQ_birthText()) + '　·　年起点 大寒 ' + esc(L.dahanText) + '（北京时间）</p>';
+  h += '<dl>';
+  h += '<dt>岁运</dt><dd>' + esc(L.yunElem) + '运' + (L.tai ? '太过' : '不及') + '　·　' + esc(L.yunName) + '</dd>';
+  h += '<dt>司天</dt><dd>' + esc(L.sitian) + '　管上半年，落' + esc(YQ_QI_ZANG[L.sitian]) + '</dd>';
+  h += '<dt>在泉</dt><dd>' + esc(L.zaiquan) + '　管下半年，落' + esc(YQ_QI_ZANG[L.zaiquan]) + '</dd>';
+  h += '<dt>出生时</dt><dd>' + esc(YQ_stepText(step)) + '</dd>';
+  h += '</dl>';
+  if(L.flags.length || L.pingQi){
+    h += '<div class="chips">';
+    L.flags.forEach(f => { h += '<span class="chip">' + esc(f) + '</span>'; });
+    if(L.pingQi) h += '<span class="chip">平气</span>';
+    h += '</div>';
+  }
+  h += '<p class="p">' + esc(YQ_YUN_PLAIN[L.yunElem + (L.tai ? '太过' : '不及')] || '') + '</p>';
+  h += '<p class="p">上半年' + esc(L.sitian) + '当令：' + esc(YQ_QI_PLAIN[L.sitian] || '') + '</p>';
+  h += '<p class="p">下半年' + esc(L.zaiquan) + '当令：' + esc(YQ_QI_PLAIN[L.zaiquan] || '') + '</p>';
+  if(inn.top){
+    h += '<p class="p">落到九体上：<b>先天更容易往 ' + esc(NAME[inn.top.k]) + ' 偏</b>'
+      + (inn.second ? '，其次 ' + esc(NAME[inn.second.k]) : '') + '。这是气化底色，不是现在的病。</p>';
+  }
+  h += '<p class="fine">标签取《运气病候素材》岁运、六气各条的「证候倾向」栏（ZH-01～22），只作倾向，不引病候原句。'
+     + '本层不改动、也不参与上面的九体分数与主体质判定。</p>';
+  card.innerHTML = h;
+  out.appendChild(card);
+
+  /* ② 先天 × 后天 合判 */
+  const kind = YQ_kindOf(R, inn);
+  const innName = inn.top ? NAME[inn.top.k] : '—';
+  let mainName = '—', mainTxt = '九体均未达判定线';
+  if(R.main){
+    const lv = R.mainLevel === '是' ? '判为' : (R.mainLevel === '基本是' ? '基本判为' : '倾向');
+    mainName = NAME[R.main];
+    mainTxt = mainName + '（' + lv + '）';
+    if(R.mixed.length) mainTxt += '　兼夹：' + R.mixed.map(k => NAME[k]).join('、');
+  }
+  const innTxt = inn.top ? (innName + '（主）' + (inn.second ? '　兼 ' + NAME[inn.second.k] : '')) : '—';
+  const J = YQ_jointText(kind, innName, mainName);
+  const relTxt = {same:'同向', part:'部分同向', diff:'不同向', none:'底色未显', pinghe:'目前平和'}[kind] || '—';
+
+  const jc = el("div", "joint");
+  let jh = '<p class="lead">先天 × 后天 合判</p>';
+  jh += '<div class="kv"><span>先天底色</span><strong>' + esc(innTxt) + '</strong></div>';
+  jh += '<div class="kv"><span>问卷判出</span><strong>' + esc(mainTxt) + '</strong></div>';
+  jh += '<div class="kv"><span>两者关系</span><strong>' + esc(relTxt) + '</strong></div>';
+  jh += '<p class="verdict-1">' + esc(J.h) + '</p>';
+  jh += '<p class="p">' + esc(J.a) + '</p>';
+  jh += '<p class="p">' + esc(J.b) + '</p>';
+  const trig = inn.top ? YQ_triggerLine(inn.top.k) : '';
+  if(trig) jh += '<p class="p">' + esc(trig) + '</p>';
+  jc.innerHTML = jh;
+  out.appendChild(jc);
+}
+
+/* 时令页里的今年运气一行 */
+function YQ_todayLine(){
+  const y = YQ_todayYear(), L = YQ_calc(y);
+  return '【今年】' + L.gz + '年：' + L.yunElem + '运' + (L.tai ? '太过' : '不及')
+    + '，' + L.sitian + '司天、' + L.zaiquan + '在泉。这是全年的气候大势，与上面对你个人的判定分开看。';
+}
+</script>
+<script>
+/* ================= 状态 ================= */
+const answers = {};        // S01..S27, P29..P35 → 1..n（季节不答，按当日日期判定）
+let sex = "";
+const birth = {y: null, m: null, d: null, prev: false};
+let lastResult = null;
+let lastLuck = null;
+const APP_VERSION = "中医体质自测_五运六气合判版 v1.1";
+
+const $ = (s, r) => (r || document).querySelector(s);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* ================= 逐题界面 ================= */
+let pages = [];
+let idx = 0;
+let lastIdx = -1;          // 上一张卡，用于交叉淡出
+let fadeTok = 0;           // 过渡令牌：快速连点时只让最后一轮的收尾生效
+
+/* 特禀是否命中：27 题答完后才算（答完才解锁条件题） */
+function tebingHit() {
+  const done = Q27.every(q => (q.g && q.g !== sex) ? true : answers[q.id] != null);
+  if (!done) return false;
+  const r = rawOf("tebing");
+  return r.conv != null && r.conv >= 30;
+}
+
+/* P35（特禀过敏原）是否在列：按当前答案现算 */
+function pageOn(p) { return !(p && p.id === "P35" && !tebingHit()); }
+function nextOn(i, dir) {
+  for (let t = i; t >= 0 && t < pages.length; t += dir) if (pageOn(pages[t])) return t;
+  return -1;
+}
+function onUpto(i) { let n = 0; for (let t = 0; t <= i && t < pages.length; t++) if (pageOn(pages[t])) n++; return n; }
+function onTotal() { return onUpto(pages.length - 1); }
+
+function pageList() {
+  const list = [{sex: true}, {birth: true}];
+  Q27.forEach(q => { if (q.g && q.g !== sex) return; list.push({id: q.id, seg: "判定", t: q.t, o: OPTS5, note: q.note}); });
+  Q8.forEach(q => {
+    // P35 照例进列。它出不出现由 pageOn() 在每次翻页时按当前答案现算，
+    // 不在构建题库时拍快照——否则回退改判定题、特禀转化分跨过 30 后，题目会卡住不动。
+    list.push({id: q.id, seg: "补充", t: q.t, o: q.o, note: q.note});
+  });
+  return list;
+}
+
+function buildDeck(keep, startAt) {
+  pages = pageList();
+  const deck = $("#deck");
+  deck.innerHTML = "";
+  pages.forEach((p, i) => {
+    const c = el("div", "card");
+    c.hidden = true;
+    c.appendChild(el("span", "kicker", p.birth ? "第 2 步 · 出生日期" : ("第 " + (i + 1) + " / " + pages.length + " 题")));
+    if (p.sex) {
+      c.appendChild(el("h3", null, "先确认你的性别"));
+      c.appendChild(el("p", "note", "湿热质的判定按性别各有一道专属题，所以这一项必答；其余题目男女相同。"));
+      const box = el("div", "choices");
+      [["男", "m"], ["女", "f"]].forEach(([label, v]) => {
+        const b = el("button", "choice" + (sex === v ? " on" : ""));
+        b.type = "button";
+        b.innerHTML = "<span>" + esc(label) + "</span>";
+        b.addEventListener("click", () => {
+          sex = v;
+          delete answers.S17;
+          delete answers.S18;
+          [...box.children].forEach(x => x.classList.remove("on"));
+          b.classList.add("on");
+          // 性别专属题靠 sex 决定是否入列，选完必须重建题库；但停在性别页（startAt=0）不跳，
+          // 让用户看到这一下「已选」的反馈，点「下一题」再进出生日期
+          buildDeck(null, 0);
+        });
+        box.appendChild(b);
+      });
+      c.appendChild(box);
+    } else if (p.birth) {
+      c.dataset.qid = "BIRTH";
+      c.appendChild(el("h3", null, "再填你的出生年月日"));
+      c.appendChild(el("p", "note", "五运六气按出生那一年推，只用年月日，不问时辰，也不问出生地。"));
+      const grid = el("div", "birth");
+      const ySel = el("select"), mSel = el("select"), dSel = el("select");
+      ySel.setAttribute("aria-label", "出生年");
+      mSel.setAttribute("aria-label", "出生月");
+      dSel.setAttribute("aria-label", "出生日");
+      const addOpt = (sel, txt, val) => {
+        const o = document.createElement("option");
+        o.value = val;
+        o.textContent = txt;
+        sel.appendChild(o);
+      };
+      const nowY = new Date().getFullYear();
+      addOpt(ySel, "出生年", "");
+      for(let y = nowY; y >= nowY - 110; y--){ addOpt(ySel, y + " 年", y); }
+      addOpt(mSel, "月", "");
+      for(let m = 1; m <= 12; m++){ addOpt(mSel, m + " 月", m); }
+      addOpt(dSel, "日", "");
+
+      const fillDays = () => {
+        const yv = Number(ySel.value) || nowY, mv = Number(mSel.value) || 1;
+        const days = new Date(yv, mv, 0).getDate();
+        const keep = Number(dSel.value);
+        while(dSel.options.length) dSel.remove(0);
+        addOpt(dSel, "日", "");
+        for(let i = 1; i <= days; i++) addOpt(dSel, i + " 日", i);
+        if(keep && keep <= days) dSel.value = String(keep);
+      };
+
+      const noteEl = el("div", "birth-note", "");
+      const prevWrap = el("label", "birth-prev");
+      const prevBox = document.createElement("input");
+      prevBox.type = "checkbox";
+      const prevTxt = el("span", null, "");
+      prevWrap.appendChild(prevBox);
+      prevWrap.appendChild(prevTxt);
+      prevWrap.hidden = true;
+      prevWrap.style.display = "none";
+
+      const refresh = () => {
+        birth.y = ySel.value ? Number(ySel.value) : null;
+        birth.m = mSel.value ? Number(mSel.value) : null;
+        birth.d = dSel.value ? Number(dSel.value) : null;
+        if(!birth.y || !birth.m || !birth.d){
+          prevWrap.hidden = true; prevWrap.style.display = "none";
+          birth.prev = false;
+          prevBox.checked = false;
+          noteEl.innerHTML = "运气年按大寒换年：1 月 1 日到大寒之间出生的，归上一个运气年，这里会自动换算。";
+          return;
+        }
+        const yr = YQ_birthYear(birth.y, birth.m, birth.d, birth.prev);
+        const L = YQ_calc(yr);
+        noteEl.innerHTML = "按大寒换年，你落在 <b>" + esc(String(yr)) + " " + esc(YQ_ganzhi(yr)) + " 年</b>　｜　"
+          + esc(L.yunElem) + "运" + (L.tai ? "太过" : "不及") + "　｜　" + esc(L.sitian) + "司天　｜　" + esc(L.zaiquan) + "在泉";
+        const dh = YQ_daHan(birth.y);
+        if(birth.m === dh.m && birth.d === dh.d){
+          prevWrap.hidden = false;
+          prevWrap.style.display = "flex";
+          prevTxt.textContent = "我确知出生在这一年的大寒交司时刻（" + YQ_hhmm(dh) + "）之前，按上一个运气年算";
+          prevBox.checked = !!birth.prev;
+        } else {
+          prevWrap.hidden = true; prevWrap.style.display = "none";
+          birth.prev = false;
+          prevBox.checked = false;
+        }
+      };
+
+      ySel.addEventListener("change", () => { fillDays(); refresh(); });
+      mSel.addEventListener("change", () => { fillDays(); refresh(); });
+      dSel.addEventListener("change", refresh);
+      prevBox.addEventListener("change", () => { birth.prev = prevBox.checked; refresh(); });
+
+      grid.appendChild(ySel);
+      grid.appendChild(mSel);
+      grid.appendChild(dSel);
+      c.appendChild(grid);
+      c.appendChild(noteEl);
+      c.appendChild(prevWrap);
+
+      if(birth.y) ySel.value = String(birth.y);
+      if(birth.m) mSel.value = String(birth.m);
+      fillDays();
+      if(birth.d) dSel.value = String(birth.d);
+      refresh();
+    } else {
+      c.dataset.qid = p.id;
+      c.appendChild(el("h3", null, p.t));
+      if (p.note) c.appendChild(el("p", "note", p.note));
+      const isScale = p.o.length === 5 && p.o[0] === OPTS5[0];
+      if (isScale) c.appendChild(el("p", "note", "不必纠结精确，选最接近的一档就好。"));
+      const box = el("div", isScale ? "scale" : "choices");
+      let cap = null;
+      p.o.forEach((label, j) => {
+        const v = j + 1;
+        const b = el("button", isScale ? ("segBtn t" + v) : "choice");
+        b.type = "button";
+        if (answers[p.id] === v) b.classList.add("on");
+        if (isScale) {
+          const parts = label.split("（");
+          b.innerHTML = "<b>" + esc(parts[0]) + "</b><i>" + esc((parts[1] || "").replace(/）$/, "")) + "</i>";
+        } else {
+          b.innerHTML = "<span>" + esc(label) + "</span>";
+        }
+        b.addEventListener("click", () => {
+          answers[p.id] = v;
+          [...box.children].forEach(x => x.classList.remove("on"));
+          b.classList.add("on");
+          if (cap) cap.textContent = "已选：" + label;
+          syncBar();
+        });
+        box.appendChild(b);
+      });
+      c.appendChild(box);
+      if (isScale) {
+        cap = el("p", "scale-note", answers[p.id] != null ? "已选：" + p.o[answers[p.id] - 1] : "点一档，再按「下一题」");
+        c.appendChild(cap);
+      }
+    }
+    deck.appendChild(c);
+  });
+  const at = startAt != null ? startAt : (keep ? Math.max(0, pages.findIndex(p => p.id === keep)) : 0);
+  go(at);
+}
+
+function go(i, dir) {
+  if (!pages.length) return;
+  let t = Math.max(0, Math.min(pages.length - 1, i));
+  if (!pageOn(pages[t])) {                       // 落在被隐藏的 P35 上，就往行进方向找下一张
+    const n = nextOn(t, dir === -1 ? -1 : 1);
+    if (n >= 0) t = n;
+  }
+  idx = t;
+  const cards = $("#deck").children;
+  const cur = cards[idx];
+  const prev = lastIdx >= 0 ? cards[lastIdx] : null;
+  const tok = ++fadeTok;
+  // 旧卡若正在显示，先量高度，再把它做成浮层淡出；新卡原地淡入——中间不留空白帧
+  const prevH = (prev && prev !== cur && !prev.hidden) ? prev.offsetHeight : 0;
+  [...cards].forEach(c => { c.style.cssText = ""; });     // 清掉上一轮过渡留在行内的样式
+  [...cards].forEach((c, k) => { c.hidden = k !== idx; });
+  cur.classList.remove("shake");
+  if (prevH) {
+    Object.assign(prev.style, {position: "absolute", left: "0", right: "0", top: "0",
+      height: prevH + "px", zIndex: "2", pointerEvents: "none", opacity: "1", transition: "opacity .18s ease"});
+    prev.hidden = false;
+    requestAnimationFrame(() => { if (tok === fadeTok) prev.style.opacity = "0"; });
+  }
+  cur.style.transition = "none";
+  cur.style.opacity = "0.6";
+  cur.style.transform = "translateY(6px)";
+  requestAnimationFrame(() => {
+    if (tok !== fadeTok) return;
+    cur.style.transition = "opacity .22s ease, transform .22s ease";
+    cur.style.opacity = "1";
+    cur.style.transform = "translateY(0)";
+  });
+  setTimeout(() => {
+    if (tok !== fadeTok) return;                    // 已被下一轮接手，不做收尾
+    [...cards].forEach(c => {
+      if (c !== $("#deck").children[idx]) c.hidden = true;
+      c.style.cssText = "";
+    });
+  }, 240);
+  lastIdx = idx;
+  const isSexPage = pages[idx].sex && !sex;
+  const total = onTotal(), curNo = onUpto(idx);
+  $("#seg").textContent = isSexPage ? "第 1 题" : (pages[idx].birth ? "出生信息" : "第 " + curNo + " / " + total + " 题");
+  $("#stage").textContent = pages[idx].sex ? "性别" : (pages[idx].birth ? "出生" : pages[idx].seg);
+  const kick = cur.children[0];
+  if (kick && kick.className === "kicker" && !pages[idx].birth) kick.textContent = "第 " + curNo + " / " + total + " 题";
+  $("#pct").textContent = isSexPage ? "开始" : Math.round(curNo / total * 100) + "%";
+  $("#fill").style.width = (isSexPage ? 0 : curNo / total * 100) + "%";
+  $("#prev").disabled = nextOn(idx - 1, -1) < 0;
+  $("#next").textContent = nextOn(idx + 1, 1) < 0 ? "查看结果" : "下一题";
+  syncBar();
+  cur.scrollIntoView({block: "nearest"});
+}
+
+function syncBar() {
+  const answered = pages.filter(p => p.id && answers[p.id] != null).length;
+  $("#seg").title = "已答 " + answered + " 题";
+}
+
+function nudge(msg) {
+  const cur = $("#deck").children[idx];
+  if (cur) {
+    cur.classList.remove("shake");
+    void cur.offsetWidth;
+    cur.classList.add("shake");
+  }
+  const t = $("#toast");
+  t.textContent = msg || "这一题还没选，选好再往下";
+  t.classList.add("show");
+  clearTimeout(nudge._tm);
+  nudge._tm = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function advance() {
+  const p = pages[idx];
+  if (p.sex) {
+    if (!sex) { nudge("请先确认性别"); return; }
+    go(idx + 1);
+    return;
+  }
+  if (p.birth) {
+    if (!birth.y || !birth.m || !birth.d) { nudge("请先选好出生年月日"); return; }
+    go(idx + 1);
+    return;
+  }
+  if (answers[p.id] == null) { nudge("这一题还没选，选好再往下"); return; }
+  const n = nextOn(idx + 1, 1);                // 后面的 P35 若已不该出现，直接跳过
+  if (n < 0) { submitNow(); return; }
+  go(n);
+}
+
+function submitNow() {
+  const left = pages.filter(p => p.id && pageOn(p) && answers[p.id] == null).length;
+  if (left) { nudge("还有 " + left + " 题没答，回去补齐再出结果"); return; }
+  $("#deckWrap").hidden = true;
+  renderResult();
+}
+
+function resetAll() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  sex = "";
+  birth.y = null; birth.m = null; birth.d = null; birth.prev = false;
+  lastLuck = null;
+  lastResult = null;                 // 重答后不保留上一次结果，避免误触导出拿到旧数据
+  $("#result").style.display = "none";
+  $("#result").innerHTML = "";
+  $("#deckWrap").hidden = false;
+  buildDeck();
+  window.scrollTo({top: 0});
+}
+
+/* ================= 计分 ================= */
+function rawOf(key) {
+  let raw = 0, miss = 0, cnt = 0;
+  Q27.forEach(q => {
+    const hit = q.k.find(k => k[0] === key);
+    if (!hit) return;
+    if (q.g && q.g !== sex) return;                 // 性别专属题不计
+    cnt++;
+    const v = answers[q.id];
+    if (v == null) { miss++; return; }
+    raw += hit[1] ? (6 - v) : v;
+  });
+  if (cnt === 0) return {raw: null, n: N[key], conv: null, miss: 0};
+  const n = cnt;                                   // 湿热：只会命中一道性别题，n=3
+  if (miss > 0) return {raw: null, n: n, conv: null, miss: miss};
+  return {raw: raw, n: n, conv: (raw - n) / (n * 4) * 100, miss: 0};
+}
+
+function judge() {
+  const conv = {}, detail = {};
+  ORDER.forEach(k => {
+    const r = rawOf(k);
+    detail[k] = r;
+    conv[k] = r.conv;
+  });
+  const bad = ORDER.filter(k => k !== "pinghe");
+  const known = bad.filter(k => conv[k] != null);      // 已答、可参与比的
+  const missing = bad.filter(k => conv[k] == null);    // 漏答，不判也不参与平和质的比较
+  const badYes = known.filter(k => conv[k] >= 40)
+                      .sort((a, b) => conv[b] - conv[a]);
+  const badTend = known.filter(k => conv[k] >= 30 && conv[k] < 40)
+                       .sort((a, b) => conv[b] - conv[a]);
+  const p = conv.pinghe;
+  let pingheLevel = "否";
+  // 「其余八项都低」只拿已答项比：漏答项不进 every，否则漏一题就把平和质误压成「否」
+  if (p != null && p >= 60 && known.length > 0) {
+    const allUnder30 = known.every(k => conv[k] < 30);
+    const allUnder40 = known.every(k => conv[k] < 40);
+    if (allUnder30) pingheLevel = "是";
+    else if (allUnder40) pingheLevel = "基本是";
+  }
+  let main = null, mainLevel = "";
+  if (pingheLevel === "是" || pingheLevel === "基本是") { main = "pinghe"; mainLevel = pingheLevel; }
+  else if (badYes.length) { main = badYes[0]; mainLevel = "是"; }
+  else if (badTend.length) { main = badTend[0]; mainLevel = "倾向是"; }
+  const mixed = badYes.filter(k => k !== main).slice(0, 3);
+  return {conv: conv, detail: detail, main: main, mainLevel: mainLevel, mixed: mixed,
+          badYes: badYes, badTend: badTend, pingheLevel: pingheLevel, missing: missing};
+}
+
+/* ================= 补充层分派 ================= */
+const ADVICE = {
+ P29: {
+  1: {def: "先养成运动习惯，别一上来就大负荷：从郊游、放风筝、踢毽子这类小运动量项目起步，别练太过、别出大汗。",
+      xueyu: "从步行、舞蹈这类促进气血运行的项目起步，中小负荷、多次数，别做大强度大负荷。"},
+  2: {def: "每周只有 1—2 次，就更要挑时段：阳虚以上午阳光充足时为最好，每次不少于 30 分钟；痰湿以下午 2∶00—4∶00 为佳，先热身 15 分钟，运动量 1 小时为最佳。",
+      yangxu: "锻炼时间最好选春夏，一天中以上午阳光充足时为最好时机，其他时间在室内进行；每次晒太阳不少于 30 分钟。",
+      tanshi: "运动时间放在下午 2∶00—4∶00 阳气极盛时，先热身 15 分钟左右，运动量 1 小时为最佳。"},
+  3: {def: "量已经够了，重点是别过头：阴虚控制出汗量、及时补水；气虚减少单次总负荷，别大出汗。",
+      yinxu: "宜中小强度、间断性运动，控制出汗量、及时补充水分，避开炎热夏天或闷热环境。",
+      qixu: "次数已足，请减少每次锻炼的总负荷量，别做大负荷和大出汗的运动。",
+      shire: "湿热质反而是九体中唯一主张「强度较大」的：中长跑、游泳、球类、武术都合适，但夏季别在烈日下长时间活动。"},
+  4: {def: "体力劳动本身就是运动量：注意劳逸结合，别把「干活」当「锻炼」再硬补，其余时段用中小负荷项目补足即可。",
+      qixu: "体力活最耗正气：不要过于劳作，注意规律作息，夏季午间适当休息。",
+      xueyu: "用中小负荷、多次数的锻炼，别做大强度大负荷，重点在「促进气血运行、持之以恒」。"}
+ },
+ P31: {
+  1: "睡前用温开水泡脚，促进气血运行、缓解疲劳，有助入睡；睡前别喝茶、咖啡、可可，也别聊太晚、别看惊险刺激的节目。"
+ },
+ P32: {
+  0: "少油腻辛辣：平和质忌过于油腻及辛辣；湿热质少肥厚油腻；痰湿质吃到七分饱、别吃太快。",
+  1: "不要过饥过饱，忌暴饮暴食：宵夜最伤脾胃；气虚质饮食还忌滋腻蛮补，否则易腹胀、食欲不振。",
+  2: "少食肥、甜、油、黏：痰湿质最忌这几样；湿热质另需避开辛温助热（辣椒、花椒、火锅、烧烤）。"
+ },
+ P33: {
+  0: "痰湿质不宜在潮湿环境久留，居住宜温暖干燥；湿热质居室宜干燥通风，可用除湿器或空调除湿。",
+  1: "阴虚质宜甘凉滋润，不宜洗桑拿、泡温泉；室内过干时可适当加湿。",
+  2: "气虚质注意室内外温差别太大、别过于贪凉；血瘀质避免久坐不动，动静结合。",
+  3: "特禀质：花粉季减少室外活动，枕头、棉被、床垫、地毯、窗帘易附尘螨，应经常清洗、日晒。"
+ },
+ P34: {
+  1: "避免长时间久坐：每小时起身活动几分钟，动静结合，比一次练很久更有用。",
+  2: "久坐超 8 小时：血瘀质尤其要避免长时间久坐、看电视、打麻将，宜在阳光充足时户外活动；痰湿质多到户外舒展阳气、通达气机。"
+ },
+ P35: {
+  0: "花粉过敏：春季花开时尽量避免过多室外活动，可提前 1 个月进行保健治疗，别去花卉集中的地方，也别在室内养鲜花；春季、季节交替别长时间野外锻炼。",
+  1: "尘螨过敏：枕头、棉被、床垫、地毯、窗帘、衣橱易附尘螨，应经常清洗、日晒，居室保持通风。",
+  2: "食物致敏：不应食用含致敏物质的食品，少食辛辣、腥发，少油腻、甜食，勿食冰冷食物。",
+  3: "说不清／多种都有：先按「避开致敏动植物＋减少室内致敏源」两条同时做——花粉季减少室外活动、枕被常清洗日晒；饮食上不食用含致敏物质的食品。"
+ }
+};
+
+function adviceFor(body) {
+  const out = [];
+  const a = k => answers["P" + k];
+  if (a(30) === 1) {  // 安全闸最优先
+    out.push({t: "运动安全", s: "先停下，再谈怎么练", b: GENERAL.safety.x + "　——" + GENERAL.safety.no});
+  }
+  const push = (label, q, txt) => { if (txt) out.push({t: label, s: txt, b: ""}); };
+  // P29 运动量
+  if (a(29)) {
+    const row = ADVICE.P29[a(29)];
+    push("运动量", 29, (body && row[body]) || row.def);
+  }
+  // P31 入睡
+  if (a(31) === 3) {
+    push("作息", 31, "凌晨 1 点后才睡：先把入睡时间提前——阴虚质熬夜最伤阴，须避免过分熬夜；入夜阳气已收，别再把剧烈运动安排在晚上。");
+  } else if (a(31) === 2) {
+    push("作息", 31, ADVICE.P31[1]);
+  }
+  // P32 饮食
+  if (a(32) && ADVICE.P32[a(32) - 1]) push("饮食", 32, ADVICE.P32[a(32) - 1]);
+  // P33 环境
+  if (a(33)) push("环境", 33, ADVICE.P33[a(33) - 1]);
+  // P34 久坐
+  if (a(34) >= 2) push("久坐", 34, ADVICE.P34[a(34) - 1]);
+  // P35 过敏原（仅特禀）
+  if (a(35)) push("过敏原", 35, ADVICE.P35[a(35) - 1]);   // 准入门是「特禀转化分 ≥30 且已作答」，不要求特禀是主体质
+  return out;
+}
+
+/* ================= 结果页 ================= */
+function fold(title, summary, bodyHTML, open) {
+  const d = el("div", "fold" + (open ? " open" : ""));
+  const h = el("button", "fold-h");
+  h.type = "button";
+  h.innerHTML = '<span class="t">' + esc(title) + '</span><span class="s">' + esc(summary) + '</span><span class="x">' + (open ? "收起" : "展开") + "</span>";
+  const b = el("div", "fold-b");
+  b.innerHTML = bodyHTML;
+  h.addEventListener("click", () => {
+    const isOpen = d.classList.toggle("open");
+    h.querySelector(".x").textContent = isOpen ? "收起" : "展开";
+    h.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+  h.setAttribute("aria-expanded", open ? "true" : "false");
+  d.appendChild(h); d.appendChild(b);
+  return d;
+}
+
+/* 把行内编号（NJG-TY-xxx / ZYTZ-TY-xxx）抽出来，正文里只留文字，编号统一附在句尾小字 */
+function splitCite(text) {
+  const refs = [];
+  const body = String(text)
+    .replace(/((?:NJG|ZYTZ)-TY-\d{3})/g, m => { refs.push(m); return ""; })
+    .replace(/\s*＋\s*/g, "＋")
+    .replace(/^[\s＋+；;、]+/, "")
+    .replace(/[\s＋+；;、]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return {text: body, refs: refs};
+}
+
+function para(text, no) {
+  return "<p>" + esc(text) + (no ? '　<span class="tagline">' + esc(no) + "</span>" : "") + "</p>";
+}
+
+function renderResult() {
+  const R = judge();
+  lastResult = R;
+  const out = $("#result");
+  out.innerHTML = "";
+  out.style.display = "block";
+
+  /* 判定结论 */
+  const v = el("div", "verdict");
+  let head = "未明显偏向任何体质";
+  let levelTxt = "";
+  if (R.main) {
+    head = NAME[R.main];
+    levelTxt = R.mainLevel === "是" ? "判为" : (R.mainLevel === "基本是" ? "基本判为" : "倾向");
+  }
+  let tags = "";
+  if (R.main) {
+    tags += '<span class="tag ' + (R.mainLevel === "倾向" ? "tag-sub" : "tag-main") + '">主体质：' + esc(head) + "</span>";
+  } else {
+    tags += '<span class="tag tag-sub">九体均未达判定线</span>';
+  }
+  R.mixed.forEach(k => { tags += '<span class="tag tag-sub">兼夹：' + esc(NAME[k]) + "（" + R.conv[k].toFixed(1) + "）</span>"; });
+  v.innerHTML = '<p class="lead">判定结果（GB/T 46939—2025）</p>' +
+    '<div class="tags">' + tags + "</div>" +
+    "<h3>" + (R.main ? esc(levelTxt) + " <em>" + esc(head) + "</em>" : esc(head)) + "</h3>" +
+    (R.mixed.length ? '<p class="also">兼夹体质只给一句该体饮食方向，不出可选清单——两体清单叠加会出现「又宜又忌」，不这样做。</p>' : '<p class="also">未判出兼夹体质。</p>');
+  if (R.missing.length) {
+    v.insertAdjacentHTML("beforeend", '<p class="also">漏答：' + esc(R.missing.map(k => NAME[k]).join("、"))
+      + "。这几项不作判定；平和质的「其余八项都低」只按已答项比。</p>");
+  }
+  out.appendChild(v);
+  renderLuck(R);
+
+  /* 九体转化分 */
+  const bars = el("div", "bars");
+  bars.appendChild(el("p", "tagline", "九体转化分（0—100），竖线为 40（判定线）与 30（倾向线）。条目少的体质原始分偏低，转换分算到负数属正常现象，不是出错；图表统一从 0 起画，不影响判定与排序。"));
+  ORDER.forEach(k => {
+    const r = R.detail[k];
+    const row = el("div", "bar-row");
+    const val = r.conv == null ? "信息不足（漏答 " + r.miss + " 题，不判）" : Math.max(0, r.conv).toFixed(1);
+    row.innerHTML = '<div class="bar-head"><span>' + esc(NAME[k]) + '</span><span class="v">' + esc(val) + "</span></div>";
+    const g = el("div", "gauge");
+    const w = r.conv == null ? 0 : Math.max(0, Math.min(100, r.conv));
+    const i = el("i");
+    i.style.width = w + "%";
+    if (r.conv != null && r.conv >= 40) i.className = "hot";
+    g.appendChild(i);
+    [30, 40].forEach(t => { const b = el("b"); b.style.left = t + "%"; g.appendChild(b); });
+    row.appendChild(g);
+    bars.appendChild(row);
+  });
+  out.appendChild(bars);
+
+  const lack = ORDER.filter(k => R.detail[k].conv == null);
+  if (lack.length) {
+    out.appendChild(el("p", "thr", "这几体本次不判定（有漏答，按规程不补分、不插补）：" + lack.map(k => NAME[k]).join("、") + "。"));
+  }
+
+  if (!R.main) {
+    const p = el("p", "thr", "九个体质都未达到判定线，本次不给调养方案。请核对是否漏答，或隔一段时间重测。");
+    out.appendChild(p);
+  } else {
+    const body = R.main;
+    const c = COPY[body];
+
+    /* ① 开篇 */
+    out.appendChild(fold("开篇", "为什么建议按体质分开调", para(GENERAL.open.x, GENERAL.open.no), true));
+    /* ② 总纲 */
+    out.appendChild(fold("总纲", "体质可调，不被贴标签", para(GENERAL.adjustable.x, GENERAL.adjustable.no), true));
+
+    /* ③ 四维 */
+    if (body === "pinghe") {
+      out.appendChild(fold("精神", "平和质：四季心态各一句", para(c.j.x, c.j.no), true));
+    } else {
+      out.appendChild(fold("精神", c.j.x.slice(0, 26) + "…", para(c.j.x, c.j.no), true));
+    }
+    out.appendChild(fold("运动", c.y.x.slice(0, 26) + "…", para(c.y.x, c.y.no) +
+      (body === "xueyu" ? para(GENERAL.safety.x, GENERAL.safety.no) : ""), true));
+    out.appendChild(fold("饮食方向", c.s.x.slice(0, 26) + "…", para(c.s.x, c.s.no), true));
+    out.appendChild(fold("起居", c.q.x.slice(0, 26) + "…", para(c.q.x, c.q.no), true));
+
+    /* ④ 宜忌清单 */
+    let listHTML = '<div class="list-group"><p class="who">' + esc(NAME[body]) + " · 宜与少食</p>";
+    if (c.f.good) listHTML += '<p class="list-good"><b>宜</b>' + esc(c.f.good) + "</p>";
+    if (c.f.bad) listHTML += '<p class="list-bad"><b>少食</b>' + esc(c.f.bad) + "</p>";
+    if (c.f.note) listHTML += '<p class="tagline">' + esc(c.f.note) + "</p>";
+    listHTML += '<p class="tagline">' + esc(c.f.no) + "　只列品名，不给克数、不给方名、不作功效说明。</p></div>";
+    if (R.mixed.length) {
+      listHTML += "<p class=\"tagline\">兼夹：" + R.mixed.map(k => esc(NAME[k]) + "　" + esc(COPY[k].s.x)).join("；") + "</p>";
+    }
+    out.appendChild(fold("宜与少食", "按你这体质列品名清单", listHTML));
+
+    /* ⑤ 时令 */
+    const seasonIdx = seasonNow();
+    const S = SEASON[seasonIdx];
+    let sHTML = para("【现值】现在是 " + S.name + "季（" + SEASON_SPAN[seasonIdx] + "）。按今天的日期 "
+      + seasonToday() + " 自动判定。");
+    sHTML += para(YQ_todayLine());
+    sHTML += para("【时令】" + S.name + "：" + S.x, S.no);
+    sHTML += para(SEASON_RULE.x, SEASON_RULE.no);
+    const fix = (SEASON_FIX[body] || [])[seasonIdx];
+    if (fix) {
+      const sp = splitCite(fix);
+      sHTML += para("【你这类体质】" + sp.text, sp.refs.join("、"));
+    } else {
+      sHTML += '<p class="tagline">本季原书未给该体专属句，不补空话；按上面的通用四时句做即可。</p>';
+    }
+    out.appendChild(fold("时令", "现在是" + S.name + "季，按这个节奏调", sHTML, true));
+
+    /* ⑥ 按你的情况 */
+    const adv = adviceFor(body);
+    let aHTML = "";
+    if (!adv.length) aHTML = '<p class="tagline">你选的这几项都落在「本来就没问题」的一档，没有额外要点。</p>';
+    adv.forEach((it, i) => {
+      aHTML += "<p><b>" + esc(it.t) + "</b>　" + esc(it.s) + "</p>";
+      if (it.b) aHTML += para(it.b, "");
+    });
+    out.appendChild(fold("按你的情况", adv.length ? "由补充题 " + Q8.length + " 道给出 " + adv.length + " 条" : "无额外要点", aHTML, true));
+
+    /* ⑦ 安全线与免责 */
+    out.appendChild(fold("运动安全线", "九体通用的停止信号",
+      para(GENERAL.safety.x, GENERAL.safety.no) + para("若已有明确疾病、正在服药或处于孕期，以上建议请先与医生确认再执行。"), true));
+
+    /* 导出 */
+    const acts = el("div", "row-actions");
+    const b1 = el("button", "primary", "导出答题记录 CSV");
+    b1.addEventListener("click", exportCSV);
+    const b2 = el("button", "ghost", "重答");
+    b2.addEventListener("click", () => {
+      resetAll();
+    });
+    acts.appendChild(b1); acts.appendChild(b2);
+    out.appendChild(acts);
+
+    const foot = el("div", "foot");
+    foot.innerHTML = "<p>文案来源：《中医体质学》（王琦，2021 规划教材）第九章「体质养生与治未病」与《素问·四气调神大论》，编号 ZYTZ-TY-001～049、NJG-TY-006～012。原文照录，不改写、不扩写。</p>" +
+      '<p>五运六气口径：运气年以当年真实大寒交司日为界，只按公历日期判定，不含时辰与出生地；先天底色只作对照，不改动上面九体的分数与结论。</p>'
+      + '<p>本页不构成诊断，不给药名、不给克数、不给方名、不作疾病预测。身体不适请就医。</p>';
+    out.appendChild(foot);
+  }
+  out.scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+/* ================= 导出 CSV ================= */
+function nowStamp() {
+  const d = new Date(), z = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + " "
+    + z(d.getHours()) + ":" + z(d.getMinutes()) + ":" + z(d.getSeconds());
+}
+
+function exportCSV() {
+  if (!lastResult) return;
+  const rows = [["题号", "题型", "题干", "答案序号", "答案文字"]];
+  Q27.forEach(q => {
+    if (q.g && q.g !== sex) return;
+    const v = answers[q.id];
+    rows.push([q.id, "判定", q.t, v, v == null ? "" : OPTS5[v - 1]]);
+  });
+  Q8.forEach(q => {
+    if (q.id === "P35" && answers.P35 == null) return;
+    const v = answers[q.id];
+    rows.push([q.id, "补充", q.t, v, v == null ? "" : q.o[v - 1]]);
+  });
+  rows.push([]);
+  rows.push(["体质", "条目数", "原始分", "转化分", "结论"]);
+  ORDER.forEach(k => {
+    const r = lastResult.detail[k];
+    let verdict = "否";
+    if (k === "pinghe") verdict = lastResult.pingheLevel;
+    else if (r.conv != null && r.conv >= 40) verdict = "是";
+    else if (r.conv != null && r.conv >= 30) verdict = "倾向是";
+    if (r.conv == null) verdict = "信息不足";
+    rows.push([NAME[k], r.n, r.raw == null ? "" : r.raw, r.conv == null ? "" : r.conv.toFixed(2), verdict]);
+  });
+  rows.push([]);
+  rows.push(["主体质", lastResult.main ? NAME[lastResult.main] : "未判定"]);
+  rows.push(["兼夹", lastResult.mixed.map(k => NAME[k]).join("、")]);
+  rows.push(["性别", sex === "f" ? "女" : "男"]);
+  if (lastLuck) {
+    const kind = YQ_kindOf(lastResult, lastLuck.innate);
+    rows.push(["出生日期", YQ_birthText()]);
+    rows.push(["运气年", lastLuck.year + " " + lastLuck.gz]);
+    rows.push(["岁运", lastLuck.yunElem + "运" + (lastLuck.tai ? "太过" : "不及") + "·" + lastLuck.yunName]);
+    rows.push(["司天", lastLuck.sitian]);
+    rows.push(["在泉", lastLuck.zaiquan]);
+    rows.push(["出生所在步", YQ_stepText(lastLuck.steps[lastLuck.stepNo])]);
+    rows.push(["先天底色", (lastLuck.innate.top ? NAME[lastLuck.innate.top.k] : "") + (lastLuck.innate.second ? "兼" + NAME[lastLuck.innate.second.k] : "")]);
+    rows.push(["先天后天关系", {same:"同向",part:"部分同向",diff:"不同向",none:"底色未显",pinghe:"目前平和"}[kind] || ""]);
+  }
+  rows.push([]);
+  rows.push(["记录信息", ""]);
+  rows.push(["导出时间", nowStamp()]);
+  rows.push(["问卷版本", APP_VERSION]);
+  rows.push(["条目集", "判定 27 题（GB/T 46939—2025）＋补充 7 题，S17/女、S18/男 各一题按性别取一；季节按导出当日日期自动判定"]);
+  rows.push(["计分口径", "转化分=(原始分-条目数)/(条目数×4)×100；非平和 ≥40 为「是」、30–40 为「倾向是」；平和质需自身 ≥60 且其余八项 <30（是）/<40（基本是）"]);
+  rows.push(["漏答项", lastResult.missing.length ? lastResult.missing.map(k => NAME[k]).join("、") : "无"]);
+  const si = seasonNow();            // 只取一次，避免跨午夜时名字与区间来自不同判定
+  rows.push(["判定季节", SEASON[si].name + "季（" + SEASON_SPAN[si] + "，按 " + seasonToday() + " 自动判定）"]);
+  const csv = rows.map(r => r.map(c => {
+    const s = c == null ? "" : String(c);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(",")).join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "体质自测_答题记录_" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/* ================= 启动 ================= */
+$("#next").addEventListener("click", advance);
+$("#prev").addEventListener("click", () => go(idx - 1, -1));
+
+document.addEventListener("keydown", e => {
+  if ($("#deckWrap").hidden) return;
+  if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;  // 焦点在控件上时不抢方向键
+  const p = pages[idx];
+  if (!p) return;
+  if (/^[1-5]$/.test(e.key)) {
+    const card = $("#deck").children[idx];
+    // 判定题的五级刻度是 .segBtn，补充题与性别页是 .choice，两种都要认
+    const bs = card ? card.querySelectorAll(".choice, .segBtn") : null;
+    if (bs && bs[Number(e.key) - 1]) bs[Number(e.key) - 1].click();
+  } else if (e.key === "ArrowRight") {
+    advance();
+  } else if (e.key === "ArrowLeft") {
+    go(idx - 1, -1);
+  }
+});
+
+buildDeck();
+</script>
+
+</body>
+</html>
