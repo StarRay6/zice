@@ -152,6 +152,15 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .foot{margin-top:26px; border-top:1px solid var(--line); padding-top:14px; font-size:13px; color:var(--ink2); line-height:1.9}
 .foot p{margin:0 0 8px}
 .row-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+/* 分享长图：遮罩 + 预览 */
+.shot-mask{position:fixed; inset:0; z-index:130; background:rgba(26,20,12,.92); display:flex; align-items:flex-start; justify-content:center; padding:20px 14px 36px; overflow:auto; -webkit-overflow-scrolling:touch}
+.shot-box{width:100%; max-width:720px; display:flex; flex-direction:column; gap:12px}
+.shot-hint{margin:0; font-size:14px; line-height:1.7; color:var(--sealsoft); letter-spacing:.3px}
+.shot-img{width:100%; height:auto; display:block; border-radius:4px; border:1px solid var(--line2); background:var(--card)}
+.shot-acts{display:flex; gap:12px; flex-wrap:wrap}
+.shot-acts a.primary{flex:1 1 180px; display:flex; align-items:center; justify-content:center; min-height:48px; padding:14px; border-radius:4px; background:var(--seal); color:#f5efe0; text-decoration:none; font-size:16px; letter-spacing:3px}
+.shot-acts a.primary:hover{background:var(--seal2)}
+.shot-acts button.ghost{flex:1 1 120px}
 /* 旧逐题样式（兼容保留） */
 .intro{margin:0 0 8px}
 .intro .hint{font-size:14px; color:var(--ink2); line-height:1.8; margin:0 0 16px}
@@ -175,7 +184,7 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   .verdict h3{font-size:32px}
 }
 @media print{
-  .nav,.row-actions,.gate,button,.toast{display:none!important}
+  .nav,.row-actions,.gate,button,.toast,.shot-mask{display:none!important}
   body{background:#fff; background-image:none}
   .fold-b{display:block!important}
   .card,.verdict,.bars{box-shadow:none}
@@ -799,7 +808,7 @@ let sex = "";
 const birth = {y: null, m: null, d: null, prev: false};
 let lastResult = null;
 let lastLuck = null;
-const APP_VERSION = "中医体质自测_五运六气合判版 v1.1";
+const APP_VERSION = "中医体质自测_五运六气合判版 v1.2";
 
 const $ = (s, r) => (r || document).querySelector(s);
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -1387,13 +1396,15 @@ function renderResult() {
 
     /* 导出 */
     const acts = el("div", "row-actions");
-    const b1 = el("button", "primary", "导出答题记录 CSV");
+    const b0 = el("button", "primary", "生成长图");
+    b0.addEventListener("click", openShot);
+    const b1 = el("button", "ghost", "导出答题记录 CSV");
     b1.addEventListener("click", exportCSV);
     const b2 = el("button", "ghost", "重答");
     b2.addEventListener("click", () => {
       resetAll();
     });
-    acts.appendChild(b1); acts.appendChild(b2);
+    acts.appendChild(b0); acts.appendChild(b1); acts.appendChild(b2);
     out.appendChild(acts);
 
     const foot = el("div", "foot");
@@ -1403,6 +1414,262 @@ function renderResult() {
     out.appendChild(foot);
   }
   out.scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+/* ================= 分享长图（canvas 手绘，不依赖任何外部库） =================
+   用途：结果页一键出图，省掉截长图。图上只复述页面上已有的结论与口径，
+   不新增判断、不新增建议、不改九体分数。宽 1080，高度按内容自动算。 */
+const SHOT_W = 1080, SHOT_PAD = 64, SHOT_CW = SHOT_W - SHOT_PAD * 2;
+const SHOT_INK = "#2c2c2c", SHOT_INK2 = "#8a7a5a", SHOT_SEAL = "#a83226";
+const SHOT_LINE = "#d4c5a0", SHOT_BAR = "#e4d8b8";
+const SHOT_FAMILY = '-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Heiti SC",sans-serif';
+let _shotMC = null;
+
+function shotFont(size, weight) { return String(weight || 400) + " " + size + "px " + SHOT_FAMILY; }
+function shotMeasure() {
+  if (!_shotMC) _shotMC = document.createElement("canvas").getContext("2d");
+  return _shotMC;
+}
+/* 按像素宽度折行：逐字量，中文按字、英文按字符，够用 */
+function shotWrap(str, maxW, font) {
+  const mc = shotMeasure();
+  mc.font = font;
+  const s = String(str == null ? "" : str);
+  const out = [];
+  let cur = "";
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "\n") { out.push(cur); cur = ""; continue; }
+    if (cur.length && mc.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+/* 只排版不入画：先算高度，再一次性画 */
+function shotBuild() {
+  const R = lastResult;
+  if (!R) return null;
+  const L = lastLuck;
+  const ops = [];
+  let y = 0, H = 0;
+  const CW = SHOT_CW;
+
+  function line(str, o) {
+    o = o || {};
+    const size = o.size || 26;
+    const f = shotFont(size, o.weight);
+    const lh = o.lh || Math.round(size * 1.62);
+    const lines = shotWrap(str, o.w || CW, f);
+    const yy = y, x = SHOT_PAD + (o.indent || 0);
+    ops.push(function (c) {
+      c.font = f; c.fillStyle = o.color || SHOT_INK;
+      c.textBaseline = "top"; c.textAlign = "left";
+      for (let i = 0; i < lines.length; i++) c.fillText(lines[i], x, yy + i * lh);
+    });
+    y = yy + lines.length * lh + (o.gap || 0);
+  }
+
+  function rule(gapTop, gapBottom) {
+    y += (gapTop || 0);
+    const yy = y;
+    ops.push(function (c) { c.fillStyle = SHOT_LINE; c.fillRect(SHOT_PAD, yy, CW, 1); });
+    y = yy + 1 + (gapBottom || 0);
+  }
+
+  function kicker(t) {
+    y += 20;
+    const yy = y;
+    ops.push(function (c) {
+      c.fillStyle = SHOT_SEAL; c.fillRect(SHOT_PAD, yy + 6, 5, 24);
+      c.font = shotFont(26, 700); c.fillStyle = SHOT_INK2;
+      c.textBaseline = "top"; c.textAlign = "left";
+      c.fillText(t, SHOT_PAD + 18, yy);
+    });
+    y = yy + 38;
+  }
+
+  function kv(k, v) {
+    const kf = shotFont(25, 700), vf = shotFont(25, 400), kw = 158, lh = 40;
+    const lines = shotWrap(v, CW - kw, vf);
+    const yy = y;
+    ops.push(function (c) {
+      c.textBaseline = "top"; c.textAlign = "left";
+      c.font = kf; c.fillStyle = SHOT_INK2; c.fillText(k, SHOT_PAD, yy + 1);
+      c.font = vf; c.fillStyle = SHOT_INK;
+      for (let i = 0; i < lines.length; i++) c.fillText(lines[i], SHOT_PAD + kw, yy + i * lh);
+    });
+    y = yy + Math.max(lines.length, 1) * lh + 4;
+  }
+
+  function barRow(name, val, hasVal) {
+    const lw = 168, rh = 44, bx = SHOT_PAD + lw, bw = CW - lw - 96;
+    const yy = y;
+    ops.push(function (c) {
+      c.textBaseline = "middle";
+      c.font = shotFont(25, 700); c.fillStyle = SHOT_INK;
+      c.fillText(name, SHOT_PAD, yy + rh / 2);
+      c.fillStyle = SHOT_BAR; c.fillRect(bx, yy + rh / 2 - 8, bw, 16);
+      if (hasVal) {
+        const p = Math.max(0, Math.min(100, val)) / 100;
+        c.fillStyle = val >= 30 ? SHOT_SEAL : "#b8a682";
+        c.fillRect(bx, yy + rh / 2 - 8, Math.round(bw * p), 16);
+      }
+      c.font = shotFont(23, 400); c.fillStyle = SHOT_INK2; c.textAlign = "right";
+      c.fillText(hasVal ? val.toFixed(1) : "信息不足", SHOT_W - SHOT_PAD, yy + rh / 2);
+      c.textAlign = "left";
+    });
+    y = yy + rh;
+  }
+
+  /* ① 抬头 */
+  y = SHOT_PAD;
+  line("中医体质自测 · 九体＋五运六气合判", {size: 44, weight: 700, lh: 58, gap: 4});
+  line("九种体质 · 判定 27 题＋补充 7 题 · 出生运气对照", {size: 24, color: SHOT_INK2, lh: 34, gap: 2});
+  line("GB/T 46939—2025 ＋ 五运六气（大寒换年）　·　生成于 " + nowStamp().slice(0, 16),
+    {size: 23, color: SHOT_INK2, lh: 34, gap: 4});
+  rule(4, 8);
+
+  /* ② 判定结果 */
+  kicker("判定结果");
+  const mainName = R.main ? NAME[R.main] : null;
+  if (mainName) {
+    line(mainName, {size: 60, weight: 700, color: SHOT_SEAL, lh: 78, gap: 2});
+    const lv = R.mainLevel === "是" ? "判为"
+      : (R.mainLevel === "基本是" ? "基本判为"
+        : (R.mainLevel === "倾向是" ? "倾向是" : ""));
+    let sub = "主体质判定：" + (lv || "—");
+    if (R.mixed && R.mixed.length) sub += "　·　兼夹：" + R.mixed.map(k => NAME[k]).join("、");
+    line(sub, {size: 26, gap: 2});
+  } else {
+    line("九体均未达判定线", {size: 44, weight: 700, color: SHOT_SEAL, lh: 60, gap: 2});
+    line("本次不给主体质结论。原因通常是漏答，或隔一段时间重测更准。", {size: 26, gap: 2});
+  }
+  if (R.missing && R.missing.length) line("漏答：" + R.missing.length + " 项，未计入判定。", {size: 23, color: SHOT_INK2, gap: 2});
+
+  /* ③ 九体分条 */
+  kicker("九体转化分（0—100）");
+  ORDER.forEach(function (k) {
+    const v = R.conv[k];
+    barRow(NAME[k], v == null ? 0 : v, v != null);
+  });
+  line("红色为已达 30（倾向线）以上，判定线在 40。条目少的体质原始分偏低，转换分算到负数属正常现象，不影响判定与排序。",
+    {size: 21, color: SHOT_INK2, lh: 32, gap: 0});
+
+  /* ④ 先天气化 */
+  const inn = L ? L.innate : null;
+  const step = L ? L.steps[L.stepNo] : null;
+  if (L && step) {
+    kicker("先天气化底色（出生运气 · 大寒换年）");
+    line(String(L.year) + "　" + L.gz + " 年", {size: 40, weight: 700, lh: 54, gap: 2});
+    kv("出生", YQ_birthText());
+    kv("年起点", "大寒 " + L.dahanText + "（北京时间）");
+    kv("岁运", L.yunElem + "运" + (L.tai ? "太过" : "不及") + "　·　" + L.yunName);
+    kv("司天", L.sitian + "（管上半年，落" + (YQ_QI_ZANG[L.sitian] || "") + "）");
+    kv("在泉", L.zaiquan + "（管下半年，落" + (YQ_QI_ZANG[L.zaiquan] || "") + "）");
+    kv("出生时", YQ_stepText(step));
+    kv("先天底色", inn.top ? (NAME[inn.top.k] + "（主）" + (inn.second ? "　兼 " + NAME[inn.second.k] : "")) : "—");
+    if (L.flags && L.flags.length) kv("标记", L.flags.join("、") + (L.pingQi ? "、平气" : ""));
+  }
+
+  /* ⑤ 先天 × 后天 */
+  if (L && inn) {
+    const kind = YQ_kindOf(R, inn);
+    const innName = inn.top ? NAME[inn.top.k] : "—";
+    const J = YQ_jointText(kind, innName, mainName || "未判定");
+    const rel = {same: "同向", part: "部分同向", diff: "不同向", none: "底色未显", pinghe: "目前平和"}[kind] || "—";
+    kicker("先天 × 后天");
+    kv("先天底色", innName + (inn.second ? "（兼 " + NAME[inn.second.k] + "）" : ""));
+    kv("问卷判出", mainName ? (mainName + "（" + (R.mainLevel || "") + "）") : "九体均未达判定线");
+    kv("两者关系", rel);
+    line(J.h, {size: 29, weight: 700, gap: 4});
+    line(J.a, {size: 25, gap: 6});
+    line(J.b, {size: 25, gap: 4});
+    const trig = inn.top ? YQ_triggerLine(inn.top.k) : "";
+    if (trig) line(trig, {size: 24, color: SHOT_INK2, gap: 2});
+  }
+
+  /* ⑥ 时令 */
+  const si = seasonNow(), S = SEASON[si];
+  kicker("现值季节");
+  line(S.name + "季（" + SEASON_SPAN[si] + "）　·　按今天 " + seasonToday() + " 自动判定", {size: 25, gap: 2});
+  line("【时令】" + S.name + "：" + S.x, {size: 25, gap: 2});
+  const fix = (SEASON_FIX[R.main] || [])[si];
+  if (fix) line(fix, {size: 23, color: SHOT_INK2, gap: 2});
+
+  /* ⑦ 页脚 */
+  rule(14, 6);
+  line("本图由自测页自动生成，属健康科普参考，不替代面诊，不构成诊疗或用药建议，不给方名与克数，不作疾病预测。身体不适请就医。",
+    {size: 21, color: SHOT_INK2, lh: 31, gap: 2});
+  line("文案：《中医体质学》（王琦，2021 规划教材）第九章、《素问·四气调神大论》，编号 ZYTZ-TY-001～049、NJG-TY-006～012，原文照录。",
+    {size: 20, color: SHOT_INK2, lh: 29, gap: 2});
+  line(APP_VERSION, {size: 19, color: "#bbaa8a", gap: 0});
+
+  H = y + SHOT_PAD;
+  ops.unshift(function (c) {
+    const g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#f6f0e1"); g.addColorStop(1, "#ece3cb");
+    c.fillStyle = g; c.fillRect(0, 0, SHOT_W, H);
+  });
+  return {ops: ops, height: H};
+}
+
+function shotToast(msg) {
+  const t = $("#toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(shotToast._tm);
+  shotToast._tm = setTimeout(function () { t.classList.remove("show"); }, 2600);
+}
+
+/* 画一张；失败就提示，不吞掉 */
+function makeShot() {
+  try {
+    const built = shotBuild();
+    if (!built) { shotToast("还没有可生成的结果"); return null; }
+    const cv = document.createElement("canvas");
+    cv.width = SHOT_W; cv.height = built.height;
+    const ctx = cv.getContext("2d");
+    ctx.fillStyle = "#f2ebd8"; ctx.fillRect(0, 0, SHOT_W, built.height);
+    built.ops.forEach(function (fn) { fn(ctx); });
+    let url = "";
+    try { url = cv.toDataURL("image/png"); } catch (err) { shotToast("浏览器拒绝生成图片，先用截图代替"); return null; }
+    return {url: url, h: built.height};
+  } catch (err) {
+    shotToast("生成失败：" + (err && err.message ? err.message : err));
+    return null;
+  }
+}
+
+function openShot() {
+  const shot = makeShot();
+  if (!shot) return;
+  const mask = el("div", "shot-mask");
+  const box = el("div", "shot-box");
+  box.appendChild(el("p", "shot-hint",
+    "手机上长按图片可存进相册；电脑端点「保存图片」。图宽 1080 像素，可直接发微信或朋友圈。"));
+  const img = document.createElement("img");
+  img.className = "shot-img";
+  img.src = shot.url;
+  img.alt = "中医体质自测结果长图";
+  box.appendChild(img);
+  const acts = el("div", "shot-acts");
+  const a = document.createElement("a");
+  a.className = "primary";
+  a.href = shot.url;
+  a.setAttribute("download", "中医体质自测_" + nowStamp().replace(/[:\s]/g, "-") + ".png");
+  a.textContent = "保存图片";
+  const b = el("button", "ghost", "关闭");
+  b.type = "button";
+  const close = function () { if (mask.parentNode) mask.parentNode.removeChild(mask); };
+  b.addEventListener("click", close);
+  acts.appendChild(a); acts.appendChild(b);
+  box.appendChild(acts);
+  mask.appendChild(box);
+  mask.addEventListener("click", function (e) { if (e.target === mask) close(); });
+  document.body.appendChild(mask);
 }
 
 /* ================= 导出 CSV ================= */
