@@ -161,6 +161,17 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .shot-acts a.primary{flex:1 1 180px; display:flex; align-items:center; justify-content:center; min-height:48px; padding:14px; border-radius:4px; background:var(--seal); color:#f5efe0; text-decoration:none; font-size:16px; letter-spacing:3px}
 .shot-acts a.primary:hover{background:var(--seal2)}
 .shot-acts button.ghost{flex:1 1 120px}
+/* 出图方式选择（底部小面板，两个大按钮） */
+.shot-pick{position:fixed; inset:0; z-index:135; background:rgba(26,20,12,.74); display:flex; align-items:flex-end; justify-content:center; padding:0}
+.shot-pick-box{width:100%; max-width:520px; background:var(--card); border:1px solid var(--line2); border-radius:12px 12px 0 0; padding:20px 18px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -6px 24px rgba(40,28,12,.28)}
+.shot-pick-t{margin:0 0 4px; font-size:17px; font-weight:700; letter-spacing:2px; color:var(--ink)}
+.shot-pick-s{margin:0 0 14px; font-size:13px; line-height:1.7; color:var(--ink2)}
+.shot-opt{display:block; width:100%; text-align:left; background:var(--card2); border:1px solid var(--line); border-radius:4px; padding:13px 16px; margin:0 0 10px; cursor:pointer; font-family:var(--sans); transition:background .16s ease}
+.shot-opt:hover{background:#f7f0dd}
+.shot-opt b{display:block; font-size:16px; letter-spacing:1px; color:var(--seal)}
+.shot-opt span{display:block; margin-top:3px; font-size:13px; line-height:1.65; color:var(--ink2)}
+.shot-pick-x{width:100%; margin-top:4px}
+@media (min-width:560px){ .shot-pick{align-items:center} .shot-pick-box{border-radius:8px} }
 /* 旧逐题样式（兼容保留） */
 .intro{margin:0 0 8px}
 .intro .hint{font-size:14px; color:var(--ink2); line-height:1.8; margin:0 0 16px}
@@ -184,7 +195,7 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   .verdict h3{font-size:32px}
 }
 @media print{
-  .nav,.row-actions,.gate,button,.toast,.shot-mask{display:none!important}
+  .nav,.row-actions,.gate,button,.toast,.shot-mask,.shot-pick{display:none!important}
   body{background:#fff; background-image:none}
   .fold-b{display:block!important}
   .card,.verdict,.bars{box-shadow:none}
@@ -808,7 +819,7 @@ let sex = "";
 const birth = {y: null, m: null, d: null, prev: false};
 let lastResult = null;
 let lastLuck = null;
-const APP_VERSION = "中医体质自测_五运六气合判版 v1.2";
+const APP_VERSION = "中医体质自测_五运六气合判版 v1.3";
 
 const $ = (s, r) => (r || document).querySelector(s);
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -1211,7 +1222,8 @@ function adviceFor(body) {
   const out = [];
   const a = k => answers["P" + k];
   if (a(30) === 1) {  // 安全闸最优先
-    out.push({t: "运动安全", s: "先停下，再谈怎么练", b: GENERAL.safety.x + "　——" + GENERAL.safety.no});
+    out.push({t: "运动安全", s: "先停下，再谈怎么练",
+      b: "你答过运动中不适，这一条按安全闸优先提示。具体的停止信号清单见下面「运动安全线」一节，这里不重复一遍。"});
   }
   const push = (label, q, txt) => { if (txt) out.push({t: label, s: txt, b: ""}); };
   // P29 运动量
@@ -1348,7 +1360,7 @@ function renderResult() {
       out.appendChild(fold("精神", c.j.x.slice(0, 26) + "…", para(c.j.x, c.j.no), true));
     }
     out.appendChild(fold("运动", c.y.x.slice(0, 26) + "…", para(c.y.x, c.y.no) +
-      (body === "xueyu" ? para(GENERAL.safety.x, GENERAL.safety.no) : ""), true));
+      (body === "xueyu" ? para("血瘀质运动先看安全停止信号：完整清单见下文「运动安全线」一节，这里不重复一遍。", "") : ""), true));
     out.appendChild(fold("饮食方向", c.s.x.slice(0, 26) + "…", para(c.s.x, c.s.no), true));
     out.appendChild(fold("起居", c.q.x.slice(0, 26) + "…", para(c.q.x, c.q.no), true));
 
@@ -1361,7 +1373,7 @@ function renderResult() {
     if (R.mixed.length) {
       listHTML += "<p class=\"tagline\">兼夹：" + R.mixed.map(k => esc(NAME[k]) + "　" + esc(COPY[k].s.x)).join("；") + "</p>";
     }
-    out.appendChild(fold("宜与少食", "按你这体质列品名清单", listHTML));
+    out.appendChild(fold("宜与少食", "按你这体质列品名清单", listHTML, true));
 
     /* ⑤ 时令 */
     const seasonIdx = seasonNow();
@@ -1396,8 +1408,8 @@ function renderResult() {
 
     /* 导出 */
     const acts = el("div", "row-actions");
-    const b0 = el("button", "primary", "生成长图");
-    b0.addEventListener("click", openShot);
+    const b0 = el("button", "primary", "生成图片");
+    b0.addEventListener("click", chooseShot);
     const b1 = el("button", "ghost", "导出答题记录 CSV");
     b1.addEventListener("click", exportCSV);
     const b2 = el("button", "ghost", "重答");
@@ -1447,8 +1459,90 @@ function shotWrap(str, maxW, font) {
   return out;
 }
 
+/* —— 「详细全图」用：把结果页 DOM 里的文字按块取出来，不改写、不重排语义 —— */
+function shotClean(s) { return String(s == null ? "" : s).replace(/[\s\u00a0]+/g, " ").trim(); }
+function shotJoinInline(el) {
+  const parts = [];
+  for (let i = 0; i < el.children.length; i++) parts.push(shotClean(el.children[i].textContent));
+  return parts.filter(Boolean).join("　");
+}
+function shotText(el) {
+  const cls = " " + (el && el.className || "") + " ";
+  if ((cls.indexOf(" kv ") >= 0 || cls.indexOf(" chips ") >= 0) && el.children.length) return shotJoinInline(el);
+  return shotClean(el.textContent);
+}
+/* 逐个抓 #result 的直接子块：折叠块拿标题＋正文，其余卡片拿 p / dt / dd / .kv / .chips */
+function shotFullSections() {
+  const out = [];
+  const res = $("#result");
+  if (!res || !res.children) return out;
+  const skip = ["row-actions", "shot-mask", "shot-pick", " bars ", " verdict ", " foot "];
+  for (let i = 0; i < res.children.length; i++) {
+    const ch = res.children[i];
+    const cls = " " + (ch.className || "") + " ";
+    if (skip.some(function (s) { return cls.indexOf(s) >= 0; })) continue;
+    if (cls.indexOf(" fold ") >= 0) {
+      const t = ch.querySelector(".fold-h .t");
+      out.push({h: shotClean(t ? t.textContent : "")});
+      const ps = ch.querySelectorAll(".fold-b p, .fold-b li");
+      for (let j = 0; j < ps.length; j++) {
+        const txt = shotText(ps[j]);
+        if (txt) out.push({t: txt, c: " " + (ps[j].className || "") + " "});
+      }
+      continue;
+    }
+    const ps = ch.querySelectorAll("p, dt, dd, li, .kv, .chips");
+    for (let j = 0; j < ps.length; j++) {
+      const txt = shotText(ps[j]);
+      if (!txt) continue;
+      const tag = ps[j].tagName === "DT" ? " dt " : (ps[j].tagName === "DD" ? " dd " : " ");
+      out.push({t: txt, c: " " + (ps[j].className || "") + tag});
+    }
+  }
+  return out;
+}
+/* 夜色按原 class 分级：大标题、判语、说明、小注各不相同 */
+function shotBlockStyle(c) {
+  c = " " + (c || "") + " ";
+  if (c.indexOf(" big ") >= 0) return {size: 32, weight: 700, lh: 48, gap: 4};
+  if (c.indexOf(" verdict-1 ") >= 0) return {size: 29, weight: 700, lh: 44, gap: 4};
+  if (c.indexOf(" lead ") >= 0) return {size: 25, weight: 700, color: SHOT_INK2, lh: 38, gap: 2};
+  if (c.indexOf(" who ") >= 0) return {size: 26, weight: 700, lh: 40, gap: 2};
+  if (c.indexOf(" thr ") >= 0) return {size: 24, color: SHOT_SEAL, lh: 38, gap: 2};
+  if (c.indexOf(" tagline ") >= 0 || c.indexOf(" fine ") >= 0 || c.indexOf(" subline ") >= 0)
+    return {size: 22, color: SHOT_INK2, lh: 33, gap: 2};
+  if (c.indexOf(" dt ") >= 0) return {size: 24, weight: 700, color: SHOT_INK2, lh: 36, gap: 0};
+  if (c.indexOf(" dd ") >= 0) return {size: 24, lh: 36, gap: 2};
+  return {size: 24, lh: 38, gap: 4};
+}
+/* 出图方式选择：一份结论速览，一份整页详版 */
+function chooseShot() {
+  const mask = el("div", "shot-pick");
+  const box = el("div", "shot-pick-box");
+  box.appendChild(el("p", "shot-pick-t", "生成图片"));
+  box.appendChild(el("p", "shot-pick-s", "先选一份：速览图便于转发，详版图把结果页整页排进一张长图。生成后可长按保存。"));
+  const close = function () { if (mask.parentNode) mask.parentNode.removeChild(mask); };
+  const makeOpt = function (title, desc, type) {
+    const b = el("button", "shot-opt");
+    b.type = "button";
+    b.innerHTML = "<b>" + title + "</b><span>" + desc + "</span>";
+    b.addEventListener("click", function () { close(); openShot(type); });
+    return b;
+  };
+  box.appendChild(makeOpt("体质分析图", "判定结果＋九体分＋先天运气＋合判解读，两屏以内，适合发朋友圈。", "brief"));
+  box.appendChild(makeOpt("详细全图", "结果页整页内容：判定、九体分、先天运气、合判、开篇总纲、精神运动饮食起居、宜与少食清单、时令、按你的情况、安全线与免责。", "full"));
+  const x = el("button", "ghost shot-pick-x", "取消");
+  x.type = "button";
+  x.addEventListener("click", close);
+  box.appendChild(x);
+  mask.appendChild(box);
+  mask.addEventListener("click", function (e) { if (e.target === mask) close(); });
+  document.body.appendChild(mask);
+}
+
 /* 只排版不入画：先算高度，再一次性画 */
-function shotBuild() {
+function shotBuild(type) {
+  type = type || "brief";
   const R = lastResult;
   if (!R) return null;
   const L = lastLuck;
@@ -1557,6 +1651,18 @@ function shotBuild() {
   line("红色为已达 30（倾向线）以上，判定线在 40。条目少的体质原始分偏低，转换分算到负数属正常现象，不影响判定与排序。",
     {size: 21, color: SHOT_INK2, lh: 32, gap: 0});
 
+  if (type === "full") {
+    /* 详细全图：把结果页 DOM 里的每一块文字按原顺序搬进来；键值对（dt/dd）合成一行 */
+    const secs = shotFullSections();
+    for (let i = 0; i < secs.length; i++) {
+      const b = secs[i], bc = " " + (b.c || "") + " ";
+      if (b.h) { kicker(b.h); continue; }
+      const nx = secs[i + 1] ? " " + (secs[i + 1].c || "") + " " : " ";
+      if (bc.indexOf(" dt ") >= 0 && nx.indexOf(" dd ") >= 0) { kv(b.t, secs[i + 1].t); i++; continue; }
+      if (bc.indexOf(" dd ") >= 0) continue;
+      line(b.t, shotBlockStyle(b.c));
+    }
+  } else {
   /* ④ 先天气化 */
   const inn = L ? L.innate : null;
   const step = L ? L.steps[L.stepNo] : null;
@@ -1598,6 +1704,8 @@ function shotBuild() {
   const fix = (SEASON_FIX[R.main] || [])[si];
   if (fix) line(fix, {size: 23, color: SHOT_INK2, gap: 2});
 
+  }
+
   /* ⑦ 页脚 */
   rule(14, 6);
   line("本图由自测页自动生成，属健康科普参考，不替代面诊，不构成诊疗或用药建议，不给方名与克数，不作疾病预测。身体不适请就医。",
@@ -1625,9 +1733,9 @@ function shotToast(msg) {
 }
 
 /* 画一张；失败就提示，不吞掉 */
-function makeShot() {
+function makeShot(type) {
   try {
-    const built = shotBuild();
+    const built = shotBuild(type);
     if (!built) { shotToast("还没有可生成的结果"); return null; }
     const cv = document.createElement("canvas");
     cv.width = SHOT_W; cv.height = built.height;
@@ -1643,8 +1751,8 @@ function makeShot() {
   }
 }
 
-function openShot() {
-  const shot = makeShot();
+function openShot(type) {
+  const shot = makeShot(type);
   if (!shot) return;
   const mask = el("div", "shot-mask");
   const box = el("div", "shot-box");
@@ -1659,7 +1767,7 @@ function openShot() {
   const a = document.createElement("a");
   a.className = "primary";
   a.href = shot.url;
-  a.setAttribute("download", "中医体质自测_" + nowStamp().replace(/[:\s]/g, "-") + ".png");
+  a.setAttribute("download", "中医体质自测_" + (type === "full" ? "详版_" : "分析_") + nowStamp().replace(/[:\s]/g, "-") + ".png");
   a.textContent = "保存图片";
   const b = el("button", "ghost", "关闭");
   b.type = "button";
