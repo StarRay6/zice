@@ -123,6 +123,8 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .data-save-consent input{width:20px; height:20px; margin:2px 0 0; flex:0 0 auto}
 .data-save button{width:100%}
 .data-save-status{font-size:13px; line-height:1.7; color:var(--ink2); overflow-wrap:anywhere; margin:10px 0 0}
+.data-save-status.is-ok{color:#3b6d11}
+.data-save-status.is-error{color:#8b2820; background:#fbe9e7; border:1px solid #e7bdb5; border-radius:4px; padding:9px 11px}
 .verdict{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:20px; margin:0 0 16px}
 .verdict .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
 .tags{margin:0 0 10px; display:flex; flex-wrap:wrap; gap:8px}
@@ -247,6 +249,11 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .joint .verdict-1{font-size:19px; line-height:1.6; font-weight:700; letter-spacing:1px; margin:14px 0 8px; color:var(--seal)}
 .joint .p{margin:0 0 9px; font-size:15px; line-height:1.9}
 @media (max-width:430px){ .joint .kv{grid-template-columns:64px 1fr} .luck .big{font-size:21px} }
+/* 启动失败提示：脚本没跑起来时，别让用户面对一片空白 */
+.fatal{background:#fdecea; border:1px solid #c0392b; border-left:4px solid #c0392b; color:#7b1f14;
+  padding:14px 16px; border-radius:4px; font-size:14px; line-height:1.85; margin:0 0 16px}
+/* hidden 属性必须真的隐藏：.gate 自己写了 display:grid，会盖掉浏览器默认的 [hidden] */
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -305,12 +312,36 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 
 </div>
 
-<script src="config.public.js"></script>
-<script src="assessment-core.js"></script>
-<script src="cloud.js"></script>
+<!-- 改动 config.public.js / assessment-core.js / cloud.js 后，把下面的 v= 数字 +1，强制浏览器重新下载，避免访客用到旧缓存。 -->
+<script src="config.public.js?v=3"></script>
+<script src="assessment-core.js?v=3"></script>
+<script src="cloud.js?v=3"></script>
 <script>
+/* ================= 启动自检：脚本没加载成功时给可见提示，别留白屏 ================= */
+function showFatal(msg) {
+  if (window.__fatalLocked) return;          // 只报第一条，别被后续连锁错误覆盖掉真正原因
+  window.__fatalLocked = true;
+  const box = document.getElementById("fatalBox");
+  if (box) { box.textContent = msg; return; }
+  const d = document.createElement("div");
+  d.id = "fatalBox";
+  d.className = "fatal";
+  d.textContent = msg;
+  const host = document.querySelector(".wrap");
+  if (host) host.insertBefore(d, host.firstChild);
+  else document.body.appendChild(d);
+}
+const CORE = window.AssessmentCore;
+if (!CORE || !Array.isArray(CORE.Q27) || !Array.isArray(CORE.Q8)) {
+  const g = document.getElementById("consentGate"), w = document.getElementById("deckWrap");
+  if (g) g.hidden = true;
+  if (w) w.hidden = true;
+  showFatal("问卷脚本没有加载成功（assessment-core.js）。请按 Ctrl+F5 强制刷新页面；若仍然这样，说明 index.html 和 assessment-core.js 没有放在同一个目录里。");
+  throw new Error("assessment-core.js not loaded");
+}
+
 /* ================= 判定层 27 题（GB/T 46939—2025，题干照原文） ================= */
-const {OPTS5, Q27, Q8, NAME, ORDER, N} = AssessmentCore;
+const {OPTS5, Q27, Q8, NAME, ORDER, N} = CORE;
 
 /* 题库、体质名与判定参数统一来自共享核心。 */
 
@@ -1839,9 +1870,14 @@ document.addEventListener("keydown", e => {
     if (!cb.checked) return;
     window.__consentGranted = true;
     window.__consentedAt = new Date().toISOString();
-    gate.hidden = true;
+    gate.remove();                            // 同意后整块移除，不再和第一题叠在一起
     deck.hidden = false;
-    window.scrollTo({top: 0});
+    const top = deck.getBoundingClientRect().top + window.scrollY - 16;
+    window.scrollTo({top: Math.max(0, top)}); // 直接落到问卷开头
+    setTimeout(() => {                        // 兜底自检：题库没生成时给个明确提示
+      const d = $("#deck");
+      if (d && d.children.length === 0) showFatal("题目没有生成，请按 Ctrl+F5 强制刷新页面。如果一直这样，请把这段提示截图给我。");
+    }, 600);
   });
   $("#gateDecline").addEventListener("click", () => {
     main.hidden = true;
@@ -1854,7 +1890,11 @@ document.addEventListener("keydown", e => {
   });
 })();
 
-buildDeck();
+try {
+  buildDeck();
+} catch (e) {
+  showFatal("题目渲染失败：" + (e && e.message ? e.message : e) + "。请按 Ctrl+F5 强制刷新页面。");
+}
 </script>
 
 </body>
