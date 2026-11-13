@@ -106,6 +106,16 @@ button.ghost:hover{background:#cdbc93}
 button.ghost:disabled{opacity:.5; cursor:not-allowed}
 /* 结果区 */
 #result{display:none}
+/* 开始前知情同意 */
+.gate{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:24px; margin:0 0 16px}
+.gate h2{font-size:24px; margin:0 0 6px; letter-spacing:2px}
+.gate .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 16px}
+.gate p{font-size:15px; line-height:1.9; color:var(--ink,#2c2c2c); margin:0 0 12px}
+.gate .note{font-size:13px; color:var(--ink2)}
+.gate-consent{display:flex; gap:10px; align-items:flex-start; font-size:15px; line-height:1.7; margin:18px 0 16px; cursor:pointer}
+.gate-consent input{width:20px; height:20px; margin:3px 0 0; flex:0 0 auto}
+.gate-actions{display:flex; gap:12px; flex-wrap:wrap}
+.gate-actions button{flex:1; min-width:160px}
 .data-save{background:var(--card); border:1px solid var(--line); border-radius:4px; padding:18px 20px; margin:0 0 16px}
 .data-save .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
 .data-save-copy{font-size:14px; line-height:1.8; color:var(--ink2); margin:0 0 12px}
@@ -249,6 +259,31 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   </header>
 
   <div class="warn"><b>重要声明</b>　本问卷仅为健康科普参考，<b>不能替代专业中医师面诊诊断</b>，不构成诊疗、用药建议，如有不适请及时就医。判定题按「近一年大多数时候」答，补充题按现在的情况答。出生年月日只用来推五运六气，按大寒换年，只算到日、不算时辰。</div>
+
+  <section id="consentGate" class="gate">
+    <div id="gateMain">
+      <h2>开始前请先阅读</h2>
+      <p class="lead">关于本次数据保存</p>
+      <p>本问卷会保存你的<strong>性别、出生日期、问卷答案</strong>，以及由服务端计算的体质判定与五运六气结果，用于统计分析和改进判定标准。不收集姓名、手机号或联系方式。</p>
+      <p>数据以随机编号匿名保存，结果页会显示记录编号，请自行保存，以便日后申请删除该记录。本次同意仅对当前这一页有效，重新打开页面需要再次确认。</p>
+      <p class="note">不同意保存则无法使用本问卷，你可以直接关闭本页面。</p>
+      <label class="gate-consent">
+        <input type="checkbox" id="gateConsent">
+        <span>我已阅读上述说明，并同意保存本次记录</span>
+      </label>
+      <div class="gate-actions">
+        <button class="primary" id="gateStart" disabled>同意并开始问卷</button>
+        <button class="ghost" id="gateDecline">不同意，退出</button>
+      </div>
+    </div>
+    <div id="gateDeclined" hidden>
+      <h2>你未同意保存数据</h2>
+      <p>因此本问卷无法使用。如果改变主意，可以返回重新选择；否则直接关闭页面即可，我们不会保存任何信息。</p>
+      <div class="gate-actions">
+        <button class="ghost" id="gateBack">返回重新选择</button>
+      </div>
+    </div>
+  </section>
 
   <section id="deckWrap">
     <div class="headline">
@@ -1791,6 +1826,33 @@ document.addEventListener("keydown", e => {
     go(idx - 1, -1);
   }
 });
+
+/* ================= 开始前知情同意：必须同意才能使用问卷 ================= */
+(function () {
+  const gate = $("#consentGate"), main = $("#gateMain"), declined = $("#gateDeclined");
+  const deck = $("#deckWrap"), cb = $("#gateConsent"), start = $("#gateStart");
+  deck.hidden = true;                       // 未同意前不展示问卷
+  $("#result").style.display = "none";
+
+  cb.addEventListener("change", () => { start.disabled = !cb.checked; });
+  start.addEventListener("click", () => {
+    if (!cb.checked) return;
+    window.__consentGranted = true;
+    window.__consentedAt = new Date().toISOString();
+    gate.hidden = true;
+    deck.hidden = false;
+    window.scrollTo({top: 0});
+  });
+  $("#gateDecline").addEventListener("click", () => {
+    main.hidden = true;
+    declined.hidden = false;
+    deck.hidden = true;
+  });
+  $("#gateBack").addEventListener("click", () => {
+    declined.hidden = true;
+    main.hidden = false;
+  });
+})();
 
 buildDeck();
 </script>
