@@ -106,6 +106,13 @@ button.ghost:hover{background:#cdbc93}
 button.ghost:disabled{opacity:.5; cursor:not-allowed}
 /* 结果区 */
 #result{display:none}
+.data-save{background:var(--card); border:1px solid var(--line); border-radius:4px; padding:18px 20px; margin:0 0 16px}
+.data-save .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
+.data-save-copy{font-size:14px; line-height:1.8; color:var(--ink2); margin:0 0 12px}
+.data-save-consent{display:flex; gap:10px; align-items:flex-start; font-size:15px; line-height:1.7; margin:0 0 14px; cursor:pointer}
+.data-save-consent input{width:20px; height:20px; margin:2px 0 0; flex:0 0 auto}
+.data-save button{width:100%}
+.data-save-status{font-size:13px; line-height:1.7; color:var(--ink2); overflow-wrap:anywhere; margin:10px 0 0}
 .verdict{background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:20px; margin:0 0 16px}
 .verdict .lead{font-size:12px; letter-spacing:.12em; color:var(--ink2); margin:0 0 10px}
 .tags{margin:0 0 10px; display:flex; flex-wrap:wrap; gap:8px}
@@ -263,55 +270,14 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 
 </div>
 
+<script src="config.public.js"></script>
+<script src="assessment-core.js"></script>
+<script src="cloud.js"></script>
 <script>
 /* ================= 判定层 27 题（GB/T 46939—2025，题干照原文） ================= */
-const OPTS5 = ["没有（根本不）","很少（有一点）","有时（有些）","经常（相当）","总是（非常）"];
+const {OPTS5, Q27, Q8, NAME, ORDER, N} = AssessmentCore;
 
-const Q27 = [
- {id:"S01", t:"您精力充沛吗？", k:[["pinghe",0]]},
- {id:"S02", t:"您容易疲乏吗？", k:[["pinghe",1],["qixu",0]]},
- {id:"S03", t:"您感到闷闷不乐、情绪低沉吗？", k:[["pinghe",1],["qiyu",0]]},
- {id:"S04", t:"您比一般人耐受不了寒冷（冬天的寒冷，夏天的冷空调、电扇等）吗？", k:[["pinghe",1],["yangxu",0]]},
- {id:"S05", t:"您容易气短（呼吸短促，接不上气）吗？", k:[["qixu",0]]},
- {id:"S06", t:"您容易心慌吗？", k:[["qixu",0]]},
- {id:"S07", t:"您胃脘部、背部或腰膝部怕冷吗？", k:[["yangxu",0]]},
- {id:"S08", t:"您感到怕冷、衣服比别人穿得多吗？", k:[["yangxu",0]]},
- {id:"S09", t:"您感觉身体、脸上发热吗？", k:[["yinxu",0]]},
- {id:"S10", t:"您皮肤或口唇干吗？", k:[["yinxu",0]]},
- {id:"S11", t:"您面部两颧潮红或偏红吗？", k:[["yinxu",0]]},
- {id:"S12", t:"您感到身体沉重不轻松或不爽快吗？", k:[["tanshi",0]]},
- {id:"S13", t:"您腹部肥满松软吗？", k:[["tanshi",0]]},
- {id:"S14", t:"您嘴里有黏黏的感觉吗？", k:[["tanshi",0]]},
- {id:"S15", t:"您面部或鼻部有油腻感或者油亮发光吗？", k:[["shire",0]]},
- {id:"S16", t:"您小便时尿道有发热感、尿色浓（深）吗？", k:[["shire",0]]},
- {id:"S17", t:"您带下色黄（白带颜色发黄）吗？", k:[["shire",0]], g:"f"},
- {id:"S18", t:"您的阴囊部位潮湿吗？", k:[["shire",0]], g:"m"},
- {id:"S19", t:"您身体上有哪里疼痛吗？", k:[["xueyu",0]]},
- {id:"S20", t:"您面色晦暗或容易出现褐斑吗？", k:[["xueyu",0]]},
- {id:"S21", t:"您口唇颜色偏暗吗？", k:[["xueyu",0]]},
- {id:"S22", t:"您容易精神紧张、焦虑不安吗？", k:[["qiyu",0]]},
- {id:"S23", t:"您多愁善感、感情脆弱吗？", k:[["qiyu",0]]},
- {id:"S24", t:"您没有感冒时也会打喷嚏吗？", k:[["tebing",0]]},
- {id:"S25", t:"您容易过敏（对药物、食物、气味、花粉或在季节交替、气候变化时）吗？", k:[["tebing",0]]},
- {id:"S26", t:"您的皮肤容易起荨麻疹（风团、风疹块、风疙瘩）吗？", k:[["tebing",0]]},
- {id:"S27", t:"您的皮肤一抓就红，并出现抓痕吗？", k:[["tebing",0]]}
-];
-
-/* ================= 补充层 7 题（季节改按当日日期自动判定，不再作答） ================= */
-const Q8 = [
- {id:"P29", t:"你平时的运动量大概是？", o:["几乎不运动","每周 1—2 次","每周 3 次以上","主要靠体力工作，没有专门锻炼"]},
- {id:"P30", t:"运动或爬楼时，有没有出现过胸闷、心慌、眩晕、异常疲乏、两腿无力？", o:["有过","没有"]},
- {id:"P31", t:"你通常几点入睡？", o:["23 点前","23 点—凌晨 1 点","凌晨 1 点以后"]},
- {id:"P32", t:"你的三餐更接近哪一种？", o:["常吃外卖，偏油腻","常有宵夜","偏爱甜食、黏糯主食","相对规律，吃到七分饱"]},
- {id:"P33", t:"你多数时间待在哪种环境？", o:["潮湿（临水、返潮、地下室）","干燥（长期空调暖气）","空调房久坐","临街、绿化多，花粉季明显"]},
- {id:"P34", t:"每天大约坐着多久（不含睡眠）？", o:["不到 4 小时","4—8 小时","超过 8 小时"]},
- {id:"P35", t:"你主要对什么过敏？", o:["花粉","尘螨（枕被、地毯、窗帘）","食物","说不清／多种都有"], only:"tebing"}
-];
-
-/* ================= 体质名与判定参数 ================= */
-const NAME = {pinghe:"平和质",qixu:"气虚质",yangxu:"阳虚质",yinxu:"阴虚质",tanshi:"痰湿质",shire:"湿热质",xueyu:"血瘀质",qiyu:"气郁质",tebing:"特禀质"};
-const ORDER = ["pinghe","qixu","yangxu","yinxu","tanshi","shire","xueyu","qiyu","tebing"];
-const N = {pinghe:4,qixu:3,yangxu:3,yinxu:3,tanshi:3,shire:3,xueyu:3,qiyu:3,tebing:4};
+/* 题库、体质名与判定参数统一来自共享核心。 */
 
 /* ================= 调养文案（ZYTZ-TY-001～049，原文照录） ================= */
 const COPY = {
@@ -398,16 +364,8 @@ const SEASON_RULE = {no:"NJG-TY-011", x:"夫四时阴阳者，万物之根本也
 const SEASON_SPAN = ["2 月中—4 月", "5—7 月", "8—10 月", "11 月—次年 2 月上"];
 /* 季节按当日日期自动判定。口径与原来的季节题一致：2 月 15 日起春、5 月起夏、8 月起秋、11 月起冬;
    改由日期判定，是为了让用户少答一题，同时结果页能报出「现在是哪个季节」。 */
-function seasonNow(d) {
-  d = d || new Date();
-  const m = d.getMonth() + 1, day = d.getDate();
-  if (m === 2) return day >= 15 ? 0 : 3;      // 2 月上仍算冬
-  if (m === 3 || m === 4) return 0;
-  if (m >= 5 && m <= 7) return 1;
-  if (m >= 8 && m <= 10) return 2;
-  return 3;                                   // 11、12、1 月
-}
-function seasonToday(d) { d = d || new Date(); return (d.getMonth() + 1) + " 月 " + d.getDate() + " 日"; }
+function seasonNow(d) { return AssessmentCore.seasonNow(d); }
+function seasonToday(d) { return AssessmentCore.seasonToday(d); }
 /* 体质×季节修正（只有原书明写才填，其余留空） */
 const SEASON_FIX = {
  pinghe:["ZYTZ-TY-004 春季去户外活动，心胸开阔、情绪乐观","ZYTZ-TY-004 夏季易急躁上火，尽量保持平稳心情","ZYTZ-TY-004 秋季多与交流沟通，保持乐观豁达","ZYTZ-TY-004 冬季保养精神以安定清静为根本"],
@@ -690,15 +648,16 @@ function YQ_todayYear(){
   return (now < YQ_cst(YQ_daHan(y))) ? y - 1 : y;
 }
 
+/* 计算入口统一转到共享核心；本文件只保留界面渲染。 */
+YQ_daHan = AssessmentCore.YQ_daHan;
+YQ_ganzhi = AssessmentCore.YQ_ganzhi;
+YQ_birthYear = AssessmentCore.YQ_birthYear;
+YQ_calc = AssessmentCore.YQ_calc;
+YQ_hhmm = AssessmentCore.YQ_hhmm;
+YQ_todayYear = AssessmentCore.YQ_todayYear;
+
 /* 汇总：供结果页调用 */
-function YQ_build(){
-  if(!birth.y || !birth.m || !birth.d) return null;
-  const year = YQ_birthYear(birth.y, birth.m, birth.d, birth.prev);
-  const L = YQ_calc(year);
-  L.stepNo = YQ_stepIndex(year, birth.m, birth.d);
-  L.innate = YQ_innate(L, L.stepNo);
-  return L;
-}
+function YQ_build(){ return AssessmentCore.buildYunqi(birth); }
 
 /* ================= 结果页：先天底色与合判 ================= */
 function YQ_birthText(){
@@ -707,14 +666,7 @@ function YQ_birthText(){
 function YQ_stepText(step){
   return '第 ' + step.no + ' 之气（' + step.time + '）· 主气 ' + step.zhu + ' · 客气 ' + step.ke;
 }
-function YQ_kindOf(R, inn){
-  const A = (inn.marks || []).map(x => x.k);
-  if(!R.main) return 'none';
-  if(R.main === 'pinghe') return 'pinghe';
-  if(A.indexOf(R.main) >= 0) return 'same';
-  if(R.mixed.some(k => A.indexOf(k) >= 0)) return 'part';
-  return 'diff';
-}
+function YQ_kindOf(R, inn){ return AssessmentCore.kindOf(R, inn); }
 function YQ_jointText(kind, innName, mainName){
   const T = {
     same:['同向：先天与后天指同一个方向',
@@ -1119,6 +1071,7 @@ function resetAll() {
   birth.y = null; birth.m = null; birth.d = null; birth.prev = false;
   lastLuck = null;
   lastResult = null;                 // 重答后不保留上一次结果，避免误触导出拿到旧数据
+  AssessmentCloud.reset();
   $("#result").style.display = "none";
   $("#result").innerHTML = "";
   $("#deckWrap").hidden = false;
@@ -1127,54 +1080,8 @@ function resetAll() {
 }
 
 /* ================= 计分 ================= */
-function rawOf(key) {
-  let raw = 0, miss = 0, cnt = 0;
-  Q27.forEach(q => {
-    const hit = q.k.find(k => k[0] === key);
-    if (!hit) return;
-    if (q.g && q.g !== sex) return;                 // 性别专属题不计
-    cnt++;
-    const v = answers[q.id];
-    if (v == null) { miss++; return; }
-    raw += hit[1] ? (6 - v) : v;
-  });
-  if (cnt === 0) return {raw: null, n: N[key], conv: null, miss: 0};
-  const n = cnt;                                   // 湿热：只会命中一道性别题，n=3
-  if (miss > 0) return {raw: null, n: n, conv: null, miss: miss};
-  return {raw: raw, n: n, conv: (raw - n) / (n * 4) * 100, miss: 0};
-}
-
-function judge() {
-  const conv = {}, detail = {};
-  ORDER.forEach(k => {
-    const r = rawOf(k);
-    detail[k] = r;
-    conv[k] = r.conv;
-  });
-  const bad = ORDER.filter(k => k !== "pinghe");
-  const known = bad.filter(k => conv[k] != null);      // 已答、可参与比的
-  const missing = bad.filter(k => conv[k] == null);    // 漏答，不判也不参与平和质的比较
-  const badYes = known.filter(k => conv[k] >= 40)
-                      .sort((a, b) => conv[b] - conv[a]);
-  const badTend = known.filter(k => conv[k] >= 30 && conv[k] < 40)
-                       .sort((a, b) => conv[b] - conv[a]);
-  const p = conv.pinghe;
-  let pingheLevel = "否";
-  // 「其余八项都低」只拿已答项比：漏答项不进 every，否则漏一题就把平和质误压成「否」
-  if (p != null && p >= 60 && known.length > 0) {
-    const allUnder30 = known.every(k => conv[k] < 30);
-    const allUnder40 = known.every(k => conv[k] < 40);
-    if (allUnder30) pingheLevel = "是";
-    else if (allUnder40) pingheLevel = "基本是";
-  }
-  let main = null, mainLevel = "";
-  if (pingheLevel === "是" || pingheLevel === "基本是") { main = "pinghe"; mainLevel = pingheLevel; }
-  else if (badYes.length) { main = badYes[0]; mainLevel = "是"; }
-  else if (badTend.length) { main = badTend[0]; mainLevel = "倾向是"; }
-  const mixed = badYes.filter(k => k !== main).slice(0, 3);
-  return {conv: conv, detail: detail, main: main, mainLevel: mainLevel, mixed: mixed,
-          badYes: badYes, badTend: badTend, pingheLevel: pingheLevel, missing: missing};
-}
+function rawOf(key) { return AssessmentCore.rawOf(key, answers, sex); }
+function judge() { return AssessmentCore.judge(answers, sex); }
 
 /* ================= 补充层分派 ================= */
 const ADVICE = {
@@ -1281,6 +1188,18 @@ function splitCite(text) {
 
 function para(text, no) {
   return "<p>" + esc(text) + (no ? '　<span class="tagline">' + esc(no) + "</span>" : "") + "</p>";
+}
+
+function buildCloudPayload() {
+  const pad = n => String(n).padStart(2, "0");
+  return {
+    questionnaire_version: AssessmentCore.QUESTIONNAIRE_VERSION,
+    assessment_date: nowStamp().slice(0, 10),
+    sex: sex,
+    birth_date: birth.y + "-" + pad(birth.m) + "-" + pad(birth.d),
+    birth_prev_dahan: !!birth.prev,
+    answers: Object.assign({}, answers)
+  };
 }
 
 function renderResult() {
@@ -1425,6 +1344,10 @@ function renderResult() {
       + '<p>本页不构成诊断，不给药名、不给克数、不给方名、不作疾病预测。身体不适请就医。</p>';
     out.appendChild(foot);
   }
+
+  /* 匿名保存（可选）：默认不勾选，不影响查看、CSV 和图片功能 */
+  AssessmentCloud.mount(out, buildCloudPayload());
+
   out.scrollIntoView({behavior: "smooth", block: "start"});
 }
 
