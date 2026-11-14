@@ -254,6 +254,13 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   padding:14px 16px; border-radius:4px; font-size:14px; line-height:1.85; margin:0 0 16px}
 /* hidden 属性必须真的隐藏：.gate 自己写了 display:grid，会盖掉浏览器默认的 [hidden] */
 [hidden]{display:none!important}
+/* 备份短码卡片：保存失败时把整份答卷压成 32 个字符，发给作者即可补录 */
+.code-box{margin:14px 0 0; padding:12px 14px; border:1px dashed var(--line2); border-radius:6px; background:var(--card2)}
+.code-box .code-label{font-size:13px; color:var(--ink2); margin:0 0 6px}
+.code-box .code-val{display:block; font-family:ui-monospace,"SFMono-Regular",Consolas,monospace; font-size:15px;
+  line-height:1.6; letter-spacing:.05em; word-break:break-all; color:var(--seal2); user-select:all; -webkit-user-select:all}
+.code-box .code-tip{font-size:12.5px; line-height:1.65; color:var(--ink2); margin:8px 0 0}
+.code-box.is-ok{border-color:var(--seal); background:var(--card)}
 </style>
 </head>
 <body>
@@ -316,7 +323,8 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 <!-- 改动 config.public.js / assessment-core.js / cloud.js 后，把下面的 v= 数字 +1，强制浏览器重新下载，避免访客用到旧缓存。 -->
 <script src="config.public.js?v=3"></script>
 <script src="assessment-core.js?v=3"></script>
-<script src="cloud.js?v=4"></script>
+<script src="result-code.js?v=1"></script>
+<script src="cloud.js?v=5"></script>
 <script>
 /* ================= 启动自检：脚本没加载成功时给可见提示，别留白屏 ================= */
 function showFatal(msg) {
@@ -1269,6 +1277,46 @@ function buildCloudPayload() {
   };
 }
 
+/* ================= 备份短码 =================
+   为什么要有它：访客手机网络连不上服务器时，自动保存会失败，那份答卷就丢了。
+   这里把「性别 + 生日 + 评估日期 + 全部答案」压成 32 个字符（混合进制 + Base32），
+   访客复制发给作者，作者用 tools/upload-code.mjs 还原后补录，一条都不丢。
+   注意：短码含出生日期与全部答案，属敏感个人信息，提示里必须讲清只发给作者。 */
+function copyBackupCode(btn) {
+  let code;
+  try {
+    code = ZiceCode.encode(buildCloudPayload());
+  } catch (e) {
+    alert("生成备份短码失败：" + ((e && e.message) || e));
+    return;
+  }
+  const out = $("#result");
+  const old = out.querySelector(".code-box");
+  if (old) old.remove();
+
+  const box = el("div", "code-box");
+  box.innerHTML =
+    '<p class="code-label">备份短码（含你的性别、出生日期和全部答案）</p>' +
+    '<span class="code-val">' + esc(code) + "</span>" +
+    '<p class="code-tip">保存失败时，把上面这一行发给问卷作者，他那边能还原成完整答卷并补录，结果不会丢。' +
+    "这段码属于个人信息，只发给作者本人，不要发到群里或公开的页面。</p>";
+  out.appendChild(box);
+  box.scrollIntoView({behavior: "smooth", block: "center"});
+
+  const label = btn ? btn.textContent : "";
+  const flash = ok => {
+    if (!btn) return;
+    box.classList.toggle("is-ok", ok);
+    btn.textContent = ok ? "已复制 ✓" : "请长按上面的短码复制";
+    setTimeout(() => { btn.textContent = label; }, 2200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(() => flash(true), () => flash(false));
+  } else {
+    flash(false);
+  }
+}
+
 function renderResult() {
   const R = judge();
   lastResult = R;
@@ -1398,11 +1446,14 @@ function renderResult() {
     b0.addEventListener("click", chooseShot);
     const b1 = el("button", "ghost", "导出答题记录 CSV");
     b1.addEventListener("click", exportCSV);
+    /* 保存失败时的兜底：把整份答卷压成 32 个字符，发给作者即可补录 */
+    const b3 = el("button", "ghost", "复制备份短码");
+    b3.addEventListener("click", () => copyBackupCode(b3));
     const b2 = el("button", "ghost", "重答");
     b2.addEventListener("click", () => {
       resetAll();
     });
-    acts.appendChild(b0); acts.appendChild(b1); acts.appendChild(b2);
+    acts.appendChild(b0); acts.appendChild(b1); acts.appendChild(b3); acts.appendChild(b2);
     out.appendChild(acts);
 
     const foot = el("div", "foot");
