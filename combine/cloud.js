@@ -10,6 +10,8 @@
         手机网络常有"一阵一阵连不上"的情况，重试能救回大部分。
      2) 3 次都失败，就把这份答卷暂存在本机浏览器里，联网/下次打开本页时自动补传。
         补传用同一个 client_submission_id，服务端是幂等的，不会产生重复记录。
+        这个标识同时被编进「备份短码」，作者若先拿短码手工补录了，访客再补传也会
+        命中同一个唯一约束被挡掉，同样不会变两条。
      3) 暂存内容只放在本设备，补传成功即删除。 */
   const QUEUE_KEY = "assessment_pending_v1";
   const MAX_ATTEMPTS = 3;
@@ -19,7 +21,13 @@
   let saving = false;
   let saved = false;
 
+  /* 提交标识：优先用短码库的 48 bit 版本 —— 它能被编进备份短码，作者补录时写库用的
+     就是同一个标识，访客下次联网补传会命中唯一约束，不会变成两条。
+     短码库没加载上时退回随机 UUID（只能保证本机重试不重复）。 */
   function newId() {
+    if (window.ZiceCode && typeof window.ZiceCode.newSubmissionId === "function") {
+      return window.ZiceCode.newSubmissionId();
+    }
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
       return window.crypto.randomUUID();
     }
@@ -29,6 +37,15 @@
       const v = c === "x" ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
+  }
+
+  /* 把任意标识收敛成规范形态：老队列里存的整串随机 UUID，会收敛成同一个 48 bit 标识，
+     这样它和短码里编的、服务端记的才对得上。 */
+  function canonicalId(id) {
+    if (window.ZiceCode && typeof window.ZiceCode.normalizeSubmissionId === "function") {
+      return window.ZiceCode.normalizeSubmissionId(id);
+    }
+    return id || newId();
   }
 
   function sleep(ms) {
@@ -137,9 +154,12 @@
     if (!configured()) return;
     const list = readQueue();
     for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      /* 老队列里可能存着整串随机 UUID，补传前统一收敛，跟短码里的标识对齐 */
+      const id = canonicalId(item.client_submission_id);
       try {
-        await sendOnce(list[i]);
-        dequeue(list[i].client_submission_id);
+        await sendOnce(Object.assign({}, item, {client_submission_id: id}));
+        dequeue(item.client_submission_id);
       } catch (e) { /* 还是连不上，留着下次 */ }
     }
   }
@@ -186,7 +206,7 @@
       status.textContent = "正在保存，请稍候…";
 
       const payload = Object.assign({}, rawPayload, {
-        client_submission_id: clientSubmissionId,
+        client_submission_id: canonicalId(clientSubmissionId),
         consent: true,
         consent_version: CONSENT_VERSION
       });
@@ -235,5 +255,11 @@
     bootFlush();
   }
 
-  window.AssessmentCloud = {mount: mount, reset: reset, flushQueue: flushQueue};
+  /* currentSubmissionId：结果页生成备份短码时要用它，保证短码里的标识和真正写库的一致 */
+  window.AssessmentCloud = {
+    mount: mount,
+    reset: reset,
+    flushQueue: flushQueue,
+    currentSubmissionId: function () { return canonicalId(clientSubmissionId); }
+  };
 })();

@@ -323,8 +323,8 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 <!-- 改动 config.public.js / assessment-core.js / cloud.js 后，把下面的 v= 数字 +1，强制浏览器重新下载，避免访客用到旧缓存。 -->
 <script src="config.public.js?v=3"></script>
 <script src="assessment-core.js?v=3"></script>
-<script src="result-code.js?v=1"></script>
-<script src="cloud.js?v=5"></script>
+<script src="result-code.js?v=2"></script>
+<script src="cloud.js?v=6"></script>
 <script>
 /* ================= 启动自检：脚本没加载成功时给可见提示，别留白屏 ================= */
 function showFatal(msg) {
@@ -1279,13 +1279,21 @@ function buildCloudPayload() {
 
 /* ================= 备份短码 =================
    为什么要有它：访客手机网络连不上服务器时，自动保存会失败，那份答卷就丢了。
-   这里把「性别 + 生日 + 评估日期 + 全部答案」压成 32 个字符（混合进制 + Base32），
-   访客复制发给作者，作者用 tools/upload-code.mjs 还原后补录，一条都不丢。
+   这里把「性别 + 生日 + 评估日期 + 全部答案 + 本次提交标识」压成 35 个字符
+   （混合进制 + Base32），访客复制发给作者，作者用 tools/upload-code.mjs 还原后补录。
+   带上提交标识是为了防重：作者补录后，访客本机再自动补传会命中同一个唯一约束被挡掉，
+   不会变成两条。
    注意：短码含出生日期与全部答案，属敏感个人信息，提示里必须讲清只发给作者。 */
 function copyBackupCode(btn) {
   let code;
   try {
-    code = ZiceCode.encode(buildCloudPayload());
+    const payload = buildCloudPayload();
+    /* 必须带上本次会话的提交标识：没有它，作者补录的那条和访客本机补传的那条
+       编号不一致，服务端拦不住重复。 */
+    if (window.AssessmentCloud && AssessmentCloud.currentSubmissionId) {
+      payload.client_submission_id = AssessmentCloud.currentSubmissionId();
+    }
+    code = ZiceCode.encode(payload);
   } catch (e) {
     alert("生成备份短码失败：" + ((e && e.message) || e));
     return;
@@ -1299,7 +1307,8 @@ function copyBackupCode(btn) {
     '<p class="code-label">备份短码（含你的性别、出生日期和全部答案）</p>' +
     '<span class="code-val">' + esc(code) + "</span>" +
     '<p class="code-tip">保存失败时，把上面这一行发给问卷作者，他那边能还原成完整答卷并补录，结果不会丢。' +
-    "这段码属于个人信息，只发给作者本人，不要发到群里或公开的页面。</p>";
+    "这段码带着本次提交的编号，作者补录后你下次打开页面也不会重复上传一次。" +
+    "码里属于个人信息，只发给作者本人，不要发到群里或公开的页面。</p>";
   out.appendChild(box);
   box.scrollIntoView({behavior: "smooth", block: "center"});
 
