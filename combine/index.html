@@ -273,6 +273,7 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
       <p class="lead">关于本次数据保存</p>
       <p>本问卷会保存你的<strong>性别、出生日期、问卷答案</strong>，以及由服务端计算的体质判定与五运六气结果，用于统计分析和改进判定标准。不收集姓名、手机号或联系方式。</p>
       <p>数据以随机编号匿名保存，结果页会显示记录编号，请自行保存，以便日后申请删除该记录。本次同意仅对当前这一页有效，重新打开页面需要再次确认。</p>
+      <p>若上传时网络中断，本次记录会先<strong>暂存在本机浏览器</strong>，待网络恢复或下次打开本页时自动补传；补传成功后立即从本机删除。</p>
       <p class="note">不同意保存则无法使用本问卷，你可以直接关闭本页面。</p>
       <label class="gate-consent">
         <input type="checkbox" id="gateConsent">
@@ -315,7 +316,7 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 <!-- 改动 config.public.js / assessment-core.js / cloud.js 后，把下面的 v= 数字 +1，强制浏览器重新下载，避免访客用到旧缓存。 -->
 <script src="config.public.js?v=3"></script>
 <script src="assessment-core.js?v=3"></script>
-<script src="cloud.js?v=3"></script>
+<script src="cloud.js?v=4"></script>
 <script>
 /* ================= 启动自检：脚本没加载成功时给可见提示，别留白屏 ================= */
 function showFatal(msg) {
