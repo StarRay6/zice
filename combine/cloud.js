@@ -52,10 +52,16 @@
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
-  function configured() {
+  /* 数据接口地址：优先 apiBase（境内函数计算），回退 supabaseUrl（旧配置，便于回滚）。
+     不再限制必须是 *.supabase.co —— 换入口只改 config.public.js 一行。 */
+  function apiBase() {
     const config = window.APP_PUBLIC_CONFIG || {};
-    return /^https:\/\/.+\.supabase\.co\/?$/.test(config.supabaseUrl || "") &&
-      typeof config.supabaseAnonKey === "string" && config.supabaseAnonKey.length > 20;
+    return String(config.apiBase || config.supabaseUrl || "").replace(/\/$/, "");
+  }
+
+  function configured() {
+    const base = apiBase();
+    return /^https:\/\/[^\s]+$/.test(base) && base.length > 12;
   }
 
   function element(tag, className, text) {
@@ -105,16 +111,15 @@
   }
 
   async function sendOnce(payload) {
-    const config = window.APP_PUBLIC_CONFIG;
     const controller = new AbortController();
     const timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
     try {
-      const response = await fetch(config.supabaseUrl.replace(/\/$/, "") + "/functions/v1/submit-assessment", {
+      /* 云函数同时接受 /submit 和旧路径 /functions/v1/submit-assessment，
+         这里沿用旧路径，万一要回滚到 Supabase 也不用改。 */
+      const response = await fetch(apiBase() + "/functions/v1/submit-assessment", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "apikey": config.supabaseAnonKey,
-          "Authorization": "Bearer " + config.supabaseAnonKey
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload),
         signal: controller.signal
@@ -196,7 +201,7 @@
         return;
       }
       if (!configured()) {
-        fail("数据保存尚未配置：请先在 config.public.js 填写公开的 Supabase 配置。");
+        fail("数据保存尚未配置：请先在 config.public.js 填写接口地址（apiBase）。");
         return;
       }
 
