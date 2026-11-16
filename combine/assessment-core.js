@@ -324,7 +324,9 @@
     const done = Q27.every(q => q.g && q.g !== sex ? true : answers[q.id] != null);
     if (!done) return false;
     const r = rawOf("tebing",answers,sex);
-    return r.conv != null && r.conv >= 30;
+    if (r.conv == null) return false;
+    // S25 自述「容易过敏」选 1（根本没有）时，要求更强的证据才追问过敏原：门槛升到 40
+    return r.conv >= (answers.S25 === 1 ? 40 : 30);
   }
 
   function parseBirthDate(value) {

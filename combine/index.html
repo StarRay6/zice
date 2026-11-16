@@ -931,7 +931,7 @@ button.ghost:disabled{opacity:.48; cursor:not-allowed}
 
 <!-- 改动 config.public.js / assessment-core.js / cloud.js 后，把下面的 v= 数字 +1，强制浏览器重新下载，避免访客用到旧缓存。 -->
 <script src="config.public.js?v=4"></script>
-<script src="assessment-core.js?v=3"></script>
+<script src="assessment-core.js?v=4"></script>
 <script src="result-code.js?v=2"></script>
 <script src="cloud.js?v=8"></script>
 <script>
@@ -1468,7 +1468,9 @@ function tebingHit() {
   const done = Q27.every(q => (q.g && q.g !== sex) ? true : answers[q.id] != null);
   if (!done) return false;
   const r = rawOf("tebing");
-  return r.conv != null && r.conv >= 30;
+  if (r.conv == null) return false;
+  // S25 自述「容易过敏」选 1（根本没有）时，要求更强的证据才追问过敏原：门槛升到 40
+  return r.conv >= (answers.S25 === 1 ? 40 : 30);
 }
 
 /* P35（特禀过敏原）是否在列：按当前答案现算 */
@@ -1485,7 +1487,7 @@ function pageList() {
   Q27.forEach(q => { if (q.g && q.g !== sex) return; list.push({id: q.id, seg: "判定", t: q.t, o: OPTS5, note: q.note}); });
   Q8.forEach(q => {
     // P35 照例进列。它出不出现由 pageOn() 在每次翻页时按当前答案现算，
-    // 不在构建题库时拍快照——否则回退改判定题、特禀转化分跨过 30 后，题目会卡住不动。
+    // 不在构建题库时拍快照——否则回退改判定题、特禀转化分跨过门槛后，题目会卡住不动。
     list.push({id: q.id, seg: "补充", t: q.t, o: q.o, note: q.note});
   });
   return list;
@@ -1834,7 +1836,7 @@ function adviceFor(body) {
   // P34 久坐
   if (a(34) >= 2) push("久坐", 34, ADVICE.P34[a(34) - 1]);
   // P35 过敏原（仅特禀）
-  if (a(35)) push("过敏原", 35, ADVICE.P35[a(35) - 1]);   // 准入门是「特禀转化分 ≥30 且已作答」，不要求特禀是主体质
+  if (a(35)) push("过敏原", 35, ADVICE.P35[a(35) - 1]);   // 准入门由 tebingHit() 决定（S25=1 时 ≥40，否则 ≥30），且已作答
   return out;
 }
 
