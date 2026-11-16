@@ -169,6 +169,44 @@
     }
   }
 
+  /* ---------- 反馈 ---------- */
+  /* 建议内容不进补传队列：它不是答题数据，丢了用户重写一次就行，
+     没必要为它在 localStorage 里堆一份副本。失败就让用户当场重试。 */
+  async function sendFeedback(feedback) {
+    if (!configured()) throw new Error("接口地址未配置");
+    const controller = new AbortController();
+    const timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
+
+    let payload = {
+      text: String((feedback && feedback.text) || "").trim(),
+      contact: String((feedback && feedback.contact) || "").trim(),
+      page: (feedback && feedback.page) || "",
+      submission_id: (feedback && feedback.submission_id) || ""
+    };
+    /* 顺手带上当前这份答卷的编号：用户反馈"结果看不懂"时能直接对上记录。
+       还没生成编号（同意门阶段）就留空。 */
+    if (!payload.submission_id) {
+      try { payload.submission_id = canonicalId(clientSubmissionId); } catch (e) { /* 留空 */ }
+    }
+
+    try {
+      const response = await fetch(apiBase() + "/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      let data = {};
+      try { data = await response.json(); } catch (e) { /* 非 JSON 响应 */ }
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error ? String(data.error) : "HTTP " + response.status);
+      }
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   function mount(container, rawPayload) {
     const card = element("section", "data-save");
     card.appendChild(element("p", "lead", "数据保存状态"));
@@ -265,6 +303,7 @@
     mount: mount,
     reset: reset,
     flushQueue: flushQueue,
+    sendFeedback: sendFeedback,
     currentSubmissionId: function () { return canonicalId(clientSubmissionId); }
   };
 })();

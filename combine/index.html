@@ -204,6 +204,50 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   transition:opacity .25s ease, transform .25s ease; z-index:60; white-space:nowrap;
 }
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+/* 反馈：右下浮标 + 弹层 */
+.fb-fab{
+  position:fixed; right:14px; bottom:88px; z-index:55;
+  width:56px; height:56px; padding:0;
+  border:1px solid var(--line2); border-radius:50%;
+  background:var(--card2); color:var(--seal);
+  font-family:var(--sans); font-size:13px; letter-spacing:1px;
+  box-shadow:0 3px 14px rgba(60,40,15,.18); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .18s ease;
+}
+.fb-fab:hover{background:#f7efd8}
+.fb-fab:focus-visible{outline:2px solid var(--seal); outline-offset:3px}
+.fb-mask{position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(44,32,16,.42); z-index:70; display:none}
+.fb-mask.show{display:block}
+.fb-panel{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(92vw,460px); max-height:86vh; overflow:auto;
+  background:var(--card2); border:1px solid var(--line2); border-radius:6px;
+  box-shadow:0 8px 32px rgba(50,35,15,.24); padding:22px 20px 18px;
+  z-index:71; display:none; text-align:left;
+}
+.fb-panel.show{display:block}
+.fb-panel h3{font-size:18px; margin:0 0 6px; letter-spacing:2px; color:var(--ink); font-weight:700}
+.fb-lead{font-size:13px; color:var(--ink2); margin:0 0 14px; line-height:1.75}
+.fb-panel textarea,.fb-panel input[type="email"]{
+  width:100%; font-family:var(--sans); font-size:15px; line-height:1.7; color:var(--ink);
+  background:#fffdf5; border:1px solid var(--line2); border-radius:4px; padding:10px 12px;
+}
+.fb-panel textarea{min-height:118px; resize:vertical}
+.fb-panel textarea:focus-visible,.fb-panel input[type="email"]:focus-visible{outline:2px solid var(--seal); outline-offset:1px}
+.fb-count{text-align:right; font-size:12px; color:var(--ink2); margin:6px 0 12px; font-variant-numeric:tabular-nums}
+.fb-count.over{color:var(--seal); font-weight:700}
+.fb-actions{display:flex; gap:10px; margin:16px 0 0}
+.fb-actions button{flex:1; min-height:46px; font-size:15px; padding:12px}
+.fb-msg{font-size:13px; line-height:1.7; margin:10px 0 0; min-height:20px}
+.fb-msg.err{color:var(--seal2)}
+.fb-note{font-size:12px; color:var(--ink2); line-height:1.7; margin:10px 0 0}
+/* 提交成功后的感谢态：把输入区整块换掉，不再留一行小绿字 */
+.fb-done{text-align:center; padding:30px 8px 12px}
+.fb-done[hidden]{display:none}
+.fb-done-title{font-size:21px; font-weight:700; letter-spacing:3px; text-indent:3px; color:var(--seal); margin:0 0 12px}
+.fb-done-sub{font-size:14px; color:var(--ink2); line-height:1.9; margin:0 0 24px}
+.fb-done button{display:block; width:100%; max-width:180px; margin:0 auto}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 #deck{position:relative}
 .card.shake{animation:shake .4s ease; border-color:#c0392b}
@@ -316,6 +360,30 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 
   <div class="toast" id="toast"></div>
 
+  <!-- 反馈入口：答题过程中随时可点，不打断做题 -->
+  <button class="fb-fab" id="fbOpen" type="button" aria-label="反馈建议">反馈</button>
+  <div class="fb-mask" id="fbMask"></div>
+  <div class="fb-panel" id="fbPanel" role="dialog" aria-modal="true" aria-labelledby="fbTitle" aria-hidden="true">
+    <div id="fbForm">
+      <h3 id="fbTitle">提个建议</h3>
+      <p class="fb-lead">题目看不懂、选项不合适、结果有疑问，或者想加什么功能，都可以写在这里。</p>
+      <textarea id="fbText" maxlength="1000" placeholder="比如：第 12 题的表述我分不清「容易疲乏」和「容易气短」的区别……"></textarea>
+      <div class="fb-count"><span id="fbCount">0</span> / 1000</div>
+      <input type="email" id="fbContact" maxlength="80" inputmode="email" autocomplete="email" placeholder="邮箱（选填，方便我回信给你）">
+      <div class="fb-actions">
+        <button class="ghost" id="fbCancel" type="button">取消</button>
+        <button class="primary" id="fbSend" type="button">发送</button>
+      </div>
+      <p class="fb-msg" id="fbMsg" role="status" aria-live="polite"></p>
+      <p class="fb-note">内容存于境内服务器。请不要写他人的隐私信息。</p>
+    </div>
+    <div class="fb-done" id="fbDone" hidden>
+      <p class="fb-done-title">感谢您的反馈</p>
+      <p class="fb-done-sub">每条建议我都会看，能改的会尽快改。留了邮箱的，我会回信。</p>
+      <button class="primary" id="fbDoneClose" type="button">关闭</button>
+    </div>
+  </div>
+
   <section id="result" aria-live="polite"></section>
 
 </div>
@@ -324,7 +392,7 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 <script src="config.public.js?v=4"></script>
 <script src="assessment-core.js?v=3"></script>
 <script src="result-code.js?v=2"></script>
-<script src="cloud.js?v=7"></script>
+<script src="cloud.js?v=8"></script>
 <script>
 /* ================= 启动自检：脚本没加载成功时给可见提示，别留白屏 ================= */
 function showFatal(msg) {
@@ -1956,6 +2024,147 @@ try {
 } catch (e) {
   showFatal("题目渲染失败：" + (e && e.message ? e.message : e) + "。请按 Ctrl+F5 强制刷新页面。");
 }
+</script>
+
+<script>
+/* 反馈：独立小模块，不依赖页面其它逻辑；它出错也不能影响答题 */
+(function () {
+  var fab = document.getElementById("fbOpen");
+  var mask = document.getElementById("fbMask");
+  var panel = document.getElementById("fbPanel");
+  var textEl = document.getElementById("fbText");
+  var contactEl = document.getElementById("fbContact");
+  var countEl = document.getElementById("fbCount");
+  var msgEl = document.getElementById("fbMsg");
+  var sendBtn = document.getElementById("fbSend");
+  var cancelBtn = document.getElementById("fbCancel");
+  var formEl = document.getElementById("fbForm");
+  var doneEl = document.getElementById("fbDone");
+  var doneBtn = document.getElementById("fbDoneClose");
+  var toastEl = document.getElementById("toast");
+  var sending = false;
+  var doneTimer = null;
+
+  if (!fab || !mask || !panel || !textEl || !contactEl || !sendBtn || !cancelBtn || !formEl || !doneEl || !doneBtn) return;
+
+  function setMsg(kind, text) {
+    msgEl.className = "fb-msg" + (kind ? " " + kind : "");
+    msgEl.textContent = text || "";
+  }
+
+  function updateCount() {
+    var n = textEl.value.length;
+    countEl.textContent = n;
+    countEl.parentNode.className = "fb-count" + (n >= 1000 ? " over" : "");
+  }
+
+  /* 表单态与感谢态互斥切换：发送成功后把整块输入区换掉，
+     比在底部留一行小绿字更像"这件事结束了"。 */
+  function showDone() {
+    formEl.hidden = true;
+    doneEl.hidden = false;
+    clearTimeout(doneTimer);
+    doneTimer = setTimeout(close, 4000);
+  }
+
+  function resetPanel() {
+    clearTimeout(doneTimer);
+    doneTimer = null;
+    formEl.hidden = false;
+    doneEl.hidden = true;
+    setMsg("", "");
+  }
+
+  function open() {
+    resetPanel();
+    panel.classList.add("show");
+    mask.classList.add("show");
+    panel.setAttribute("aria-hidden", "false");
+    setTimeout(function () { textEl.focus(); }, 30);
+  }
+
+  function close() {
+    clearTimeout(doneTimer);
+    doneTimer = null;
+    panel.classList.remove("show");
+    mask.classList.remove("show");
+    panel.setAttribute("aria-hidden", "true");
+    resetPanel();
+  }
+
+  function pageName() {
+    var r = document.getElementById("result");
+    if (r && window.getComputedStyle(r).display !== "none") return "result";
+    var gate = document.getElementById("consentGate");
+    if (gate && !gate.hidden) return "intro";
+    return "answers";
+  }
+
+  function toast(message) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add("show");
+    clearTimeout(toast._tm);
+    toast._tm = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+  }
+
+  fab.addEventListener("click", open);
+  mask.addEventListener("click", close);
+  cancelBtn.addEventListener("click", close);
+  doneBtn.addEventListener("click", close);
+  textEl.addEventListener("input", updateCount);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && panel.classList.contains("show")) close();
+  });
+
+  sendBtn.addEventListener("click", function () {
+    if (sending) return;
+
+    var text = textEl.value.trim();
+    if (text.length < 2) {
+      setMsg("err", "多写两个字吧，不然我看不出问题在哪。");
+      textEl.focus();
+      return;
+    }
+
+    /* 联系方式只要邮箱。填了就得像个邮箱，否则我回不了信；留空也允许。 */
+    var email = contactEl.value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      setMsg("err", "邮箱看着不太对，检查一下有没有 @ 和完整的域名；也可以留空。");
+      contactEl.focus();
+      return;
+    }
+
+    var cloud = window.AssessmentCloud;
+    if (!cloud || typeof cloud.sendFeedback !== "function") {
+      setMsg("err", "页面脚本没加载完整，请按 Ctrl+F5 强制刷新后再试。");
+      return;
+    }
+
+    sending = true;
+    sendBtn.disabled = true;
+    sendBtn.textContent = "发送中…";
+    setMsg("", "");
+
+    cloud.sendFeedback({
+      text: text,
+      contact: email,
+      page: pageName()
+    }).then(function () {
+      textEl.value = "";
+      contactEl.value = "";
+      updateCount();
+      showDone();
+      toast("感谢您的反馈");
+    }).catch(function (err) {
+      setMsg("err", "没发出去：" + ((err && err.message) || "网络异常") + "。内容还在，可以稍后再试。");
+    }).then(function () {
+      sending = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = "发送";
+    });
+  });
+})();
 </script>
 
 </body>
