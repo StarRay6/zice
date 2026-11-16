@@ -7,14 +7,20 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f0e8d6'/%3E%3Crect x='6' y='6' width='20' height='20' fill='none' stroke='%23a83226' stroke-width='2'/%3E%3Cpath d='M11 21V11h4.6a3.4 3.4 0 0 1 0 6.8H11' fill='none' stroke='%232c2c2c' stroke-width='2'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg1:#f5efe0; --bg2:#ede4cc; --paper:#f0e8d6;
-  --card:#faf6ea; --card2:#fffdf5;
-  --ink:#2c2c2c; --ink2:#8a7a5a;
-  --line:#d4c5a0; --line2:#c9b88e; --line3:#e0d3b4;
-  --brown:#b8a682; --tan:#d8c9a0; --tan2:#d8c9a8; --tanink:#5c4a28;
-  --seal:#a83226; --seal2:#8b2820; --sealsoft:#e5d8b8;
-  --warnbg:#fdf3dc; --warnline:#c9a96e; --warnink:#7a4a1a;
+  --bg1:#f8f2e5; --bg2:#ece2ce; --paper:#f4ecdc;
+  --card:#fffaf0; --card2:#fbf4e5; --surface:#fffdf8;
+  --navcard:#f3e6cd; --navcardhover:#ebdcc0;
+  --ink:#25221c; --ink2:#655b4d; --ink3:#877963;
+  --line:#dccdaf; --line2:#c8b48c; --line3:#ebdfc9;
+  --brown:#b49b73; --tan:#e7d9bd; --tan2:#e8ddc9; --tanink:#564733;
+  --seal:#9b382d; --seal2:#7c2a21; --sealsoft:#f2dfd8;
+  --jade:#566a58; --jade2:#425444; --jadesoft:#e8eee4;
+  --warnbg:#fbf3dd; --warnline:#d8c298; --warnink:#725026;
+  --serif:"Songti SC","STSong","Noto Serif SC","SimSun",serif;
   --sans:system-ui,-apple-system,"Microsoft YaHei","PingFang SC",sans-serif;
+  --shadow-sm:0 1px 2px rgba(55,38,16,.04),0 8px 24px rgba(55,38,16,.055);
+  --shadow-md:0 14px 40px rgba(55,38,16,.10);
+  --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -134,6 +140,18 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .verdict h3{font-size:26px; margin:0; line-height:1.4; letter-spacing:3px}
 .verdict h3 em{font-style:normal; color:var(--seal)}
 .verdict .also{font-size:14px; color:var(--ink2); margin:9px 0 0; line-height:1.8}
+.verdict-main{min-width:0}
+.verdict-aside{margin-top:16px; padding-top:14px; border-top:1px solid var(--line3); display:flex; flex-direction:column; gap:14px}
+.verdict-note{min-width:0}
+.verdict-note h4{font-size:15px; line-height:1.5; font-weight:700; letter-spacing:1.5px; color:var(--seal); margin:0 0 4px}
+.verdict-note .note-b{font-size:13.5px; line-height:1.85; color:var(--ink2)}
+.verdict-note .note-b p{margin:0 0 5px}
+.verdict-note .note-b p:last-child{margin-bottom:0}
+@media (min-width:760px){
+  .verdict.has-aside{display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); column-gap:24px; align-items:start}
+  .verdict-aside{margin-top:0; padding-top:0; border-top:0; border-left:1px solid var(--line3); padding-left:22px; gap:18px}
+  .verdict-note .note-b{font-size:14px; line-height:1.9}
+}
 .bars{margin:0 0 16px; background:var(--card); border:1px solid var(--line); border-radius:4px; box-shadow:0 2px 12px rgba(60,40,15,.1); padding:18px 20px}
 .bar-row{margin:0 0 12px}
 .bar-head{display:flex; justify-content:space-between; font-size:14px; line-height:1.6}
@@ -143,21 +161,114 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 .gauge i.hot{background:var(--seal2)}
 .gauge b{position:absolute; top:-3px; bottom:-3px; width:1px; background:var(--ink2); opacity:.55}
 .thr{font-size:12px; color:var(--ink2); margin:8px 0 0; line-height:1.7}
-/* 展开行 */
-.fold{border:1px solid var(--line); border-radius:4px; background:var(--card); margin:0 0 10px; overflow:hidden}
-.fold-h{
-  width:100%; text-align:left; background:transparent; border:0; cursor:pointer;
-  font-family:var(--sans); color:var(--ink); padding:14px 18px; display:flex; gap:12px; align-items:baseline; min-height:48px;
+/* 结果目录：长方形卡片网格，尽量一屏内排完；点卡片在原位放大查看 */
+.res-nav{
+  margin:4px 0 16px; padding:13px 14px 13px; border:1px solid var(--line); border-radius:8px;
+  background:var(--card2); box-shadow:none;
 }
-.fold-h .t{flex:0 0 auto; font-weight:700; font-size:15px; letter-spacing:1px}
-.fold-h .s{flex:1 1 auto; min-width:0; font-size:14px; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.fold-h .x{flex:0 0 auto; font-size:13px; color:var(--ink2)}
-.fold-b{display:none; padding:0 18px 16px; font-size:15px; line-height:1.9}
-.fold-b p{margin:0 0 9px}
-.fold.open .fold-b{display:block}
-.fold.open .fold-h .x{color:var(--seal)}
-.fold-h:hover .t{color:var(--seal)}
-.fold-h:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.res-nav-head{display:flex; align-items:baseline; justify-content:space-between; gap:6px 12px; flex-wrap:wrap; margin:0 0 9px}
+.res-nav-head b{font-size:15px; letter-spacing:2px; color:var(--ink)}
+.res-nav-head span{font-size:12px; color:var(--ink2); line-height:1.5}
+.res-nav-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px}
+@media (min-width:620px){ .res-nav-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+.nav-card{
+  display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto;
+  column-gap:0; align-items:center; text-align:left; min-height:60px; padding:8px 11px;
+  border:1px solid var(--line); border-radius:6px;
+  background:var(--navcard); color:var(--ink); font-family:var(--sans); cursor:pointer;
+  box-shadow:none;
+  transition:background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.nav-card:hover{background:var(--navcardhover); border-color:var(--line2); box-shadow:none}
+.nav-card:active{transform:none}
+.nav-card:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.nav-card .t{grid-column:1; grid-row:1; font-size:15px; font-weight:700; letter-spacing:.4px; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.nav-card .s{grid-column:1; grid-row:2; font-size:12px; line-height:1.4; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.nav-card:hover .t{color:var(--seal)}
+
+/* 详情卡作为弹层的取数来源，页面下方不再铺开；打印时再展开 */
+.detail{
+  background:var(--card); border:1px solid var(--line); border-radius:8px;
+  box-shadow:0 2px 10px rgba(60,40,15,.07); margin:0 0 14px; overflow:hidden;
+}
+.detail-h{
+  display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto;
+  row-gap:2px; align-items:center; padding:13px 15px 11px;
+  border-bottom:1px dashed var(--line3); background:var(--card2);
+}
+.detail-h .t{grid-column:1; grid-row:1; font-size:17px; font-weight:700; letter-spacing:1px; line-height:1.4}
+.detail-h .s{grid-column:1; grid-row:2; font-size:12.5px; line-height:1.5; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.detail-b{padding:14px 16px 16px; font-size:15px; line-height:1.9}
+.detail-b p{margin:0 0 9px}
+.detail-b p:last-child{margin-bottom:0}
+.detail-b .luck,.detail-b .joint,.detail-b .bars,.detail-b .foot{
+  padding:0; margin:0; border:0; border-radius:0; background:transparent; box-shadow:none;
+}
+/* 移动端详情单栏；桌面端两栏排卡片（打印时使用） */
+.detail-grid{display:block}
+@media (min-width:760px){
+  .detail-grid{column-count:2; column-gap:14px}
+  .detail{display:inline-block; width:100%; vertical-align:top; -webkit-column-break-inside:avoid; break-inside:avoid}
+}
+#result .detail{display:none}
+
+/* 详情弹层：从被点中的卡片位置缩放展开，关闭时缩回原卡片 */
+.detail-modal{position:fixed; inset:0; z-index:90}
+.detail-modal[hidden]{display:none}
+.detail-modal-mask{
+  position:absolute; inset:0; background:rgba(40,28,12,.46); opacity:0;
+  transition:opacity .3s ease; -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+}
+.detail-modal.is-open .detail-modal-mask{opacity:1}
+.detail-modal-card{
+  position:fixed; left:0; top:0; width:680px; height:auto; display:flex; overflow:hidden;
+  border:1px solid var(--line2); border-radius:12px; background:var(--card);
+  box-shadow:0 24px 80px rgba(40,24,8,.30); transform-origin:0 0; will-change:transform;
+}
+.detail-modal-inner{display:flex; flex-direction:column; width:100%; height:100%; min-height:0; opacity:0; transition:opacity .22s ease}
+.detail-modal-card.is-content .detail-modal-inner{opacity:1}
+.detail-modal-h{
+  flex:none; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start;
+  padding:18px 20px 14px; border-bottom:1px dashed var(--line3); background:var(--card2);
+}
+.detail-modal-kicker{font-size:11px; letter-spacing:.18em; color:var(--seal); margin:0 0 3px}
+.detail-modal-h h2{font-size:22px; line-height:1.4; letter-spacing:1px; margin:0 0 4px; color:var(--ink)}
+.detail-modal-sub{font-size:13px; line-height:1.6; color:var(--ink2); margin:0}
+.detail-modal-close{
+  width:36px; height:36px; padding:0; border:1px solid var(--line); border-radius:50%;
+  background:var(--card); color:var(--ink2); font-size:20px; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.detail-modal-close:hover{color:var(--seal); border-color:var(--line2); background:#f7efd8}
+.detail-modal-close:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.detail-modal-scroll{
+  flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; -webkit-overflow-scrolling:touch;
+}
+.detail-modal-scroll::-webkit-scrollbar{width:6px}
+.detail-modal-scroll::-webkit-scrollbar-thumb{background:var(--line2); border-radius:99px}
+.detail-modal-scroll .detail-b{padding:16px 22px 20px; font-size:15px; line-height:1.9}
+.detail-modal-scroll .detail-b p{margin:0 0 9px}
+.detail-modal-scroll .detail-b p:last-child{margin-bottom:0}
+.detail-modal-foot{
+  flex:none; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:9px 14px 10px 20px; border-top:1px solid var(--line3); background:var(--card2);
+  font-size:12px; color:var(--ink2); line-height:1.5;
+}
+.detail-modal-foot .ghost{padding:6px 14px; font-size:13px; min-height:32px}
+body.modal-open{overflow:hidden}
+@media (max-width:600px){
+  .detail-modal-h{padding:15px 16px 12px}
+  .detail-modal-h h2{font-size:20px}
+  .detail-modal-scroll .detail-b{padding:14px 16px 18px}
+  .detail-modal-foot{padding:8px 10px 9px 16px}
+}
+/* 结果页把保存状态卡压成短卡，给目录腾出一屏 */
+#result .data-save{padding:12px 14px; margin:0 0 12px; border-radius:8px}
+#result .data-save .data-save-copy{display:none}
+#result .data-save .lead{margin:0 0 6px}
+#result .data-save-status{margin:0; line-height:1.65}
+#result .data-save button{margin-top:10px}
 .tagline{font-size:13px; color:var(--ink2); margin:0 0 6px}
 /* 清单 */
 .list-group{margin:0 0 12px; padding:14px; background:#f5ecd4; border-left:3px solid var(--seal); border-radius:0 4px 4px 0}
@@ -217,6 +328,8 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
 }
 .fb-fab:hover{background:#f7efd8}
 .fb-fab:focus-visible{outline:2px solid var(--seal); outline-offset:3px}
+/* 结果页卡片目录较长，右下浮标会挡住卡片；反馈入口收进底部操作区 */
+.result-mode .fb-fab{display:none}
 .fb-mask{position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(44,32,16,.42); z-index:70; display:none}
 .fb-mask.show{display:block}
 .fb-panel{
@@ -234,7 +347,9 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   background:#fffdf5; border:1px solid var(--line2); border-radius:4px; padding:10px 12px;
 }
 .fb-panel textarea{min-height:118px; resize:vertical}
-.fb-panel textarea:focus-visible,.fb-panel input[type="email"]:focus-visible{outline:2px solid var(--seal); outline-offset:1px}
+.fb-panel textarea:focus-visible,.fb-panel input[type="email"]:focus-visible{
+  outline:none; border-color:var(--seal); box-shadow:0 0 0 3px rgba(155,56,45,.13);
+}
 .fb-count{text-align:right; font-size:12px; color:var(--ink2); margin:6px 0 12px; font-variant-numeric:tabular-nums}
 .fb-count.over{color:var(--seal); font-weight:700}
 .fb-actions{display:flex; gap:10px; margin:16px 0 0}
@@ -258,10 +373,14 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   .verdict h3{font-size:32px}
 }
 @media print{
-  .nav,.row-actions,.gate,button,.toast,.shot-mask,.shot-pick{display:none!important}
+  .nav,.row-actions,.gate,button,.toast,.shot-mask,.shot-pick,.res-nav,.detail-modal{display:none!important}
   body{background:#fff; background-image:none}
-  .fold-b{display:block!important}
-  .card,.verdict,.bars{box-shadow:none}
+  .detail-grid{display:block!important; column-count:1!important}
+  #result .detail{display:block!important}
+  /* 开篇与调养总纲已直接显示在判定卡右侧，打印时不再重复展开一次 */
+  #result #sec-open,#result #sec-general{display:none!important}
+  .detail{width:auto!important; break-inside:avoid; box-shadow:none}
+  .card,.verdict,.bars,.detail{box-shadow:none}
 }
 /* ===== 出生日期与运气卡（新增层） ===== */
 .birth{display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:10px; margin:6px 0 0}
@@ -305,15 +424,414 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   line-height:1.6; letter-spacing:.05em; word-break:break-all; color:var(--seal2); user-select:all; -webkit-user-select:all}
 .code-box .code-tip{font-size:12.5px; line-height:1.65; color:var(--ink2); margin:8px 0 0}
 .code-box.is-ok{border-color:var(--seal); background:var(--card)}
+
+/* ================= 视觉统一层：宣纸、墨色、朱印 ================= */
+body{
+  max-width:860px; padding:40px 24px 30px; min-height:100vh;
+  background-color:var(--paper);
+  background-image:
+    radial-gradient(ellipse at 50% -18%,rgba(255,253,247,.92) 0%,rgba(255,253,247,0) 56%),
+    linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
+  background-attachment:scroll;
+  font-size:16px; line-height:1.75;
+}
+.wrap{max-width:860px}
+::selection{background:var(--sealsoft); color:var(--seal2)}
+
+/* 抬头 */
+.masthead{position:relative; padding:0 0 22px; margin:0 0 24px; border-bottom:1px solid var(--line2); text-align:center}
+.masthead-mark{
+  width:46px; height:46px; margin:0 auto 14px; display:grid; place-items:center;
+  border:1px solid var(--seal); border-radius:5px; color:var(--seal);
+  background:rgba(255,250,240,.7); box-shadow:inset 0 0 0 3px var(--card),0 2px 6px rgba(80,45,25,.06);
+  font-family:var(--serif); font-size:22px; line-height:1; font-weight:700; letter-spacing:.02em;
+}
+.masthead-mark span{transform:translateY(-1px)}
+.masthead h1{
+  margin:0 0 9px; font-family:var(--serif); font-size:clamp(28px,4.4vw,40px);
+  line-height:1.28; letter-spacing:.12em; text-indent:.12em; font-weight:700;
+}
+.masthead .sub{margin:0; color:var(--ink2); font-size:13.5px; line-height:1.8; letter-spacing:.025em}
+.masthead .meta{margin:9px 0 0; color:var(--ink3); font-size:11px; letter-spacing:.08em}
+
+/* 声明、提示 */
+.warn{
+  margin:0 0 20px; padding:15px 18px; border:1px solid var(--warnline); border-left:4px solid var(--seal);
+  border-radius:12px; background:var(--warnbg); color:var(--warnink);
+  font-size:14px; line-height:1.85; box-shadow:0 1px 0 rgba(255,255,255,.7) inset;
+}
+.warn b{color:var(--seal2); font-weight:700; letter-spacing:.03em}
+
+/* 同意页 */
+.gate{
+  margin:0 0 20px; padding:28px 26px; background:var(--card);
+  border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);
+}
+.gate h2{
+  margin:0 0 6px; font-family:var(--serif); font-size:26px; font-weight:700;
+  line-height:1.35; letter-spacing:.08em;
+}
+.gate .lead{
+  display:flex; align-items:center; gap:9px; margin:0 0 18px;
+  color:var(--seal); font-size:11.5px; font-weight:600; letter-spacing:.14em;
+}
+.gate .lead::before{content:""; width:18px; height:2px; background:var(--seal)}
+.gate p{margin:0 0 14px; color:var(--ink); font-size:15px; line-height:1.95}
+.gate p:last-child{margin-bottom:0}
+.gate .note{color:var(--ink2); font-size:13.5px; line-height:1.8}
+.gate-consent{
+  margin:22px 0 18px; padding:18px 0 0; border-top:1px solid var(--line3);
+  align-items:flex-start; color:var(--ink); font-size:14.5px; line-height:1.7;
+}
+.gate-consent input{top:1px; width:19px; height:19px; accent-color:var(--seal)}
+.gate-actions{gap:10px}
+.gate-actions button{min-height:50px}
+
+/* 结果页保存条 */
+#result > .data-save{
+  margin:0 0 16px; padding:16px 18px; background:var(--card2);
+  border-radius:var(--radius-md); box-shadow:none;
+}
+#result > .data-save .lead{margin:0 0 7px; color:var(--seal); font-size:11.5px; letter-spacing:.13em}
+.data-save-status{font-size:14px; line-height:1.75}
+.data-save-status.is-ok{
+  margin-top:10px; padding:11px 13px; border:1px solid #cfdcc9; border-radius:10px;
+  background:var(--jadesoft); color:var(--jade2);
+}
+.data-save-status.is-error{
+  margin-top:10px; padding:11px 13px; border:1px solid #e5c2ba; border-radius:10px;
+  background:#fcf0ed; color:#873027;
+}
+#result .data-save button{margin-top:12px}
+
+/* 逐题：题卡、选项、刻度 */
+.card{
+  min-height:296px; padding:30px 26px; border-radius:var(--radius-lg);
+  border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow-sm);
+  justify-content:center;
+}
+.card .kicker{
+  display:flex; align-items:center; gap:8px; color:var(--seal);
+  font-size:11.5px; font-weight:600; letter-spacing:.12em;
+}
+.card .kicker::before{content:""; width:5px; height:5px; background:var(--seal); border-radius:50%}
+.card h3{
+  margin:12px 0 10px; font-family:var(--serif); font-size:22px; font-weight:600;
+  line-height:1.55; letter-spacing:.02em; color:var(--ink);
+}
+.card .note{margin:0 0 18px; color:var(--ink2); font-size:14px; line-height:1.8}
+.choices{display:grid; grid-template-columns:1fr; gap:9px}
+.choice{
+  min-height:52px; padding:12px 15px; border:1px solid var(--line3); border-radius:12px;
+  background:var(--card2); color:var(--ink); font-size:15.5px; line-height:1.55;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.choice:hover{background:var(--card); border-color:var(--line2)}
+.choice.on{
+  background:var(--sealsoft); border-color:var(--seal); color:var(--seal2);
+  font-weight:600; box-shadow:inset 0 0 0 1px rgba(155,56,45,.10);
+}
+.choice.on::after{
+  content:""; width:8px; height:8px; margin-left:auto; border-radius:50%;
+  background:var(--seal); flex:0 0 auto;
+}
+.choice:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.scale{gap:7px; margin-top:2px}
+.segBtn{
+  min-height:64px; padding:12px 3px; border:1px solid var(--line3); border-radius:11px;
+  background:var(--card2); color:var(--tanink);
+  transition:background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease;
+}
+.segBtn.t1{background:#fffaf0}
+.segBtn.t2{background:#fbf2df}
+.segBtn.t3{background:#f5e8cf}
+.segBtn.t4{background:#eeddbf}
+.segBtn.t5{background:#e5d1ae}
+.segBtn b{font-size:15px; font-weight:600; letter-spacing:.02em}
+.segBtn i{font-size:10.5px; opacity:.72}
+.segBtn:hover{border-color:var(--line2); box-shadow:0 2px 8px rgba(80,50,20,.06)}
+.segBtn.on{
+  background:var(--seal); border-color:var(--seal); color:#fffaf0;
+  box-shadow:0 6px 16px rgba(155,56,45,.22);
+}
+.segBtn.on i{opacity:.92}
+.segBtn:focus-visible{outline:2px solid var(--seal); outline-offset:2px}
+.scale-note{margin:14px 0 0; font-size:14px; color:var(--ink2); line-height:1.65; min-height:22px}
+.birth{gap:10px; margin:0}
+.birth select{
+  min-height:52px; padding:11px 28px 11px 12px; border:1px solid var(--line); border-radius:10px;
+  background-color:var(--surface); color:var(--ink); font-family:var(--sans); font-size:16px;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23877963' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+}
+.birth select:focus-visible{outline:2px solid var(--seal); outline-offset:1px}
+.birth-note{
+  margin:14px 0 0; padding:12px 14px; border:1px solid var(--line3); border-left:3px solid var(--seal);
+  border-radius:10px; background:var(--card2); color:var(--ink2);
+  font-size:13.5px; line-height:1.8;
+}
+.birth-note b{color:var(--seal2); font-weight:700}
+.birth-prev{font-size:13.5px; line-height:1.7; color:var(--ink2)}
+.birth-prev input{accent-color:var(--seal)}
+@media (max-width:430px){ .segBtn i{display:none} }
+
+/* 进度与底部操作 */
+.headline{margin:0 0 10px; font-size:12.5px; letter-spacing:.06em}
+.headline .seg{font-family:var(--serif); font-size:15px; letter-spacing:.04em; color:var(--ink)}
+.headline .stage{color:var(--seal); font-weight:600; letter-spacing:.08em}
+.headline .pct{color:var(--ink3); font-variant-numeric:tabular-nums}
+.track{height:8px; margin:0 0 24px; background:var(--line3); border-radius:999px; box-shadow:inset 0 1px 2px rgba(80,55,25,.06)}
+.track i{background:var(--seal); border-radius:inherit; transition:width .35s ease}
+.nav{
+  margin-top:24px; padding:13px 0 calc(12px + env(safe-area-inset-bottom));
+  background:var(--paper); border-top:1px solid var(--line);
+  box-shadow:0 -8px 20px rgba(70,48,20,.045); gap:10px;
+}
+.nav button{min-height:50px}
+
+/* 统一按钮 */
+button.primary{
+  min-height:50px; padding:13px 18px; border:1px solid transparent; border-radius:12px;
+  background:var(--seal); color:#fffaf0; font-size:15px; font-weight:600;
+  letter-spacing:.09em; box-shadow:0 7px 16px rgba(155,56,45,.18);
+  transition:background .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+button.primary:hover{background:var(--seal2); transform:translateY(-1px); box-shadow:0 9px 20px rgba(124,42,33,.20)}
+button.primary:active{transform:translateY(0)}
+button.primary:disabled{background:var(--line2); color:var(--card); box-shadow:none; cursor:not-allowed; transform:none}
+button.ghost{
+  min-height:50px; padding:13px 18px; border:1px solid var(--line); border-radius:12px;
+  background:var(--card2); color:var(--ink); font-size:15px; font-weight:500;
+  letter-spacing:.06em; transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+button.ghost:hover{background:var(--card); border-color:var(--line2); color:var(--seal2)}
+button.ghost:disabled{opacity:.48; cursor:not-allowed}
+
+/* 结果页操作组 */
+.row-actions{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:22px}
+.row-actions .primary{grid-column:1/-1}
+.row-actions button{min-width:0; padding-left:10px; padding-right:10px; letter-spacing:.03em}
+@media (min-width:760px){
+  .row-actions{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .row-actions .primary{grid-column:auto}
+}
+/* 判定结果 */
+#result > .verdict{
+  margin:0 0 20px; padding:28px; border:1px solid var(--line); border-radius:var(--radius-lg);
+  background:var(--card); box-shadow:var(--shadow-sm);
+}
+.verdict .lead{
+  display:flex; align-items:center; gap:9px; margin:0 0 14px;
+  color:var(--ink3); font-size:11.5px; font-weight:600; letter-spacing:.13em;
+}
+.verdict .lead::before{content:""; width:18px; height:2px; background:var(--seal)}
+.tags{gap:8px; margin:0 0 14px}
+.tag{
+  padding:6px 12px; border-radius:999px; font-size:13px; line-height:1.4;
+  letter-spacing:.03em; border:1px solid transparent;
+}
+.tag-main{background:var(--seal); color:#fffaf0; box-shadow:0 3px 8px rgba(155,56,45,.14)}
+.tag-sub{background:var(--card2); border-color:var(--line); color:var(--ink2)}
+.verdict h3{
+  margin:4px 0 0; font-family:var(--serif); font-size:clamp(31px,4.2vw,42px);
+  font-weight:700; line-height:1.22; letter-spacing:.03em;
+}
+.verdict h3 em{color:var(--seal)}
+.verdict .also{margin:12px 0 0; max-width:30em; color:var(--ink2); font-size:14px; line-height:1.85}
+.verdict-read{
+  margin:18px 0 0; padding-top:12px; border-top:1px solid var(--line3);
+  color:var(--ink2); font-size:14px; line-height:1.82;
+}
+.verdict-read b{color:var(--seal); font-weight:600; letter-spacing:.04em}
+.verdict-axis{display:grid; gap:13px; margin:4px 0 0; padding:0 0 2px}
+.axis-line{display:grid; grid-template-columns:auto minmax(0,1fr); align-items:baseline; column-gap:12px; row-gap:1px}
+.axis-label{font-size:11.5px; font-weight:600; line-height:1.5; letter-spacing:.12em; color:var(--ink3); white-space:nowrap}
+.axis-name{min-width:0; font-family:var(--serif); line-height:1.3; letter-spacing:.02em}
+.axis-note{grid-column:2; font-size:12px; line-height:1.5; color:var(--ink3)}
+.axis-line.innate .axis-name{font-size:clamp(20px,2.8vw,24px); font-weight:400; color:var(--ink2)}
+.axis-line.acquired .axis-label{color:var(--seal)}
+.axis-line.acquired .axis-name{font-size:clamp(30px,4.6vw,40px); font-weight:700; color:var(--seal)}
+.verdict-main{min-width:0}
+.verdict-aside{margin-top:22px; padding-top:0; border-top:1px solid var(--line3); gap:12px}
+.verdict-note{
+  min-width:0; padding:14px 16px; border:1px solid var(--line3); border-radius:12px;
+  background:var(--card2);
+}
+.verdict-note h4{
+  display:flex; align-items:center; gap:8px; margin:0 0 7px;
+  font-family:var(--serif); font-size:17px; font-weight:700; line-height:1.4;
+  letter-spacing:.06em; color:var(--seal);
+}
+.verdict-note h4::before{content:""; width:4px; height:14px; background:var(--seal); border-radius:2px}
+.verdict-note .note-b{font-size:14px; line-height:1.9; color:var(--ink2)}
+.verdict-note .note-b p{margin:0 0 7px}
+.verdict-note .note-b p:last-child{margin-bottom:0}
+.verdict-facts{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px;
+  margin:22px 0 0; overflow:hidden; border:1px solid var(--line3);
+  border-radius:12px; background:var(--line3);
+}
+.verdict-facts span{display:flex; flex-direction:column; gap:3px; min-width:0; padding:11px 12px; background:var(--card2)}
+.verdict-facts i{font-style:normal; font-size:11px; line-height:1.5; letter-spacing:.06em; color:var(--ink3)}
+.verdict-facts b{font-family:var(--serif); font-size:19px; font-weight:700; line-height:1.25; color:var(--seal)}
+@media (min-width:760px){
+  .verdict.has-aside{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); column-gap:28px; align-items:stretch}
+  .verdict-main{display:flex; flex-direction:column; justify-content:flex-start}
+  .verdict-facts{margin-top:18px}
+  .verdict-aside{margin-top:0; padding-top:0; border-top:0}
+  .verdict-note .note-b{font-size:14px; line-height:1.92}
+}
+
+/* 结果目录 */
+.res-nav{
+  margin:4px 0 18px; padding:18px 18px 16px; background:var(--card);
+  border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:none;
+}
+.res-nav-head{margin:0 0 12px; padding:0 0 11px; border-bottom:1px solid var(--line3)}
+.res-nav-head b{font-family:var(--serif); font-size:18px; letter-spacing:.08em; color:var(--ink)}
+.res-nav-head span{font-size:12.5px; color:var(--ink3); letter-spacing:.01em}
+.res-nav-grid{grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+@media (min-width:620px){ .res-nav-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+.nav-card{
+  min-height:68px; padding:11px 13px; border:1px solid var(--line);
+  border-radius:12px; background:var(--navcard); box-shadow:none;
+  transition:background .16s ease,border-color .16s ease;
+}
+.nav-card:hover{background:var(--navcardhover); border-color:var(--line2); box-shadow:none}
+.nav-card .t{font-size:15px; font-weight:600; letter-spacing:.02em; color:var(--ink)}
+.nav-card .s{font-size:13px; color:var(--ink2)}
+/* 详情与弹层 */
+.detail{border-radius:16px; box-shadow:0 2px 10px rgba(55,38,16,.05)}
+.detail-h{padding:15px 18px 12px; background:var(--card2)}
+.detail-h .t{font-family:var(--serif); font-size:18px; letter-spacing:.04em}
+.detail-h .s{font-size:13px; color:var(--ink2)}
+.detail-b{padding:18px 20px 20px; font-size:15px; line-height:1.9}
+.detail-b p{margin:0 0 10px}
+.detail-modal-card{border:1px solid var(--line2); border-radius:18px; background:var(--card); box-shadow:0 30px 90px rgba(35,24,10,.30)}
+.detail-modal-h{padding:22px 24px 17px; background:var(--card2)}
+.detail-modal-kicker{font-size:11px; letter-spacing:.14em; color:var(--seal)}
+.detail-modal-h h2{font-family:var(--serif); font-size:24px; line-height:1.4; letter-spacing:.03em}
+.detail-modal-sub{font-size:13.5px; line-height:1.7; color:var(--ink2)}
+.detail-modal-close{
+  width:40px; height:40px; border-color:var(--line); background:var(--card);
+  color:var(--ink2); font-size:19px; transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.detail-modal-close:hover{background:var(--sealsoft); border-color:var(--sealsoft); color:var(--seal)}
+.detail-modal-scroll .detail-b{padding:20px 24px 24px; font-size:15.5px; line-height:1.95}
+.detail-modal-scroll .detail-b p{margin:0 0 11px}
+.detail-modal-foot{padding:11px 16px 12px 24px; background:var(--card2); font-size:12.5px; color:var(--ink2)}
+.detail-modal-foot .ghost{min-height:36px; padding:7px 15px; font-size:13px}
+@media (max-width:600px){
+  .detail-modal-card{border-radius:16px}
+  .detail-modal-h{padding:17px 18px 13px}
+  .detail-modal-h h2{font-size:22px}
+  .detail-modal-scroll .detail-b{padding:16px 18px 20px; font-size:15px; line-height:1.92}
+  .detail-modal-foot{padding:10px 12px 10px 18px}
+}
+
+/* 反馈与出图面板 */
+.fb-fab{
+  position:absolute; top:0; right:0; bottom:auto; z-index:20;
+  width:auto; height:44px; min-height:44px; min-width:44px; padding:0 6px; border:0; border-bottom:1px solid var(--line2);
+  border-radius:0; background:transparent; box-shadow:none; color:var(--ink3);
+  font-size:12px; font-weight:500; letter-spacing:.08em;
+}
+.fb-fab:hover{background:transparent; color:var(--seal); border-bottom-color:var(--seal)}
+.fb-panel{
+  border-radius:var(--radius-lg); background:var(--card); border:1px solid var(--line2);
+  box-shadow:0 18px 50px rgba(40,28,12,.24); padding:24px 22px 20px;
+}
+.fb-panel h3{font-family:var(--serif); font-size:22px; letter-spacing:.06em}
+.fb-lead{font-size:13.5px; line-height:1.8}
+.fb-panel textarea,.fb-panel input[type="email"]{
+  border-color:var(--line); border-radius:11px; background:var(--surface); font-size:16px; padding:12px 13px;
+}
+.fb-panel textarea:focus-visible,.fb-panel input[type="email"]:focus-visible{
+  outline:none; border-color:var(--seal); box-shadow:0 0 0 3px rgba(155,56,45,.13);
+}
+.fb-actions button{min-height:48px; padding:11px 14px; font-size:14px}
+.fb-done-title{font-family:var(--serif); font-size:24px; letter-spacing:.06em}
+.shot-pick-box{border-radius:20px 20px 0 0; background:var(--card); border-color:var(--line2)}
+.shot-pick-t{font-family:var(--serif); font-size:19px; letter-spacing:.05em}
+.shot-opt{border-radius:12px; background:var(--card2); border-color:var(--line); padding:15px 16px}
+.shot-opt b{font-size:16px; letter-spacing:.04em}
+.shot-opt span{font-size:13.5px}
+.shot-acts a.primary{border-radius:12px; background:var(--seal); letter-spacing:.06em; box-shadow:0 7px 16px rgba(155,56,45,.18)}
+.shot-acts a.primary:hover{background:var(--seal2)}
+/* 页脚、短码 */
+.foot{border-top-color:var(--line); padding-top:18px; font-size:13.5px; line-height:1.95; color:var(--ink2)}
+.list-group{
+  margin:0 0 12px; padding:13px 15px; background:var(--card2);
+  border:1px solid var(--line3); border-left:3px solid var(--seal); border-radius:10px;
+}
+.list-group .who{color:var(--seal2); font-size:14px}
+.list-good b,.list-bad b{font-weight:700}
+.list-good b{color:var(--ink2)}
+.list-bad b{color:var(--seal)}
+.code-box{border-radius:12px; background:var(--card2); border-color:var(--line2); padding:14px 16px}
+.code-box .code-label{font-size:13.5px; color:var(--ink2)}
+.code-box .code-val{font-size:15px; color:var(--seal2)}
+.code-box .code-tip{font-size:12.5px; line-height:1.75}
+
+/* 页面级响应式 */
+@media (max-width:767px){
+  body{padding:28px 16px 20px}
+  .wrap{max-width:100%}
+  .masthead{padding-bottom:18px; margin-bottom:20px}
+  .masthead-mark{width:40px; height:40px; margin-bottom:12px; font-size:19px}
+  .masthead h1{font-size:28px; letter-spacing:.1em; text-indent:.1em}
+  .masthead .sub{font-size:13px; line-height:1.75}
+  .gate{padding:22px 18px; border-radius:16px}
+  .gate h2{font-size:23px}
+  .gate p{font-size:14.5px; line-height:1.9}
+  .card{min-height:280px; padding:24px 18px; border-radius:16px}
+  .card h3{font-size:20px; line-height:1.6}
+  #result > .verdict{padding:20px 18px; border-radius:16px}
+  .verdict h3{font-size:30px}
+  .verdict .also{font-size:14px}
+  .verdict-note{padding:13px 14px}
+  .verdict-note h4{font-size:16px}
+  .verdict-note .note-b{font-size:14px; line-height:1.86}
+  .res-nav{padding:15px 13px 14px; border-radius:16px}
+  .res-nav-head b{font-size:17px}
+  .res-nav-head span{font-size:12px}
+  .res-nav-grid{gap:8px}
+  .nav-card{min-height:74px; padding:9px 10px; border-radius:10px}
+  .nav-card .t{font-size:14.5px}
+  .nav-card .s{
+    font-size:12.5px; line-height:1.45; white-space:normal; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .row-actions{grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px}
+  .row-actions .primary{grid-column:1/-1}
+  .row-actions button{font-size:14px; padding:11px 8px; min-height:46px}
+  .fb-panel{padding:20px 17px 18px; border-radius:16px}
+  .fb-panel h3{font-size:20px}
+}
+@media (min-width:768px){
+  body{padding:48px 28px 34px}
+  .card{padding:32px 30px}
+  #result > .verdict{padding:30px 32px}
+  .res-nav{padding:20px 20px 18px}
+}
+@media print{
+  body{background:#fff!important; background-image:none!important}
+  .masthead-mark{box-shadow:none}
+  .fb-fab{display:none!important}
+  .card,.gate,#result > .verdict,.res-nav,.detail{box-shadow:none!important}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header class="masthead">
+    <div class="masthead-mark" aria-hidden="true"><span>體</span></div>
     <h1>中医体质自测</h1>
     <p class="sub">九种体质 · 判定 27 题＋补充 7 题 · 出生运气对照</p>
     <p class="meta">GB/T 46939—2025　＋　五运六气（大寒换年）</p>
+    <button class="fb-fab" id="fbOpen" type="button" aria-label="反馈建议">反馈</button>
   </header>
 
   <div class="warn"><b>重要声明</b>　本问卷仅为健康科普参考，<b>不能替代专业中医师面诊诊断</b>，不构成诊疗、用药建议，如有不适请及时就医。判定题按「近一年大多数时候」答，补充题按现在的情况答。出生年月日只用来推五运六气，按大寒换年，只算到日、不算时辰。</div>
@@ -361,7 +879,6 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   <div class="toast" id="toast"></div>
 
   <!-- 反馈入口：答题过程中随时可点，不打断做题 -->
-  <button class="fb-fab" id="fbOpen" type="button" aria-label="反馈建议">反馈</button>
   <div class="fb-mask" id="fbMask"></div>
   <div class="fb-panel" id="fbPanel" role="dialog" aria-modal="true" aria-labelledby="fbTitle" aria-hidden="true">
     <div id="fbForm">
@@ -385,6 +902,30 @@ button.ghost:disabled{opacity:.5; cursor:not-allowed}
   </div>
 
   <section id="result" aria-live="polite"></section>
+
+  <!-- 详情弹层：以点中的卡片为起点放大展开 -->
+  <div class="detail-modal" id="detailModal" hidden>
+    <div class="detail-modal-mask" data-close aria-hidden="true"></div>
+    <section class="detail-modal-card" id="detailModalCard" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+      <div class="detail-modal-inner">
+        <header class="detail-modal-h">
+          <div>
+            <p class="detail-modal-kicker">结果详情</p>
+            <h2 id="detailModalTitle"></h2>
+            <p class="detail-modal-sub" id="detailModalSub"></p>
+          </div>
+          <button class="detail-modal-close" id="detailModalClose" type="button" aria-label="关闭详情">×</button>
+        </header>
+        <div class="detail-modal-scroll" id="detailModalScroll">
+          <div class="detail-b" id="detailModalBody"></div>
+        </div>
+        <footer class="detail-modal-foot">
+          <span>内容完整展示 · 关闭后回到目录</span>
+          <button class="ghost" id="detailModalClose2" type="button">关闭</button>
+        </footer>
+      </div>
+    </section>
+  </div>
 
 </div>
 
@@ -822,7 +1363,7 @@ function YQ_jointText(kind, innName, mainName){
       '先天底色是' + innName + '，问卷判出的是' + mainName + '。常见于作息、饮食、环境、病程这类后天因素把底色盖过去；也可能这层底色本就不显。',
       '调养以' + mainName + '为主，' + innName + '只作背景，不必因为它去硬补。'],
     none:['问卷没判出明显偏颇，先天仍有底色',
-      '九体都未到判定线，而先天底色是' + innName + '。说明这层底色目前没被触发，或后天养护已经把它压住了。它是“易感方向”，不是现在的病。',
+      '九体都未出现明显偏颇，而先天底色是' + innName + '。说明这层底色目前没被触发，或后天养护已经把它压住了。它是“易感方向”，不是现在的病。',
       '不必照' + innName + '去调，留意它容易显出来的时段就好。'],
     pinghe:['目前平和，先天仍留着一层底色',
       '问卷判为平和（或基本平和），先天底色却偏向' + innName + '。说明后天养护把这一层压住了，这是好事。',
@@ -837,16 +1378,14 @@ function YQ_triggerLine(k){
   return '这类底色容易显出来的时段：逢' + qi + '司天或在泉的年份，以及每年' + YQ_QI_SEG[qi] + '前后。';
 }
 
-function renderLuck(R){
+function renderLuck(R, host){
   lastLuck = YQ_build();
   if(!lastLuck) return;
   const L = lastLuck, inn = L.innate, step = L.steps[L.stepNo];
-  const out = $("#result");
+  const out = host || $("#result");
 
-  /* ① 出生运气卡 */
-  const card = el("div", "luck");
-  let h = '<p class="lead">先天气化底色（出生运气 · 大寒换年）</p>';
-  h += '<p class="big">' + esc(String(L.year)) + '　' + esc(L.gz) + ' 年</p>';
+  /* ① 出生运气（收起态只给年份、岁运、司天） */
+  let h = '<p class="big">' + esc(String(L.year)) + '　' + esc(L.gz) + ' 年</p>';
   h += '<p class="subline">出生 ' + esc(YQ_birthText()) + '　·　年起点 大寒 ' + esc(L.dahanText) + '（北京时间）</p>';
   h += '<dl>';
   h += '<dt>岁运</dt><dd>' + esc(L.yunElem) + '运' + (L.tai ? '太过' : '不及') + '　·　' + esc(L.yunName) + '</dd>';
@@ -869,13 +1408,14 @@ function renderLuck(R){
   }
   h += '<p class="fine">标签取《运气病候素材》岁运、六气各条的「证候倾向」栏（ZH-01～22），只作倾向，不引病候原句。'
      + '本层不改动、也不参与上面的九体分数与主体质判定。</p>';
-  card.innerHTML = h;
-  out.appendChild(card);
+  const luckSummary = String(L.year) + ' ' + L.gz + '年 · ' + L.yunElem + '运' + (L.tai ? '太过' : '不及')
+    + ' · ' + L.sitian + '司天';
+  out.appendChild(detailCard('先天运气底色', luckSummary, '<div class="luck">' + h + '</div>', {id: 'sec-luck', nav: '先天运气', kind: 'core', shot: 'keep'}));
 
   /* ② 先天 × 后天 合判 */
   const kind = YQ_kindOf(R, inn);
   const innName = inn.top ? NAME[inn.top.k] : '—';
-  let mainName = '—', mainTxt = '九体均未达判定线';
+  let mainName = '—', mainTxt = '九体均未明显偏颇';
   if(R.main){
     const lv = R.mainLevel === '是' ? '判为' : (R.mainLevel === '基本是' ? '基本判为' : '倾向');
     mainName = NAME[R.main];
@@ -886,9 +1426,7 @@ function renderLuck(R){
   const J = YQ_jointText(kind, innName, mainName);
   const relTxt = {same:'同向', part:'部分同向', diff:'不同向', none:'底色未显', pinghe:'目前平和'}[kind] || '—';
 
-  const jc = el("div", "joint");
-  let jh = '<p class="lead">先天 × 后天 合判</p>';
-  jh += '<div class="kv"><span>先天底色</span><strong>' + esc(innTxt) + '</strong></div>';
+  let jh = '<div class="kv"><span>先天底色</span><strong>' + esc(innTxt) + '</strong></div>';
   jh += '<div class="kv"><span>问卷判出</span><strong>' + esc(mainTxt) + '</strong></div>';
   jh += '<div class="kv"><span>两者关系</span><strong>' + esc(relTxt) + '</strong></div>';
   jh += '<p class="verdict-1">' + esc(J.h) + '</p>';
@@ -896,8 +1434,7 @@ function renderLuck(R){
   jh += '<p class="p">' + esc(J.b) + '</p>';
   const trig = inn.top ? YQ_triggerLine(inn.top.k) : '';
   if(trig) jh += '<p class="p">' + esc(trig) + '</p>';
-  jc.innerHTML = jh;
-  out.appendChild(jc);
+  out.appendChild(detailCard('先天 × 后天 合判', J.h, '<div class="joint">' + jh + '</div>', {id: 'sec-joint', nav: '先后天合判', kind: 'core', shot: 'keep'}));
 }
 
 /* 时令页里的今年运气一行 */
@@ -961,7 +1498,7 @@ function buildDeck(keep, startAt) {
   pages.forEach((p, i) => {
     const c = el("div", "card");
     c.hidden = true;
-    c.appendChild(el("span", "kicker", p.birth ? "第 2 步 · 出生日期" : ("第 " + (i + 1) + " / " + pages.length + " 题")));
+    c.appendChild(el("span", "kicker", p.birth ? "第 2 步 · 出生日期" : (p.sex ? "性别 · 必答" : (p.seg === "判定" ? "判定 · 近一年" : "补充 · 现在"))));
     if (p.sex) {
       c.appendChild(el("h3", null, "先确认你的性别"));
       c.appendChild(el("p", "note", "湿热质的判定按性别各有一道专属题，所以这一项必答；其余题目男女相同。"));
@@ -1155,7 +1692,9 @@ function go(i, dir) {
   $("#seg").textContent = isSexPage ? "第 1 题" : (pages[idx].birth ? "出生信息" : "第 " + curNo + " / " + total + " 题");
   $("#stage").textContent = pages[idx].sex ? "性别" : (pages[idx].birth ? "出生" : pages[idx].seg);
   const kick = cur.children[0];
-  if (kick && kick.className === "kicker" && !pages[idx].birth) kick.textContent = "第 " + curNo + " / " + total + " 题";
+  if (kick && kick.className === "kicker" && !pages[idx].birth) {
+    kick.textContent = pages[idx].sex ? "性别 · 必答" : (pages[idx].seg === "判定" ? "判定 · 近一年" : "补充 · 现在");
+  }
   $("#pct").textContent = isSexPage ? "开始" : Math.round(curNo / total * 100) + "%";
   $("#fill").style.width = (isSexPage ? 0 : curNo / total * 100) + "%";
   $("#prev").disabled = nextOn(idx - 1, -1) < 0;
@@ -1215,6 +1754,7 @@ function resetAll() {
   lastLuck = null;
   lastResult = null;                 // 重答后不保留上一次结果，避免误触导出拿到旧数据
   AssessmentCloud.reset();
+  document.body.classList.remove("result-mode");
   $("#result").style.display = "none";
   $("#result").innerHTML = "";
   $("#deckWrap").hidden = false;
@@ -1298,22 +1838,279 @@ function adviceFor(body) {
   return out;
 }
 
-/* ================= 结果页 ================= */
-function fold(title, summary, bodyHTML, open) {
-  const d = el("div", "fold" + (open ? " open" : ""));
-  const h = el("button", "fold-h");
-  h.type = "button";
-  h.innerHTML = '<span class="t">' + esc(title) + '</span><span class="s">' + esc(summary) + '</span><span class="x">' + (open ? "收起" : "展开") + "</span>";
-  const b = el("div", "fold-b");
-  b.innerHTML = bodyHTML;
-  h.addEventListener("click", () => {
-    const isOpen = d.classList.toggle("open");
-    h.querySelector(".x").textContent = isOpen ? "收起" : "展开";
-    h.setAttribute("aria-expanded", isOpen ? "true" : "false");
+/* ================= 结果页 =================
+   结果页只保留一屏卡片目录；详情正文隐藏为数据源。
+   点卡片时，弹层从被点卡片的矩形位置缩放展开，关闭时缩回原卡片。 */
+let detailSeq = 0;
+
+const detailModal = document.getElementById("detailModal");
+const detailModalCard = document.getElementById("detailModalCard");
+const detailModalTitle = document.getElementById("detailModalTitle");
+const detailModalSub = document.getElementById("detailModalSub");
+const detailModalBody = document.getElementById("detailModalBody");
+const detailModalScroll = document.getElementById("detailModalScroll");
+const detailModalClose = document.getElementById("detailModalClose");
+const detailModalClose2 = document.getElementById("detailModalClose2");
+const detailModalReduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+let detailModalOpen = false;
+let detailModalTrigger = null;
+let detailModalOrigin = null;
+let detailModalTimer = 0;
+let detailModalContentTimer = 0;
+let detailModalRootPad = "";
+
+function detailModalReduced() { return !!(detailModalReduce && detailModalReduce.matches); }
+
+/* 弹层目标几何：按当前视口算宽度/最大高度/边距。打开与重排共用同一套口径。 */
+function detailLayoutMetrics() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const margin = vw < 600 ? 12 : 24;
+  const targetW = Math.max(260, Math.min(vw - margin * 2, vw < 600 ? 366 : 680));
+  const maxH = Math.min(vh - margin * 2, vw < 600 ? vh - margin * 2 : 720);
+  return { vw: vw, vh: vh, margin: margin, targetW: targetW, maxH: maxH };
+}
+
+/* 视口变化（移动端地址栏伸缩、旋转屏幕、拖动窗口）时重算弹层的尺寸与位置，
+   而不是把弹层关掉——用户正在看的内容不该因为一次 resize 就丢掉。
+   动画进行中被触发时直接落到最终状态，避免半途变形。 */
+function relayoutDetailModal() {
+  if (!detailModalOpen || !detailModalCard) return;
+  const m = detailLayoutMetrics();
+  const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+  if (scrollbarW > 0) document.documentElement.style.paddingRight = scrollbarW + "px";
+  detailModalCard.style.transition = "none";
+  detailModalCard.style.width = m.targetW + "px";
+  detailModalCard.style.height = "auto";
+  detailModalCard.style.maxHeight = "none";
+  const naturalH = detailModalCard.getBoundingClientRect().height || 0;
+  const targetH = Math.max(160, Math.min(naturalH, m.maxH));
+  const targetX = Math.max(m.margin, Math.round((m.vw - m.targetW) / 2));
+  const targetY = Math.max(m.margin, Math.round((m.vh - targetH) / 2));
+  detailModalCard.style.height = targetH + "px";
+  detailModalCard.style.maxHeight = m.maxH + "px";
+  detailModalCard.style.left = targetX + "px";
+  detailModalCard.style.top = targetY + "px";
+  detailModalCard.style.transform = "translate(0px,0px) scale(1,1)";
+  detailModalCard.style.borderRadius = "12px";
+  void detailModalCard.offsetWidth;  /* 锁定重排，防止残留过渡被合并到下一帧 */
+  /* 同步关闭动画的目标矩形，让弹层收回的方向跟得上新位置 */
+  if (detailModalOrigin) {
+    detailModalOrigin.x = targetX;
+    detailModalOrigin.y = targetY;
+    detailModalOrigin.w = m.targetW;
+    detailModalOrigin.h = targetH;
+  }
+}
+
+function openDetail(d, trigger) {
+  if (!detailModal || !detailModalCard || !d || detailModalOpen) return;
+  detailModalOpen = true;
+  detailModalTrigger = trigger || null;
+  clearTimeout(detailModalTimer);
+  clearTimeout(detailModalContentTimer);
+
+  const title = d.querySelector(".detail-h .t");
+  const summary = d.querySelector(".detail-h .s");
+  const body = d.querySelector(".detail-b");
+  detailModalTitle.textContent = title ? title.textContent.trim() : "";
+  detailModalSub.textContent = summary ? summary.textContent.trim() : "";
+  detailModalBody.innerHTML = body ? body.innerHTML : "";
+  detailModalScroll.scrollTop = 0;
+
+  detailModal.hidden = false;
+  const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+  detailModalRootPad = document.documentElement.style.paddingRight;
+  document.body.classList.add("modal-open");
+  if (scrollbarW > 0) document.documentElement.style.paddingRight = scrollbarW + "px";
+  detailModalCard.classList.remove("is-content");
+  detailModalCard.style.transition = "none";
+  detailModalCard.style.visibility = "hidden";
+  detailModalCard.style.transform = "none";
+  detailModalCard.style.opacity = "1";
+  detailModalCard.style.borderRadius = "6px";
+
+  const m = detailLayoutMetrics();
+  const vw = m.vw;
+  const margin = m.margin;
+  const targetW = m.targetW;
+  const maxH = m.maxH;
+  detailModalCard.style.width = targetW + "px";
+  detailModalCard.style.height = "auto";
+  detailModalCard.style.maxHeight = "none";
+  detailModalCard.style.left = "0px";
+  detailModalCard.style.top = "0px";
+  const naturalH = detailModalCard.getBoundingClientRect().height || 0;
+  const targetH = Math.max(160, Math.min(naturalH, maxH));
+  detailModalCard.style.height = targetH + "px";
+  detailModalCard.style.maxHeight = maxH + "px";
+
+  const targetX = Math.max(margin, Math.round((vw - targetW) / 2));
+  const targetY = Math.max(margin, Math.round((m.vh - targetH) / 2));
+  const rect = trigger ? trigger.getBoundingClientRect() : null;
+  detailModalCard.style.left = targetX + "px";
+  detailModalCard.style.top = targetY + "px";
+
+  const from = rect ? {x: rect.left, y: rect.top, w: rect.width, h: rect.height} : {x: targetX, y: targetY, w: targetW, h: targetH};
+  detailModalOrigin = {x: targetX, y: targetY, w: targetW, h: targetH, from};
+  const sx = Math.max(0.01, from.w / targetW);
+  const sy = Math.max(0.01, from.h / targetH);
+  detailModalCard.style.transform = "translate(" + (from.x - targetX) + "px," + (from.y - targetY) + "px) scale(" + sx + "," + sy + ")";
+  detailModalCard.style.visibility = "visible";
+  void detailModalCard.offsetWidth;  // 锁定起始帧，确保过渡从卡片位置开始
+
+  detailModal.classList.add("is-open");
+  const reduce = detailModalReduced();
+  const dur = reduce ? 0.01 : 0.44;
+  requestAnimationFrame(() => {
+    if (!detailModalOpen) return;
+    detailModalCard.style.transition = "transform " + dur + "s cubic-bezier(.2,.72,.2,1), border-radius " + dur + "s ease";
+    detailModalCard.style.transform = "translate(0px,0px) scale(1,1)";
+    detailModalCard.style.borderRadius = "12px";
   });
-  h.setAttribute("aria-expanded", open ? "true" : "false");
+  detailModalContentTimer = setTimeout(() => {
+    detailModalCard.classList.add("is-content");
+    if (detailModalClose) {
+      try { detailModalClose.focus({preventScroll: true}); } catch (e) { detailModalClose.focus(); }
+    }
+  }, reduce ? 0 : 180);
+}
+
+function closeDetail() {
+  if (!detailModal || !detailModalCard || !detailModalOpen) return;
+  detailModalOpen = false;
+  clearTimeout(detailModalTimer);
+  clearTimeout(detailModalContentTimer);
+  detailModalCard.classList.remove("is-content");
+  detailModal.classList.remove("is-open");
+  document.body.classList.remove("modal-open");
+  document.documentElement.style.paddingRight = detailModalRootPad;
+
+  const o = detailModalOrigin;
+  const reduce = detailModalReduced();
+  const dur = reduce ? 0.01 : 0.32;
+  if (o) {
+    const sx = Math.max(0.01, o.from.w / o.w);
+    const sy = Math.max(0.01, o.from.h / o.h);
+    const dx = o.from.x - o.x;
+    const dy = o.from.y - o.y;
+    detailModalCard.style.transition = "transform " + dur + "s cubic-bezier(.4,0,.2,1), opacity " + dur + "s ease, border-radius " + dur + "s ease";
+    detailModalCard.style.transform = "translate(" + dx + "px," + dy + "px) scale(" + sx + "," + sy + ")";
+    detailModalCard.style.borderRadius = "6px";
+    detailModalCard.style.opacity = "0.75";
+  }
+  detailModalTimer = setTimeout(() => {
+    detailModal.hidden = true;
+    detailModalCard.style.visibility = "hidden";
+    detailModalCard.style.opacity = "1";
+    detailModalCard.style.transition = "none";
+    detailModalCard.style.transform = "none";
+    if (detailModalTrigger) {
+      try { detailModalTrigger.focus({preventScroll: true}); } catch (e) { detailModalTrigger.focus(); }
+    }
+    detailModalTrigger = null;
+    detailModalOrigin = null;
+  }, reduce ? 20 : dur * 1000 + 20);
+}
+
+function trapDetailFocus(e) {
+  if (!detailModalOpen || e.key !== "Tab") return;
+  const items = [].slice.call(detailModalCard.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+    .filter(x => !x.disabled && x.getClientRects().length);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
+if (detailModal) {
+  detailModal.addEventListener("click", e => {
+    if (e.target && e.target.closest("[data-close]")) closeDetail();
+  });
+}
+if (detailModalClose) detailModalClose.addEventListener("click", closeDetail);
+if (detailModalClose2) detailModalClose2.addEventListener("click", closeDetail);
+document.addEventListener("keydown", e => {
+  if (!detailModalOpen) return;
+  if (e.key === "Escape") { e.preventDefault(); closeDetail(); }
+  else trapDetailFocus(e);
+});
+let detailModalLayoutRaf = 0;
+window.addEventListener("resize", () => {
+  if (!detailModalOpen) return;
+  /* 用 rAF 合并短时间内的连续触发（移动端地址栏伸缩一次能发好几个事件） */
+  if (detailModalLayoutRaf) cancelAnimationFrame(detailModalLayoutRaf);
+  detailModalLayoutRaf = requestAnimationFrame(() => {
+    detailModalLayoutRaf = 0;
+    relayoutDetailModal();
+  });
+});
+
+function detailCard(title, summary, bodyHTML, cfg) {
+  cfg = (cfg && typeof cfg === "object") ? cfg : {};
+  detailSeq += 1;
+  const d = el("section", "detail" + (cfg.cls ? " " + cfg.cls : ""));
+  d.id = cfg.id || ("sec-" + detailSeq);
+  d.setAttribute("data-nav", cfg.nav || title);
+  d.setAttribute("data-kind", cfg.kind || "tune");
+  if (cfg.shot === "skip") d.setAttribute("data-shot", "skip");
+  const h = el("div", "detail-h");
+  h.innerHTML = '<span class="t">' + esc(title) + '</span><span class="s">' + esc(summary) + '</span>';
+  const b = el("div", "detail-b");
+  b.innerHTML = bodyHTML;
   d.appendChild(h); d.appendChild(b);
   return d;
+}
+
+/* 开篇、调养总纲不占目录卡：把正文直接放到判定结果右侧的空白区 */
+function attachVerdictNotes(out) {
+  const v = out.querySelector(".verdict");
+  const open = out.querySelector("#sec-open");
+  const general = out.querySelector("#sec-general");
+  if (!v || !open || !general || v.querySelector(".verdict-aside")) return;
+  const aside = el("aside", "verdict-aside");
+  aside.setAttribute("aria-label", "判定结果补充说明");
+  [open, general].forEach(d => {
+    const t = d.querySelector(".detail-h .t");
+    const b = d.querySelector(".detail-b");
+    const note = el("section", "verdict-note");
+    note.innerHTML = "<h4>" + esc(t ? t.textContent.trim() : "") + "</h4>" +
+      '<div class="note-b">' + (b ? b.innerHTML : "") + "</div>";
+    aside.appendChild(note);
+  });
+  v.classList.add("has-aside");
+  v.appendChild(aside);
+}
+
+/* 从详情卡自动生成目录：标题、摘要、正文都取自同一张卡，保证一一对应。
+   开篇与调养总纲已直接显示在判定卡右侧，不再生成跳转卡片。 */
+function buildResultNav(out) {
+  const allDetails = [].slice.call(out.querySelectorAll(".detail"));
+  if (!allDetails.length) return;
+  attachVerdictNotes(out);
+  const details = allDetails.filter(d => d.id !== "sec-open" && d.id !== "sec-general");
+  if (!details.length) return;
+  const nav = el("section", "res-nav");
+  nav.id = "resNav";
+  const head = el("div", "res-nav-head");
+  head.innerHTML = "<b>结果目录</b><span>共 " + details.length + " 张卡片 · 点卡片放大查看</span>";
+  const grid = el("div", "res-nav-grid");
+  details.forEach(d => {
+    const btn = el("button", "nav-card");
+    btn.type = "button";
+    btn.setAttribute("data-target", d.id);
+    const t = d.getAttribute("data-nav") || d.querySelector(".detail-h .t").textContent;
+    const s = d.querySelector(".detail-h .s").textContent;
+    btn.innerHTML = '<span class="t">' + esc(t) + '</span><span class="s">' + esc(s) + '</span>';
+    btn.setAttribute("aria-label", "查看详情：" + t);
+    btn.setAttribute("aria-haspopup", "dialog");
+    btn.addEventListener("click", () => openDetail(d, btn));
+    grid.appendChild(btn);
+  });
+  nav.appendChild(head); nav.appendChild(grid);
+  const gridHost = allDetails[0].closest(".detail-grid");
+  if (gridHost && gridHost.parentNode === out) out.insertBefore(nav, gridHost);
+  else out.insertBefore(nav, allDetails[0]);
 }
 
 /* 把行内编号（NJG-TY-xxx / ZYTZ-TY-xxx）抽出来，正文里只留文字，编号统一附在句尾小字 */
@@ -1400,80 +2197,127 @@ function renderResult() {
   const out = $("#result");
   out.innerHTML = "";
   out.style.display = "block";
+  document.body.classList.add("result-mode");
 
   /* 判定结论 */
   const v = el("div", "verdict");
-  let head = "未明显偏向任何体质";
   let levelTxt = "";
   if (R.main) {
-    head = NAME[R.main];
     levelTxt = R.mainLevel === "是" ? "判为" : (R.mainLevel === "基本是" ? "基本判为" : "倾向");
   }
-  let tags = "";
-  if (R.main) {
-    tags += '<span class="tag ' + (R.mainLevel === "倾向" ? "tag-sub" : "tag-main") + '">主体质：' + esc(head) + "</span>";
-  } else {
-    tags += '<span class="tag tag-sub">九体均未达判定线</span>';
-  }
-  R.mixed.forEach(k => { tags += '<span class="tag tag-sub">兼夹：' + esc(NAME[k]) + "（" + R.conv[k].toFixed(1) + "）</span>"; });
-  v.innerHTML = '<p class="lead">判定结果（GB/T 46939—2025）</p>' +
-    '<div class="tags">' + tags + "</div>" +
-    "<h3>" + (R.main ? esc(levelTxt) + " <em>" + esc(head) + "</em>" : esc(head)) + "</h3>" +
-    (R.mixed.length ? '<p class="also">兼夹体质只给一句该体饮食方向，不出可选清单——两体清单叠加会出现「又宜又忌」，不这样做。</p>' : '<p class="also">未判出兼夹体质。</p>');
+  const L0 = YQ_build();
+  const inn0 = L0 && L0.innate ? L0.innate : null;
+  const innateName = inn0 && inn0.top ? NAME[inn0.top.k] : "未显";
+  const innateNote = inn0 && inn0.top
+    ? "出生运气底色，只作对照" + (inn0.second ? " · 兼 " + NAME[inn0.second.k] : "")
+    : "出生运气未显示明显底色";
+  const mainName = R.main ? NAME[R.main] : "未明显偏颇";
+  const mainNote = R.main ? levelTxt + " · 本次九体问卷" : "九体均未明显偏颇";
+  let missingHTML = "";
   if (R.missing.length) {
-    v.insertAdjacentHTML("beforeend", '<p class="also">漏答：' + esc(R.missing.map(k => NAME[k]).join("、"))
-      + "。这几项不作判定；平和质的「其余八项都低」只按已答项比。</p>");
+    missingHTML = '<p class="also">漏答：' + esc(R.missing.map(k => NAME[k]).join("、"))
+      + "。这几项不作判定；平和质的「其余八项都低」只按已答项比。</p>";
   }
+  let factsHTML = "";
+  if (R.main) {
+    const score = Math.max(0, R.detail[R.main].conv).toFixed(1) + "%";
+    factsHTML = '<div class="verdict-facts" aria-label="判定依据摘要">' +
+      "<span><i>主体质判定度</i><b>" + esc(score) + "</b></span>" +
+      "<span><i>兼夹体质</i><b>" + (R.mixed.length ? R.mixed.length + " 项" : "无") + "</b></span>" +
+      "</div>";
+  }
+  v.innerHTML = '<div class="verdict-main">' +
+    '<p class="lead">判定结果（GB/T 46939—2025）</p>' +
+    '<div class="verdict-axis" role="group" aria-label="先后天体质">' +
+      '<div class="axis-line innate">' +
+        '<span class="axis-label">先天体质</span>' +
+        '<strong class="axis-name">' + esc(innateName) + '</strong>' +
+        '<span class="axis-note">' + esc(innateNote) + '</span>' +
+      '</div>' +
+      '<div class="axis-line acquired">' +
+        '<span class="axis-label">后天体质</span>' +
+        '<strong class="axis-name">' + esc(mainName) + '</strong>' +
+        '<span class="axis-note">' + esc(mainNote) + '</span>' +
+      '</div>' +
+    '</div>' +
+    (R.mixed.length ? '<p class="also">兼夹体质只给一句该体饮食方向，不单独叠加方案。</p>' : '') +
+    missingHTML +
+    '<p class="verdict-read"><b>读法</b>　先看后天体质；先天是底色对照，不改九体分数与结论；兼夹体质只给饮食方向，不单独叠加方案。</p>' +
+    factsHTML +
+    '</div>';
   out.appendChild(v);
-  renderLuck(R);
 
-  /* 九体转化分 */
+  /* 详情卡容器：目录卡在全部详情生成后统一插入到它前面 */
+  const detailGrid = el("div", "detail-grid");
+  out.appendChild(detailGrid);
+  renderLuck(R, detailGrid);
+
+  /* 九体判定度 */
   const bars = el("div", "bars");
-  bars.appendChild(el("p", "tagline", "九体转化分（0—100），竖线为 40（判定线）与 30（倾向线）。条目少的体质原始分偏低，转换分算到负数属正常现象，不是出错；图表统一从 0 起画，不影响判定与排序。"));
+  bars.appendChild(el("p", "tagline", "九体判定度（0—100），分数越高倾向越明显；条目少的体质原始分偏低，分数算到负数属正常现象，不是出错；图表统一从 0 起画，不影响判定与排序。"));
   ORDER.forEach(k => {
     const r = R.detail[k];
     const row = el("div", "bar-row");
-    const val = r.conv == null ? "信息不足（漏答 " + r.miss + " 题，不判）" : Math.max(0, r.conv).toFixed(1);
+    const val = r.conv == null ? "信息不足（漏答 " + r.miss + " 题，不判）" : Math.max(0, r.conv).toFixed(1) + "%";
     row.innerHTML = '<div class="bar-head"><span>' + esc(NAME[k]) + '</span><span class="v">' + esc(val) + "</span></div>";
     const g = el("div", "gauge");
     const w = r.conv == null ? 0 : Math.max(0, Math.min(100, r.conv));
     const i = el("i");
     i.style.width = w + "%";
-    if (r.conv != null && r.conv >= 40) i.className = "hot";
     g.appendChild(i);
-    [30, 40].forEach(t => { const b = el("b"); b.style.left = t + "%"; g.appendChild(b); });
     row.appendChild(g);
     bars.appendChild(row);
   });
-  out.appendChild(bars);
+  const barSummary = R.main
+    ? "主体质 " + NAME[R.main] + " " + Math.max(0, R.detail[R.main].conv).toFixed(1) + "%"
+    : "九体均未明显偏颇";
+  const barsCard = detailCard("九体判定度", barSummary, "", {id: "sec-bars", nav: "九体判定度", kind: "core", shot: "skip"});
+  const barsBody = barsCard.querySelector(".detail-b");
+  barsBody.appendChild(bars);
 
   const lack = ORDER.filter(k => R.detail[k].conv == null);
   if (lack.length) {
-    out.appendChild(el("p", "thr", "这几体本次不判定（有漏答，按规程不补分、不插补）：" + lack.map(k => NAME[k]).join("、") + "。"));
+    barsBody.appendChild(el("p", "thr", "这几体本次不判定（有漏答，按规程不补分、不插补）：" + lack.map(k => NAME[k]).join("、") + "。"));
   }
+  detailGrid.appendChild(barsCard);
 
   if (!R.main) {
-    const p = el("p", "thr", "九个体质都未达到判定线，本次不给调养方案。请核对是否漏答，或隔一段时间重测。");
-    out.appendChild(p);
+    detailGrid.appendChild(detailCard("本次结论", "九体均未明显偏颇",
+      para("九个体质都没有明显偏颇，本次不给调养方案。请核对是否漏答，或隔一段时间重测。", ""),
+      {id: "sec-conclusion", nav: "本次结论", kind: "core"}));
+    const acts = el("div", "row-actions");
+    const fb = el("button", "ghost", "反馈建议");
+    fb.addEventListener("click", () => document.getElementById("fbOpen").click());
+    const again = el("button", "ghost", "重答");
+    again.addEventListener("click", () => resetAll());
+    acts.appendChild(fb); acts.appendChild(again);
+    out.appendChild(acts);
   } else {
     const body = R.main;
     const c = COPY[body];
 
     /* ① 开篇 */
-    out.appendChild(fold("开篇", "为什么建议按体质分开调", para(GENERAL.open.x, GENERAL.open.no), true));
+    detailGrid.appendChild(detailCard("开篇", "为什么建议按体质分开调",
+      para(GENERAL.open.x, GENERAL.open.no), {id: "sec-open", nav: "开篇"}));
     /* ② 总纲 */
-    out.appendChild(fold("总纲", "体质可调，不被贴标签", para(GENERAL.adjustable.x, GENERAL.adjustable.no), true));
+    detailGrid.appendChild(detailCard("调养总纲", "体质可调，不被贴标签",
+      para(GENERAL.adjustable.x, GENERAL.adjustable.no), {id: "sec-general", nav: "调养总纲"}));
 
     /* ③ 四维 */
     if (body === "pinghe") {
-      out.appendChild(fold("精神", "平和质：四季心态各一句", para(c.j.x, c.j.no), true));
+      detailGrid.appendChild(detailCard("精神调养", "平和质：四季心态各一句",
+        para(c.j.x, c.j.no), {id: "sec-spirit", nav: "精神调养"}));
     } else {
-      out.appendChild(fold("精神", c.j.x.slice(0, 26) + "…", para(c.j.x, c.j.no), true));
+      detailGrid.appendChild(detailCard("精神调养", c.j.x.slice(0, 26) + "…",
+        para(c.j.x, c.j.no), {id: "sec-spirit", nav: "精神调养"}));
     }
-    out.appendChild(fold("运动", c.y.x.slice(0, 26) + "…", para(c.y.x, c.y.no) +
-      (body === "xueyu" ? para("血瘀质运动先看安全停止信号：完整清单见下文「运动安全线」一节，这里不重复一遍。", "") : ""), true));
-    out.appendChild(fold("饮食方向", c.s.x.slice(0, 26) + "…", para(c.s.x, c.s.no), true));
-    out.appendChild(fold("起居", c.q.x.slice(0, 26) + "…", para(c.q.x, c.q.no), true));
+    detailGrid.appendChild(detailCard("运动调养", c.y.x.slice(0, 26) + "…", para(c.y.x, c.y.no) +
+      (body === "xueyu" ? para("血瘀质运动先看安全停止信号：完整清单见下文「运动安全线」一节，这里不重复一遍。", "") : ""),
+      {id: "sec-sport", nav: "运动调养"}));
+    detailGrid.appendChild(detailCard("饮食方向", c.s.x.slice(0, 26) + "…",
+      para(c.s.x, c.s.no), {id: "sec-diet", nav: "饮食方向"}));
+    detailGrid.appendChild(detailCard("起居调养", c.q.x.slice(0, 26) + "…",
+      para(c.q.x, c.q.no), {id: "sec-life", nav: "起居调养"}));
 
     /* ④ 宜忌清单 */
     let listHTML = '<div class="list-group"><p class="who">' + esc(NAME[body]) + " · 宜与少食</p>";
@@ -1484,7 +2328,11 @@ function renderResult() {
     if (R.mixed.length) {
       listHTML += "<p class=\"tagline\">兼夹：" + R.mixed.map(k => esc(NAME[k]) + "　" + esc(COPY[k].s.x)).join("；") + "</p>";
     }
-    out.appendChild(fold("宜与少食", "按你这体质列品名清单", listHTML, true));
+    const cntItems = s => (s || "").split(/[、；]/).filter(Boolean).length;
+    const listSummary = (c.f.good || c.f.bad)
+      ? "宜 " + cntItems(c.f.good) + " 类 · 少食 " + cntItems(c.f.bad) + " 类"
+      : "原书未列具体食物清单";
+    detailGrid.appendChild(detailCard("宜与少食", listSummary, listHTML, {id: "sec-food", nav: "宜与少食"}));
 
     /* ⑤ 时令 */
     const seasonIdx = seasonNow();
@@ -1501,7 +2349,7 @@ function renderResult() {
     } else {
       sHTML += '<p class="tagline">本季原书未给该体专属句，不补空话；按上面的通用四时句做即可。</p>';
     }
-    out.appendChild(fold("时令", "现在是" + S.name + "季，按这个节奏调", sHTML, true));
+    detailGrid.appendChild(detailCard("本季时令", "现值" + S.name + "季 · 按这个节奏调", sHTML, {id: "sec-season", nav: "本季时令"}));
 
     /* ⑥ 按你的情况 */
     const adv = adviceFor(body);
@@ -1511,11 +2359,12 @@ function renderResult() {
       aHTML += "<p><b>" + esc(it.t) + "</b>　" + esc(it.s) + "</p>";
       if (it.b) aHTML += para(it.b, "");
     });
-    out.appendChild(fold("按你的情况", adv.length ? "由补充题 " + Q8.length + " 道给出 " + adv.length + " 条" : "无额外要点", aHTML, true));
+    detailGrid.appendChild(detailCard("按你的情况", adv.length ? "由补充题 " + Q8.length + " 道给出 " + adv.length + " 条" : "无额外要点", aHTML, {id: "sec-custom", nav: "按你的情况"}));
 
     /* ⑦ 安全线与免责 */
-    out.appendChild(fold("运动安全线", "九体通用的停止信号",
-      para(GENERAL.safety.x, GENERAL.safety.no) + para("若已有明确疾病、正在服药或处于孕期，以上建议请先与医生确认再执行。"), true));
+    detailGrid.appendChild(detailCard("运动安全线", "九体通用的停止信号",
+      para(GENERAL.safety.x, GENERAL.safety.no) + para("若已有明确疾病、正在服药或处于孕期，以上建议请先与医生确认再执行。"),
+      {id: "sec-safety", nav: "运动安全线"}));
 
     /* 导出 */
     const acts = el("div", "row-actions");
@@ -1526,19 +2375,24 @@ function renderResult() {
     /* 保存失败时的兜底：把整份答卷压成 32 个字符，发给作者即可补录 */
     const b3 = el("button", "ghost", "复制备份短码");
     b3.addEventListener("click", () => copyBackupCode(b3));
+    const b4 = el("button", "ghost", "反馈建议");
+    b4.addEventListener("click", () => document.getElementById("fbOpen").click());
     const b2 = el("button", "ghost", "重答");
     b2.addEventListener("click", () => {
       resetAll();
     });
-    acts.appendChild(b0); acts.appendChild(b1); acts.appendChild(b3); acts.appendChild(b2);
+    acts.appendChild(b0); acts.appendChild(b1); acts.appendChild(b3); acts.appendChild(b4); acts.appendChild(b2);
     out.appendChild(acts);
 
     const foot = el("div", "foot");
     foot.innerHTML = "<p>文案来源：《中医体质学》（王琦，2021 规划教材）第九章「体质养生与治未病」与《素问·四气调神大论》，编号 ZYTZ-TY-001～049、NJG-TY-006～012。原文照录，不改写、不扩写。</p>" +
       '<p>五运六气口径：运气年以当年真实大寒交司日为界，只按公历日期判定，不含时辰与出生地；先天底色只作对照，不改动上面九体的分数与结论。</p>'
       + '<p>本页不构成诊断，不给药名、不给克数、不给方名、不作疾病预测。身体不适请就医。</p>';
-    out.appendChild(foot);
+    out.appendChild(detailCard("说明与来源", "文案来源 · 运气口径 · 免责声明", foot.outerHTML, {id: "sec-source", nav: "说明与来源", kind: "info", shot: "skip"}));
   }
+
+  /* 目录卡由详情卡自动生成，插到全部详情之前 */
+  buildResultNav(out);
 
   /* 匿名保存（可选）：默认不勾选，不影响查看、CSV 和图片功能 */
   AssessmentCloud.mount(out, buildCloudPayload());
@@ -1589,24 +2443,35 @@ function shotText(el) {
   if ((cls.indexOf(" kv ") >= 0 || cls.indexOf(" chips ") >= 0) && el.children.length) return shotJoinInline(el);
   return shotClean(el.textContent);
 }
-/* 逐个抓 #result 的直接子块：折叠块拿标题＋正文，其余卡片拿 p / dt / dd / .kv / .chips */
+/* 抓一张详情卡：标题＋正文里的段落 / 列表 / 键值 / 标签，不改写、不重排语义 */
+function shotTakeDetail(ch, out) {
+  if (!ch || ch.getAttribute("data-shot") === "skip") return;
+  const t = ch.querySelector(".detail-h .t");
+  out.push({h: shotClean(t ? t.textContent : "")});
+  const ps = ch.querySelectorAll(".detail-b p, .detail-b li, .detail-b dt, .detail-b dd, .detail-b .kv, .detail-b .chips");
+  for (let j = 0; j < ps.length; j++) {
+    const txt = shotText(ps[j]);
+    if (txt) out.push({t: txt, c: " " + (ps[j].className || "") + " "});
+  }
+}
+/* 逐个抓 #result 的直接子块：详情卡拿标题＋正文，普通卡片兜底拿 p / dt / dd / .kv / .chips */
 function shotFullSections() {
   const out = [];
   const res = $("#result");
   if (!res || !res.children) return out;
-  const skip = ["row-actions", "shot-mask", "shot-pick", " bars ", " verdict ", " foot "];
+  const skip = ["row-actions", "shot-mask", "shot-pick", " res-nav ", " data-save ", " bars ", " verdict "];
   for (let i = 0; i < res.children.length; i++) {
     const ch = res.children[i];
     const cls = " " + (ch.className || "") + " ";
+    if (ch.getAttribute("data-shot") === "skip") continue;
     if (skip.some(function (s) { return cls.indexOf(s) >= 0; })) continue;
-    if (cls.indexOf(" fold ") >= 0) {
-      const t = ch.querySelector(".fold-h .t");
-      out.push({h: shotClean(t ? t.textContent : "")});
-      const ps = ch.querySelectorAll(".fold-b p, .fold-b li");
-      for (let j = 0; j < ps.length; j++) {
-        const txt = shotText(ps[j]);
-        if (txt) out.push({t: txt, c: " " + (ps[j].className || "") + " "});
-      }
+    if (cls.indexOf(" detail-grid ") >= 0) {
+      const ds = ch.querySelectorAll(".detail");
+      for (let j = 0; j < ds.length; j++) shotTakeDetail(ds[j], out);
+      continue;
+    }
+    if (cls.indexOf(" detail ") >= 0) {
+      shotTakeDetail(ch, out);
       continue;
     }
     const ps = ch.querySelectorAll("p, dt, dd, li, .kv, .chips");
@@ -1725,11 +2590,11 @@ function shotBuild(type) {
       c.fillStyle = SHOT_BAR; c.fillRect(bx, yy + rh / 2 - 8, bw, 16);
       if (hasVal) {
         const p = Math.max(0, Math.min(100, val)) / 100;
-        c.fillStyle = val >= 30 ? SHOT_SEAL : "#b8a682";
+        c.fillStyle = SHOT_SEAL;
         c.fillRect(bx, yy + rh / 2 - 8, Math.round(bw * p), 16);
       }
       c.font = shotFont(23, 400); c.fillStyle = SHOT_INK2; c.textAlign = "right";
-      c.fillText(hasVal ? val.toFixed(1) : "信息不足", SHOT_W - SHOT_PAD, yy + rh / 2);
+      c.fillText(hasVal ? val.toFixed(1) + "%" : "信息不足", SHOT_W - SHOT_PAD, yy + rh / 2);
       c.textAlign = "left";
     });
     y = yy + rh;
@@ -1755,18 +2620,18 @@ function shotBuild(type) {
     if (R.mixed && R.mixed.length) sub += "　·　兼夹：" + R.mixed.map(k => NAME[k]).join("、");
     line(sub, {size: 26, gap: 2});
   } else {
-    line("九体均未达判定线", {size: 44, weight: 700, color: SHOT_SEAL, lh: 60, gap: 2});
+    line("九体均未明显偏颇", {size: 44, weight: 700, color: SHOT_SEAL, lh: 60, gap: 2});
     line("本次不给主体质结论。原因通常是漏答，或隔一段时间重测更准。", {size: 26, gap: 2});
   }
   if (R.missing && R.missing.length) line("漏答：" + R.missing.length + " 项，未计入判定。", {size: 23, color: SHOT_INK2, gap: 2});
 
   /* ③ 九体分条 */
-  kicker("九体转化分（0—100）");
+  kicker("九体判定度（0—100）");
   ORDER.forEach(function (k) {
     const v = R.conv[k];
     barRow(NAME[k], v == null ? 0 : v, v != null);
   });
-  line("红色为已达 30（倾向线）以上，判定线在 40。条目少的体质原始分偏低，转换分算到负数属正常现象，不影响判定与排序。",
+  line("分数越高倾向越明显；条目少的体质原始分偏低，分数算到负数属正常现象，不影响判定与排序。",
     {size: 21, color: SHOT_INK2, lh: 32, gap: 0});
 
   if (type === "full") {
@@ -1805,7 +2670,7 @@ function shotBuild(type) {
     const rel = {same: "同向", part: "部分同向", diff: "不同向", none: "底色未显", pinghe: "目前平和"}[kind] || "—";
     kicker("先天 × 后天");
     kv("先天底色", innName + (inn.second ? "（兼 " + NAME[inn.second.k] + "）" : ""));
-    kv("问卷判出", mainName ? (mainName + "（" + (R.mainLevel || "") + "）") : "九体均未达判定线");
+    kv("问卷判出", mainName ? (mainName + "（" + (R.mainLevel || "") + "）") : "九体均未明显偏颇");
     kv("两者关系", rel);
     line(J.h, {size: 29, weight: 700, gap: 4});
     line(J.a, {size: 25, gap: 6});
@@ -1919,7 +2784,7 @@ function exportCSV() {
     rows.push([q.id, "补充", q.t, v, v == null ? "" : q.o[v - 1]]);
   });
   rows.push([]);
-  rows.push(["体质", "条目数", "原始分", "转化分", "结论"]);
+  rows.push(["体质", "条目数", "原始分", "判定度(%)", "结论"]);
   ORDER.forEach(k => {
     const r = lastResult.detail[k];
     let verdict = "否";
@@ -1949,7 +2814,7 @@ function exportCSV() {
   rows.push(["导出时间", nowStamp()]);
   rows.push(["问卷版本", APP_VERSION]);
   rows.push(["条目集", "判定 27 题（GB/T 46939—2025）＋补充 7 题，S17/女、S18/男 各一题按性别取一；季节按导出当日日期自动判定"]);
-  rows.push(["计分口径", "转化分=(原始分-条目数)/(条目数×4)×100；非平和 ≥40 为「是」、30–40 为「倾向是」；平和质需自身 ≥60 且其余八项 <30（是）/<40（基本是）"]);
+  rows.push(["计分口径", "判定度=(原始分-条目数)/(条目数×4)×100；非平和 ≥40 为「是」、30–40 为「倾向是」；平和质需自身 ≥60 且其余八项 <30（是）/<40（基本是）"]);
   rows.push(["漏答项", lastResult.missing.length ? lastResult.missing.map(k => NAME[k]).join("、") : "无"]);
   const si = seasonNow();            // 只取一次，避免跨午夜时名字与区间来自不同判定
   rows.push(["判定季节", SEASON[si].name + "季（" + SEASON_SPAN[si] + "，按 " + seasonToday() + " 自动判定）"]);
